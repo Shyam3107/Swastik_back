@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>Swastik</title>
+</head>
+<body>
+    <h1><%= vehicleDetails.Vehicle %></h1>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>DI No.</th>
+            <th>Place</th>
+            <th>Quantity</th>
+            <th>Rate</th>
+            <th>Amount</th>
+            <th>Diesel</th>
+            <th>Other Expenses</th>
+            <th>Remarks</th>
+        </tr>
+        <% vehicleDetails.Details.forEach(function(detail){ %>
+            <tr>
+                <td><%= detail.Date %></td>
+                <td><%= detail.DIno %></td>
+                <td><%= detail.Place %></td>
+                <td><%= detail.Qty %></td>
+                <td><%= detail.Rate %></td>
+                <td><%= detail.Amt %></td>
+                <td><%= detail.Diesel %></td>
+                <td><%= detail.Expenses %></td>
+                <td><%= detail.Remarks %></td>
+            </tr>
+         <% }) %>
+    </table>
+</body>
+</html>

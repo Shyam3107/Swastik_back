@@ -1,0 +1,21 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+table ,tr{
+    margin:3% ;
+}
+
+th,td{
+    padding: 0 10px;
+}
+
+ul{
+    list-style: none;
+    display: flex;
+    margin:0 3%;
+}
+li{
+    padding: 10px;
+}
