@@ -3,6 +3,7 @@ const app=express();
 const bodyParser=require("body-parser");
 const mongoose=require("mongoose");
 const cors=require("cors");
+const cron=require('node-cron');
 
 app.use(cors());
 app.use(express.static("public"));
@@ -62,7 +63,23 @@ const placeSchema=new mongoose.Schema({
         Current :{
             type: Number,
             default : 0
-        }
+        },
+        Daily:[{
+            Date:{
+                type:Number,
+                default: new Date().getDate()
+            },
+            Month:{
+                type:Number,
+                default: new Date().getMonth()
+            },
+            Year:{
+                type:Number,
+                default: new Date().getFullYear()
+            },
+            Open: Number,
+            Close: Number
+        }]
     },
     Payment : [PlaceVehSchema]
 })
@@ -70,6 +87,19 @@ const placeSchema=new mongoose.Schema({
 const Vmodel=mongoose.model("Vehicle",vehicleSchema); // model for Vehicle Details
 const PVmodel= mongoose.model("PlaceVeh",PlaceVehSchema); // model for vehicle took payment from place
 const Pmodel=mongoose.model("Place",placeSchema); // model for Place Details
+
+cron.schedule("0 0 0 * * *", function(x) { // to update opening and closing balance everyday
+Pmodel.find(function(err,found){
+    found.map(function(data){
+        var bal={
+            Open:data.Balance.Current,
+            Close:data.Balance.Current
+        };
+        data.Balance.Daily.push(bal);
+        data.save();
+    })
+})
+});
 
 app.get("/Vehicle",function(req,res){ // send all unique vehicle 
     Vmodel.distinct("Vehicle",function(err,detail){
@@ -123,7 +153,11 @@ app.post("/ComposePlace",function(req,res){ // post deatils of payment from diff
             var info= new Pmodel({
                 Place: req.body.place,
                 Balance: {
-                    Current: -data.Credit
+                    Current: -data.Credit,
+                    Daily:[{
+                        Close:-data.Credit,
+                        Open:0
+                    }]
                 },
                 Payment : [data]
             })
@@ -135,6 +169,8 @@ app.post("/ComposePlace",function(req,res){ // post deatils of payment from diff
         else{ // if exist then push the detail
             found[0].Payment.push(data);
             found[0].Balance.Current-=data.Credit; // deduct credit from current
+            var len=found[0].Balance.Daily.length;
+            found[0].Balance.Daily[len-1].Close-=data.Credit;
             found[0].save(function(err){
                 if(err) res.send(false);
                 else res.send(true);
@@ -148,6 +184,8 @@ app.post("/addBalance",function(req,res){ // add balance to place
     var bal=req.body.balance;
     Pmodel.find({'Place':place},function(err,found){
         found[0].Balance.Current+=bal; // update the current balance
+        var len=found[0].Balance.Daily.length;
+        found[0].Balance.Daily[len-1].Close+=bal; // update the closing balance
         var data =new PVmodel({
             Debit:bal,
             Remarks:'Cash Received'
