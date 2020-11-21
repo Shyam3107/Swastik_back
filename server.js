@@ -191,9 +191,11 @@ app.post("/addBalance",function(req,res){ // add balance to place
             Remarks:'Cash Received'
         });
         found[0].Payment.push(data); // add balance details
-        found[0].save();
+        found[0].save(function(err){
+            if(err) res.send(false);
+            else res.send(true);
+        });
     });
-    res.send(true);
 })
 
 app.listen(5000,function(){
