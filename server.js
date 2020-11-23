@@ -145,6 +145,9 @@ function addPmodel(infos){
     })
 }
 
+app.get('/',function(req,res){
+    res.send('App is Working');
+})
 
 app.get("/Vehicle",function(req,res){ // send all unique vehicle 
     Vmodel.distinct("Vehicle",function(err,detail){
