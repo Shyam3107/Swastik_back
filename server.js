@@ -217,6 +217,6 @@ app.post("/addBalance",function(req,res){ // add balance to place
     });
 })
 
-app.listen(5000,function(){
+app.listen(process.env.PORT||5000,function(){
     console.log("Server started in port 5000"); 
 })

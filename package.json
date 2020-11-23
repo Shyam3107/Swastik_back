@@ -15,8 +15,17 @@
     "ejs": "^3.1.5",
     "express": "^4.17.1",
     "mongoose": "^5.10.9",
-    "node-cron": "^2.0.3"
+    "node-cron": "^2.0.3",
+    "nodemon": "^2.0.6"
   },
   "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shyam3107/Swastik_back.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Shyam3107/Swastik_back/issues"
+  },
+  "homepage": "https://github.com/Shyam3107/Swastik_back#readme",
   "description": ""
 }
