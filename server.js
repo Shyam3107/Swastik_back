@@ -101,6 +101,51 @@ Pmodel.find(function(err,found){
 })
 });
 
+function addVmodel(info){
+    var data=new Vmodel(info);
+    data.save();
+}
+
+function addPmodel(infos){
+    info=infos.Data;
+    Pmodel.find({'Place':infos.Place},function(err,found){
+        if(found.length==0){ // if not exist then create one
+            var data= new Pmodel({
+                Place: infos.Place,
+                Balance: {
+                    Current: -info.Credit,
+                    Daily:[{
+                        Date:info.Date,
+                        Month:info.Month,
+                        Year:info.Year,
+                        Close:-info.Credit,
+                        Open:0
+                    }]
+                },
+                Payment : [info]
+            })
+            data.save(function(err){
+                if(err) res.send(false);
+            })
+        }
+        else{ // if exist then update it
+        found[0].Payment.push(info);
+        found[0].Balance.Current-=info.Credit; // deduct credit from current
+        var prevClose=-info.Credit; // think to update closing balance
+        // Pmodel.find({'Place':info.Place}) // find the closing balance on that date
+        // .where('Balance.Daily')
+        // .elemMatch({'Date':info.Date,'Month':info.Month,'Year':info.Year})
+        // .select('Balance.Daily').exec(function(err,found){
+        //     prevClose+=found[0].Balance.Daily[0].Close;
+        // });
+        // Pmodel.findOneAndUpdate({'Place':info.Place,'Balance.Daily.Date':info.Date,'Balance.Daily.Month':info.Month,'Balance.Daily.Year':info.Year},
+        // {$set:{'Balance.Daily.$.Close':prevClose}}) // update the closing balance of that day
+        found[0].save()
+        }
+    })
+}
+
+
 app.get("/Vehicle",function(req,res){ // send all unique vehicle 
     Vmodel.distinct("Vehicle",function(err,detail){
         res.send(detail);
@@ -130,53 +175,27 @@ app.get("/place/:place",function(req,res){
 })
 
 app.post("/ComposeVehicle",function(req,res){ // post details of per vehicle loaded
-    const data=new Vmodel(req.body);
-    data.save(function(err){
-        if(err){
-            res.send(false);
-        }
-        else {
-            res.send(true);
-        }
-    });
+    addVmodel(req.body);
+    if(req.body.Expenses!==0){
+        const pData= new PVmodel(req.body);
+        pData.Credit=req.body.Expenses;
+        var detail={
+            Place:req.body.Place,
+            Data:pData
+        };
+        addPmodel(detail);
+    };
 })
 
 app.post("/ComposePlace",function(req,res){ // post deatils of payment from diff places
-    const detail =new Vmodel(req.body.detail); // save vehicle detail to vehicle section
-    detail.Place=req.body.place;
-    detail.Expenses=req.body.detail.Credit;
-    detail.save();
-    const data=new PVmodel(req.body.detail); // body is an object with key place and detail
-    Pmodel.find({'Place': req.body.place},function(err,found){
-        if(err) {}; // think what to do
-        if(found.length==0){ // not exist then create one
-            var info= new Pmodel({
-                Place: req.body.place,
-                Balance: {
-                    Current: -data.Credit,
-                    Daily:[{
-                        Close:-data.Credit,
-                        Open:0
-                    }]
-                },
-                Payment : [data]
-            })
-            info.save(function(err){
-                if(err) res.send(false);
-                else res.send(true);
-            })
-        }
-        else{ // if exist then push the detail
-            found[0].Payment.push(data);
-            found[0].Balance.Current-=data.Credit; // deduct credit from current
-            var len=found[0].Balance.Daily.length;
-            found[0].Balance.Daily[len-1].Close-=data.Credit;
-            found[0].save(function(err){
-                if(err) res.send(false);
-                else res.send(true);
-            })
-        }
-    })
+    req.body.Expenses=req.body.Credit; // for vehicle section
+    addVmodel(req.body);
+    const data=new PVmodel(req.body);
+    var detail={
+        Place:req.body.Place,
+        Data:data
+    }
+    addPmodel(detail);
 })
 
 app.post("/addBalance",function(req,res){ // add balance to place
@@ -185,7 +204,7 @@ app.post("/addBalance",function(req,res){ // add balance to place
     Pmodel.find({'Place':place},function(err,found){
         found[0].Balance.Current+=bal; // update the current balance
         var len=found[0].Balance.Daily.length;
-        found[0].Balance.Daily[len-1].Close+=bal; // update the closing balance
+        found[0].Balance.Daily[len-1].Close+=bal; // update the closing balance // change it too
         var data =new PVmodel({
             Debit:bal,
             Remarks:'Cash Received'
