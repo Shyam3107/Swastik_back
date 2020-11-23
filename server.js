@@ -9,7 +9,9 @@ app.use(cors());
 app.use(express.static("public"));
 app.use(bodyParser.json());
 
-mongoose.connect("mongodb://localhost:27017/VehicleDB",{ useNewUrlParser:true,useUnifiedTopology:true});
+mongoose.connect("mongodb+srv://dbSwastik:SwastikDB@swastikdb.rinnm.mongodb.net/dbSwastik?retryWrites=true&w=majority");
+
+//mongoose.connect("mongodb://localhost:27017/VehicleDB",{ useNewUrlParser:true,useUnifiedTopology:true});
 
 const vehicleSchema=new mongoose.Schema({
     Date:{
