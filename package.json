@@ -19,7 +19,7 @@
     "node-cron": "^2.0.3",
     "nodemon": "^2.0.6"
   },
-  "devDependencies": {},
+  "devDependencies": {"cors": "^2.8.5"},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Shyam3107/Swastik_back.git"
