@@ -98,14 +98,14 @@ app.get("/Place/:place",function(req,res){ // send particular place details
         if(err){
             res.send(false);
         }
-        PettyCashbook.find({'Place':place},function(err,data){
+        PettyCashbook.find({'Place':place},function(err,data2){
             if(err){
                 res.send(false);
             }
-            detail.Balance=data[0].Balance;
+            detail.Balance=data2[0].Balance;
+            detail.detail=data;
+            res.send(detail);
         })
-        detail.detail=data;
-        res.send(detail);
     })
 })
 
