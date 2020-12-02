@@ -94,19 +94,18 @@ app.get("/Vehicle/:num",function(req,res){ // send particular vehicle details
 app.get("/Place/:place",function(req,res){ // send particular place details
     const place=req.params.place;
     var detail={};
-    PettyCashbook.find({'Place':place},function(err,data){
-        if(err){
-            res.send(false);
-        }
-        
     Vehicle.find({'Place':place},function(err,data){
         if(err){
             res.send(false);
         }
+        PettyCashbook.find({'Place':place},function(err,data){
+            if(err){
+                res.send(false);
+            }
+            detail.Balance=data[0].Balance;
+        })
         detail.detail=data;
         res.send(detail);
-    })
-        detail.Balance=data[0].Balance;
     })
 })
 
@@ -148,8 +147,8 @@ app.post("/addBalance",function(req,res){ // add balance to corresponding place
         found[0].save(function(err){
             if(err) res.send(false);
         });
+        res.send(true);
     })
-    res.send(true);
 })
 
 app.put("/editData",function(req,res){ // add diesel price and other details
