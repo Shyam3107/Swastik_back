@@ -148,6 +148,7 @@ app.post("/addBalance",function(req,res){ // add balance to corresponding place
             if(err) res.send(false);
         });
     })
+    res.send(true);
 })
 
 app.put("/editData",function(req,res){ // add diesel price and other details
