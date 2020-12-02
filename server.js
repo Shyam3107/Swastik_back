@@ -5,7 +5,6 @@ const mongoose=require("mongoose");
 const cors=require("cors");
 
 app.use(cors());
-app.use(express.static("public"));
 app.use(bodyParser.json());
 
 //mongoose.connect(process.env.MONGODB_URI,{ useNewUrlParser:true,useUnifiedTopology:true});
@@ -99,14 +98,15 @@ app.get("/Place/:place",function(req,res){ // send particular place details
         if(err){
             res.send(false);
         }
-        detail.Balance=data[0].Balance;
-    })
+        
     Vehicle.find({'Place':place},function(err,data){
         if(err){
             res.send(false);
         }
         detail.detail=data;
         res.send(detail);
+    })
+        detail.Balance=data[0].Balance;
     })
 })
 
@@ -143,6 +143,7 @@ app.post("/addBalance",function(req,res){ // add balance to corresponding place
     });
     PettyCashbook.find({'Place':place},function(err,found){
         if(err) res.send(false);
+        if(found.length===0) res.send(false);
         found[0].Balance+=req.body.Debit;
         found[0].save(function(err){
             if(err) res.send(false);
