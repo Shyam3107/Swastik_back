@@ -7,8 +7,8 @@ const cors=require("cors");
 app.use(cors());
 app.use(bodyParser.json());
 
-//mongoose.connect(process.env.MONGODB_URI,{ useNewUrlParser:true,useUnifiedTopology:true});
-mongoose.connect('mongodb+srv://dbSwastik:SwastikDB@swastikdb.rinnm.mongodb.net/dbSwastik?retryWrites=true',{ useNewUrlParser:true,useUnifiedTopology:true});
+mongoose.connect(process.env.MONGODB_URI,{ useNewUrlParser:true,useUnifiedTopology:true});
+//mongoose.connect('mongodb+srv://dbSwastik:SwastikDB@swastikdb.rinnm.mongodb.net/dbSwastik?retryWrites=true',{ useNewUrlParser:true,useUnifiedTopology:true});
 
 //mongoose.connect("mongodb://localhost:27017/SwastikDB",{ useNewUrlParser:true,useUnifiedTopology:true});
 
