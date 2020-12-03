@@ -7,8 +7,8 @@ const cors=require("cors");
 app.use(cors());
 app.use(bodyParser.json());
 
-mongoose.connect(process.env.MONGODB_URI,{ useNewUrlParser:true,useUnifiedTopology:true});
-//mongoose.connect('mongodb+srv://dbSwastik:SwastikDB@swastikdb.rinnm.mongodb.net/dbSwastik?retryWrites=true',{ useNewUrlParser:true,useUnifiedTopology:true});
+//mongoose.connect(process.env.MONGODB_URI,{ useNewUrlParser:true,useUnifiedTopology:true});
+mongoose.connect('mongodb+srv://dbSwastik:SwastikDB@swastikdb.rinnm.mongodb.net/dbSwastik?retryWrites=true',{ useNewUrlParser:true,useUnifiedTopology:true});
 
 //mongoose.connect("mongodb://localhost:27017/SwastikDB",{ useNewUrlParser:true,useUnifiedTopology:true});
 
@@ -51,7 +51,7 @@ const Vehicle=mongoose.model("Vehicle",vehicles);
 const PettyCashbook=mongoose.model("PettyCashbook",pettyCashbooks);
 
 app.get('/',function(req,res){
-    res.send('App is Working');
+    res.json('App is Working');
 })
 
 app.get("/Vehicle",function(req,res){ // send all unique vehicle 
@@ -59,25 +59,25 @@ app.get("/Vehicle",function(req,res){ // send all unique vehicle
         if(err){
             res.status(404).send(false);
         }
-        res.send(detail);
+        res.json(detail);
     });
 })
 
 app.get("/Place",function(req,res){ //send all unique place
     PettyCashbook.distinct("Place",function(err,data){
         if(err){
-            res.send(false);
+            res.json(false);
         }
-        res.send(data);
+        res.json(data);
     })
 })
 
 app.get("/Transactions",function(req,res){ // send particular vehicle details
     Vehicle.find(function(err,detail){
         if(err){
-            res.send(false);
+            res.json(false);
         }
-        res.send(detail);
+        res.json(detail);
     })
 })
 
@@ -85,9 +85,9 @@ app.get("/Vehicle/:num",function(req,res){ // send particular vehicle details
     const num=req.params.num;
     Vehicle.find({"Vehicle":num},function(err,detail){
         if(err){
-            res.send(false);
+            res.json(false);
         }
-        res.send(detail);
+        res.json(detail);
     })
 })
 
@@ -96,41 +96,41 @@ app.get("/Place/:place",function(req,res){ // send particular place details
     var detail={};
     Vehicle.find({'Place':place},function(err,data){
         if(err){
-            res.send(false);
+            res.json(false);
         }
         PettyCashbook.find({'Place':place},function(err,data2){
             if(err){
-                res.send(false);
+                res.json(false);
             }
             detail.Balance=data2[0].Balance;
             detail.detail=data;
-            res.send(detail);
+            res.json(detail);
         })
     })
 })
 
 app.post("/Compose",function(req,res){ // post vehciles data  
     new Vehicle(req.body).save(function(err){
-        if(err) res.send(false);
+        if(err) res.json(false);
     });
     if(req.body.Expenses!==0){
         PettyCashbook.find({'Place':req.body.Place},function(err,found){ // if expenses then update current from where it is received
-            if(err) res.send(false);
+            if(err) res.json(false);
             else if(found.length===0){
                 new PettyCashbook({
                     Place:req.body.Place,
                     Balance :-req.body.Expenses
                 }).save(function(err){
-                    if(err) res.send(false);
+                    if(err) res.json(false);
                 });
             }
             else{
                 found[0].Balance-=req.body.Expenses;
                 found[0].save(function(err){
-                    if(err) res.send(false);
+                    if(err) res.json(false);
                 });
             }
-            res.send(true);
+            res.json(true);
         })
     };
 })
@@ -138,16 +138,16 @@ app.post("/Compose",function(req,res){ // post vehciles data
 app.post("/addBalance",function(req,res){ // add balance to corresponding place
     var place=req.body.Place;
     new Vehicle(req.body).save(function(err){
-        if(err) res.send(false);
+        if(err) res.json(false);
     });
     PettyCashbook.find({'Place':place},function(err,found){
-        if(err) res.send(false);
-        if(found.length===0) res.send(false);
+        if(err) res.json(false);
+        if(found.length===0) res.json(false);
         found[0].Balance+=req.body.Debit;
         found[0].save(function(err){
-            if(err) res.send(false);
+            if(err) res.json(false);
         });
-        res.send(true);
+        res.json(true);
     })
 })
 
@@ -155,19 +155,19 @@ app.put("/editData",function(req,res){ // add diesel price and other details
     var data=req.body;
     function addData(Dkey,Dvalue){ 
         Vehicle.find({'_id':Dkey},function(err,found){
-            if(err) res.send(false);
+            if(err) res.json(false);
             found[0].DieselPrice=Dvalue;
             found[0].DieselCost=found[0].DieselPrice * found[0].Diesel;
             found[0].Balance=found[0].RateCost-found[0].DieselCost-found[0].Expenses;
             found[0].save(function(err){
-                if(err) res.send(false);
+                if(err) res.json(false);
             })
         })
     }
     for(var key in data){
         addData(key,data[key]);
     }
-    res.send(true);
+    res.json(true);
 })
 
 app.listen(process.env.PORT||5000,function(){
