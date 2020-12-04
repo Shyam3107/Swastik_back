@@ -56,27 +56,21 @@ app.get('/',function(req,res){
 
 app.get("/Vehicle",function(req,res){ // send all unique vehicle 
     Vehicle.distinct("Vehicle",function(err,detail){
-        if(err){
-            res.status(404).send(false);
-        }
+        if(err) res.status(400).json('Failed to Fetch');
         res.json(detail);
     });
 })
 
 app.get("/Place",function(req,res){ //send all unique place
     PettyCashbook.distinct("Place",function(err,data){
-        if(err){
-            res.json(false);
-        }
+        if(err) res.status(400).json('Failed to Fetch');
         res.json(data);
     })
 })
 
 app.get("/Transactions",function(req,res){ // send particular vehicle details
     Vehicle.find(function(err,detail){
-        if(err){
-            res.json(false);
-        }
+        if(err) res.status(400).json('Failed to Fetch');
         res.json(detail);
     })
 })
@@ -84,9 +78,7 @@ app.get("/Transactions",function(req,res){ // send particular vehicle details
 app.get("/Vehicle/:num",function(req,res){ // send particular vehicle details
     const num=req.params.num;
     Vehicle.find({"Vehicle":num},function(err,detail){
-        if(err){
-            res.json(false);
-        }
+        if(err) res.status(400).json('Failed to Fetch');
         res.json(detail);
     })
 })
@@ -95,13 +87,9 @@ app.get("/Place/:place",function(req,res){ // send particular place details
     const place=req.params.place;
     var detail={};
     Vehicle.find({'Place':place},function(err,data){
-        if(err){
-            res.json(false);
-        }
+        if(err) res.status(400).json('Failed to Fetch');
         PettyCashbook.find({'Place':place},function(err,data2){
-            if(err){
-                res.json(false);
-            }
+            if(err) res.status(400).json('Failed to Fetch');
             detail.Balance=data2[0].Balance;
             detail.detail=data;
             res.json(detail);
@@ -111,43 +99,44 @@ app.get("/Place/:place",function(req,res){ // send particular place details
 
 app.post("/Compose",function(req,res){ // post vehciles data  
     new Vehicle(req.body).save(function(err){
-        if(err) res.json(false);
+        if(err) res.status(400).json('Failed to Add');
     });
     if(req.body.Expenses!==0){
         PettyCashbook.find({'Place':req.body.Place},function(err,found){ // if expenses then update current from where it is received
-            if(err) res.json(false);
+            if(err) res.status(400).json('Failed to Add');
             else if(found.length===0){
                 new PettyCashbook({
                     Place:req.body.Place,
                     Balance :-req.body.Expenses
                 }).save(function(err){
-                    if(err) res.json(false);
+                    if(err) res.status(400).json('Failed to Add');
                 });
             }
             else{
                 found[0].Balance-=req.body.Expenses;
                 found[0].save(function(err){
-                    if(err) res.json(false);
+                    if(err) res.status(400).json('Failed to Add');
                 });
             }
-            res.json(true);
+            res.json('Successfully Added');
         })
-    };
+    }
+    else res.json('Successfully Added');
 })
 
 app.post("/addBalance",function(req,res){ // add balance to corresponding place
     var place=req.body.Place;
     new Vehicle(req.body).save(function(err){
-        if(err) res.json(false);
+        if(err) res.status(400).json('Failed to Add');
     });
     PettyCashbook.find({'Place':place},function(err,found){
-        if(err) res.json(false);
+        if(err) res.status(400).json('Failed to Add');
         if(found.length===0) res.json(false);
         found[0].Balance+=req.body.Debit;
         found[0].save(function(err){
-            if(err) res.json(false);
+            if(err) res.status(400).json('Failed to Add');
         });
-        res.json(true);
+        res.json('Successfully Added');
     })
 })
 
@@ -155,19 +144,19 @@ app.put("/editData",function(req,res){ // add diesel price and other details
     var data=req.body;
     function addData(Dkey,Dvalue){ 
         Vehicle.find({'_id':Dkey},function(err,found){
-            if(err) res.json(false);
+            if(err) res.status(400).json('Failed to Add');
             found[0].DieselPrice=Dvalue;
             found[0].DieselCost=found[0].DieselPrice * found[0].Diesel;
             found[0].Balance=found[0].RateCost-found[0].DieselCost-found[0].Expenses;
             found[0].save(function(err){
-                if(err) res.json(false);
+                if(err) res.status(400).json('Failed to Add');
             })
         })
     }
     for(var key in data){
         addData(key,data[key]);
     }
-    res.json(true);
+    res.json('Successfully Added');
 })
 
 app.listen(process.env.PORT||5000,function(){
