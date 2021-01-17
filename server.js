@@ -27,7 +27,7 @@ app.get("/Place", function (req, res) { //send all unique place
 })
 
 app.get("/Transactions", function (req, res) { // send particular vehicle details
-    Vehicle.find(function (err, detail) {
+    Vehicle.find().sort("Date").exec(function (err, detail) {
         if (err) res.status(400).json('Failed to Fetch');
         res.json(detail);
     })
@@ -35,7 +35,7 @@ app.get("/Transactions", function (req, res) { // send particular vehicle detail
 
 app.get("/Vehicle/:num", function (req, res) { // send particular vehicle details
     const num = req.params.num;
-    Vehicle.find({ "Vehicle": num }, function (err, detail) {
+    Vehicle.find({ "Vehicle": num }).sort("Date").exec(function (err, detail) {
         if (err) res.status(400).json('Failed to Fetch');
         res.json(detail);
     })
@@ -44,7 +44,7 @@ app.get("/Vehicle/:num", function (req, res) { // send particular vehicle detail
 app.get("/Place/:place", function (req, res) { // send particular place details
     const place = req.params.place;
     var detail = {};
-    Vehicle.find({ 'Place': place }, function (err, data) {
+    Vehicle.find({ 'Place': place }).sort("Date").exec(function (err, data) {
         if (err) res.status(400).json('Failed to Fetch');
         PettyCashbook.find({ 'Place': place }, function (err, data2) {
             if (err) res.status(400).json('Failed to Fetch');
@@ -61,7 +61,7 @@ app.post("/addBalance", addBalance) // add balance to corresponding place
 
 app.post("/editData", editData) // add diesel price and other details
 
-app.post('/addPlace',addPlace) // add new Place with opening balance
+app.post('/addPlace', addPlace) // add new Place with opening balance
 
 app.listen(process.env.PORT || 5000, function () {
     console.log("Server started in port 5000");
