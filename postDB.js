@@ -80,6 +80,7 @@ const addPlace = (req, res) => {
             new Vehicle(data).save(function(err){
                 if(err) res.status(400).json(err_mssg);
             })
+            data.Balance=data.Debit;
             new PettyCashbook(data).save(function(err){
                 if(err) res.status(400).json(err_mssg);
             })
