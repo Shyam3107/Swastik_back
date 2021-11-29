@@ -6,7 +6,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 
 const { checkUser } = require("./middlewares/checkUser");
-const { login } = require("./controllers/login");
+const { login } = require("./controllers/Login/login");
 const tripRoute = require("./controllers/Trips/route");
 
 app.use(cors());

@@ -1,5 +1,12 @@
+const moment = require("moment");
 const { convertCSVToJSON } = require("../../utils/utils");
-const { handleError, errorValidation } = require("../../utils/utils");
+const {
+  handleError,
+  errorValidation,
+  validateBody,
+  validatePhoneNo,
+  removeFile,
+} = require("../../utils/utils");
 const Trip = require("../../models/Trip");
 
 const fileHeader = [
@@ -53,7 +60,7 @@ module.exports.uploadTrips = async (req, res) => {
     let data = await convertCSVToJSON(req.file.path);
 
     data = data.map((item) => {
-      let tempVal = {};
+      let tempVal = { plant: user.plant };
       let diNo;
       let mssg = "";
       modelHeader.forEach((head, index) => {
@@ -68,13 +75,16 @@ module.exports.uploadTrips = async (req, res) => {
           value !== "Amount"
         )
           mssg = `Diesel In should be Litre or Amount for DI No. ${diNo}`;
-
-        if (index < 9 && !value) {
+        else if (head === "driverPhone" && validatePhoneNo(value))
+          mssg = `Fill Valid Driver Phone No. for DI No. ${diNo}`;
+        else if (index < 9 && !value) {
           // required and value not exist
           mssg = `${fileHeader[index]} is required for DI No. ${diNo}`;
         }
 
         if (mssg) throw mssg;
+
+        if (head === "date") value = moment(value, "DD-MM-YYYY").toISOString();
 
         tempVal[head] = value;
       });
@@ -82,7 +92,9 @@ module.exports.uploadTrips = async (req, res) => {
     });
 
     const insertData = await Trip.insertMany(data);
-    fs.unlinkSync(path.join(req.file.path));
+
+    removeFile(req.file.path);
+
     return res.status(200).json({
       data: insertData,
       entries: insertData.length,
@@ -112,9 +124,18 @@ module.exports.addTrips = [
         return null;
       }
       const user = req.user;
+      const { driverPhone, vehicleNo, dieselIn, cash, remarks } = req.body;
+
+      if (!validatePhoneNo(driverPhone)) throw "Enter Valid Phone No.";
+
+      if (dieselIn && dieselIn !== "Litre" && dieselIn !== "Amount")
+        throw "Diesel In Field should be Litre or Amount";
+
+      if (cash && !remarks) throw "Remarks field is mandatory if given Cash";
 
       const insertData = await Trip.create({
         ...req.body,
+        vehicleNo: vehicleNo.toUpperCase(),
         plant: user.plant,
       });
 
