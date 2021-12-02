@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 const { checkUser } = require("./middlewares/checkUser");
 const { login } = require("./controllers/Login/login");
 const tripRoute = require("./controllers/Trips/route");
+const documentRoute = require("./controllers/Documents/route");
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -39,3 +40,4 @@ app.get("/", async (req, res) => {
 
 app.get("/login", login);
 app.use("/vehicles/trips", checkUser, tripRoute);
+app.use("/vehicles/documents", checkUser, documentRoute);

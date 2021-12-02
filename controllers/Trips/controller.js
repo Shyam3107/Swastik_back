@@ -57,39 +57,49 @@ module.exports.uploadTrips = async (req, res) => {
   try {
     const user = req.user;
 
-    let data = await convertCSVToJSON(req.file.path);
+    const dataToBeInsert = await convertCSVToJSON(req.file.path);
 
-    data = data.map((item) => {
+    let data = [];
+    let tempDiNo = {};
+
+    for await (item of dataToBeInsert) {
       let tempVal = { plant: user.plant };
       let diNo;
       let mssg = "";
-      modelHeader.forEach((head, index) => {
+
+      for await ([index, head] of modelHeader.entries()) {
         let value = item[fileHeader[index]];
 
         if (head === "diNo") {
-          if (value) diNo = value;
-          else mssg = "All Fields Should have DI No.";
+          if (!value) mssg = "All Fields Should have DI No.";
+          else if (tempDiNo[value])
+            mssg = `Two rows can't have same DI No. ${value}`;
+          else {
+            const isExist = await Trip.findOne({ diNo: value });
+            if (isExist) mssg = `DI No. ${value} already exist`;
+            diNo = value;
+            tempDiNo[value] = true;
+          }
         } else if (
           head === "dieselIn" &&
           value !== "Litre" &&
           value !== "Amount"
         )
           mssg = `Diesel In should be Litre or Amount for DI No. ${diNo}`;
-        else if (head === "driverPhone" && validatePhoneNo(value))
+        else if (head === "driverPhone" && !validatePhoneNo(value))
           mssg = `Fill Valid Driver Phone No. for DI No. ${diNo}`;
-        else if (index < 9 && !value) {
-          // required and value not exist
+        else if (index < 9 && !value)
           mssg = `${fileHeader[index]} is required for DI No. ${diNo}`;
-        }
 
         if (mssg) throw mssg;
 
         if (head === "date") value = moment(value, "DD-MM-YYYY").toISOString();
 
         tempVal[head] = value;
-      });
-      return tempVal;
-    });
+      }
+
+      data.push(tempVal);
+    }
 
     const insertData = await Trip.insertMany(data);
 
@@ -124,7 +134,8 @@ module.exports.addTrips = [
         return null;
       }
       const user = req.user;
-      const { driverPhone, vehicleNo, dieselIn, cash, remarks } = req.body;
+      const { driverPhone, vehicleNo, dieselIn, cash, remarks, diNo } =
+        req.body;
 
       if (!validatePhoneNo(driverPhone)) throw "Enter Valid Phone No.";
 
@@ -132,6 +143,9 @@ module.exports.addTrips = [
         throw "Diesel In Field should be Litre or Amount";
 
       if (cash && !remarks) throw "Remarks field is mandatory if given Cash";
+
+      const isExist = await Trip.findOne({ diNo });
+      if (isExist) throw `DI No. ${diNo} already exist`;
 
       const insertData = await Trip.create({
         ...req.body,
@@ -161,7 +175,7 @@ module.exports.deleteTrips = async (req, res) => {
 
     return res.status(200).json({
       data: deletedData,
-      message: `Trip${tripIds.length > 0 ? "s" : ""} Deleted Successfully`,
+      message: `Trip${tripIds.length > 1 ? "s" : ""} Deleted Successfully`,
     });
   } catch (error) {
     return handleError(res, error);
