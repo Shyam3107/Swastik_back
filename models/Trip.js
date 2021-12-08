@@ -16,6 +16,11 @@ const tripSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    loadingPoint: {
+      type: String,
+      trim: true,
+      required: true,
+    },
     partyName: {
       type: String,
       trim: true,
