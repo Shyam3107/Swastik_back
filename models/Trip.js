@@ -41,11 +41,6 @@ const tripSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    plant: {
-      type: String,
-      trim: true,
-      required: true,
-    },
     driverName: {
       type: String,
       trim: true,
@@ -64,7 +59,8 @@ const tripSchema = new mongoose.Schema(
     },
     dieselIn: {
       type: String,
-      enum: ["Litre", "Amount"],
+      enum: ["Litre", "Amount", null, "", undefined],
+      default: null,
     },
     cash: {
       type: Number,
@@ -72,6 +68,11 @@ const tripSchema = new mongoose.Schema(
     remarks: {
       trim: true,
       type: String,
+    },
+    addedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Account",
+      required: true,
     },
   },
   { timestamps: true }

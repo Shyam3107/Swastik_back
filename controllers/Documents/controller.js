@@ -56,7 +56,7 @@ module.exports.uploadDocuments = async (req, res) => {
     let tempVehicleNo = {};
 
     for await (item of dataToBeInsert) {
-      let tempVal = { addedBy: user.email };
+      let tempVal = { addedBy: user._id };
       let vehicleNo;
       let mssg = "";
 
@@ -111,7 +111,7 @@ module.exports.addDocuments = [
 
       const insertData = await Document.create({
         ...req.body,
-        addedBy: user.email,
+        addedBy: user._id,
       });
 
       return res
@@ -136,7 +136,7 @@ module.exports.editDocuments = [
       const documentId = req.body._id;
       const updateData = await Document.findByIdAndUpdate(
         { _id: documentId },
-        { ...req.body, addedBy: user.email }
+        req.body
       );
 
       if (!updateData) throw "Record Not Found";

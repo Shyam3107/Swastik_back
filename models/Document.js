@@ -34,7 +34,8 @@ const documentSchema = new mongoose.Schema(
       required: true,
     },
     addedBy: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Account",
       required: true,
     },
   },

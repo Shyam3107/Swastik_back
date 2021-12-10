@@ -48,7 +48,17 @@ const modelHeader = [
 module.exports.getTrips = async (req, res) => {
   try {
     const user = req.user;
-    const trips = await Trip.find();
+    const { diNo } = req.query;
+
+    let trips;
+    if (diNo) trips = await Trip.findOne({ diNo });
+    else
+      trips = await Trip.find()
+        .populate({ path: "addedBy", select: "location" })
+        .sort({ date: -1 });
+
+    if (!trips) throw "This DI No. does not exist in our record";
+
     return res.status(200).json({ data: trips });
   } catch (error) {
     return handleError(res, error);
@@ -65,7 +75,7 @@ module.exports.uploadTrips = async (req, res) => {
     let tempDiNo = {};
 
     for await (item of dataToBeInsert) {
-      let tempVal = { plant: user.plant };
+      let tempVal = { addedBy: user._id };
       let diNo;
       let mssg = "";
 
@@ -82,16 +92,19 @@ module.exports.uploadTrips = async (req, res) => {
             diNo = value;
             tempDiNo[value] = true;
           }
-        } else if (
+        } else if (index < 9 && !value)
+          mssg = `${fileHeader[index]} is required for DI No. ${diNo}`;
+        else if (head === "driverPhone" && !validatePhoneNo(value))
+          mssg = `Fill Valid Driver Phone No. for DI No. ${diNo}`;
+        else if (
+          item["Diesel"] &&
           head === "dieselIn" &&
           value !== "Litre" &&
           value !== "Amount"
         )
           mssg = `Diesel In should be Litre or Amount for DI No. ${diNo}`;
-        else if (head === "driverPhone" && !validatePhoneNo(value))
-          mssg = `Fill Valid Driver Phone No. for DI No. ${diNo}`;
-        else if (index < 9 && !value)
-          mssg = `${fileHeader[index]} is required for DI No. ${diNo}`;
+        else if (item["Diesel"] && !item["Pump Name"])
+          mssg = `Pump Name is mandatory if Diesel Taken for DI No. ${diNo}`;
 
         if (mssg) throw mssg;
 
@@ -137,8 +150,7 @@ module.exports.addTrips = [
         return null;
       }
       const user = req.user;
-      const { driverPhone, vehicleNo, dieselIn, cash, remarks, diNo } =
-        req.body;
+      const { driverPhone, dieselIn, cash, remarks, diNo } = req.body;
 
       if (!validatePhoneNo(driverPhone)) throw "Enter Valid Phone No.";
 
@@ -152,13 +164,50 @@ module.exports.addTrips = [
 
       const insertData = await Trip.create({
         ...req.body,
-        vehicleNo: vehicleNo.toUpperCase(),
-        plant: user.plant,
+        addedBy: user._id,
       });
 
       return res
         .status(200)
         .json({ data: insertData, message: "Trip Added Successfully" });
+    } catch (error) {
+      return handleError(res, error);
+    }
+  },
+];
+
+module.exports.editTrips = [
+  validateBody([
+    "diNo",
+    "lrNo",
+    "date",
+    "loadingPoint",
+    "partyName",
+    "location",
+    "vehicleNo",
+    "quantity",
+    "driverName",
+    "driverPhone",
+  ]),
+  async (req, res) => {
+    try {
+      const errors = errorValidation(req, res);
+      if (errors) {
+        return null;
+      }
+      const user = req.user;
+
+      const tripId = req.body._id;
+      const updateData = await Trip.findByIdAndUpdate(
+        { _id: tripId },
+        req.body
+      );
+
+      if (!updateData) throw "Record Not Found";
+
+      return res
+        .status(200)
+        .json({ data: updateData, message: "Trip Edited Successfully" });
     } catch (error) {
       return handleError(res, error);
     }
