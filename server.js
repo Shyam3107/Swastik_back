@@ -22,7 +22,7 @@ dotenv.config();
 
 const { PORT } = require("./config/constants");
 
-app.listen(PORT, () => {
+app.listen(process.env.PORT || PORT, () => {
   console.log("Application Started in Port " + PORT);
 });
 

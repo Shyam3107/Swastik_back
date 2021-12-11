@@ -14,7 +14,7 @@ module.exports.getAccount = async (req, res) => {
     const { accountId } = req.query;
     let accounts;
     if (accountId) accounts = await Account.findById({ _id: accountId });
-    else accounts = await Account.find();
+    else accounts = await Account.find({ addedBy: user._id });
     if (!accounts) throw "This Account does not exist in our record";
 
     return res.status(200).json({ data: accounts });
@@ -32,7 +32,7 @@ module.exports.addAccount = [
         return null;
       }
       const user = req.user;
-      req.body.password = md5(req.body.password);
+      if (req.body.password) req.body.password = md5(req.body.password);
 
       const insertData = await Account.create({
         ...req.body,
@@ -57,7 +57,7 @@ module.exports.editAccount = [
         return null;
       }
       const user = req.user;
-      req.body.password = md5(req.body.password);
+      if (req.body.password) req.body.password = md5(req.body.password);
 
       const accountId = req.body._id;
       const updateData = await Document.findByIdAndUpdate(
