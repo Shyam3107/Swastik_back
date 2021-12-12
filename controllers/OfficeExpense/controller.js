@@ -39,7 +39,7 @@ module.exports.uploadExpenses = async (req, res) => {
   try {
     const user = req.user;
 
-    let dataToBeInsert = await convertCSVToJSON(req.file.path);
+    let dataToBeInsert = req.body.data;
 
     let data = [];
 
@@ -63,8 +63,6 @@ module.exports.uploadExpenses = async (req, res) => {
     }
 
     const insertData = await OfficeExpense.insertMany(data);
-
-    removeFile(req.file.path);
 
     return res.status(200).json({
       data: insertData,
