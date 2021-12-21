@@ -17,6 +17,7 @@ const accountSchema = new mongoose.Schema(
     location: {
       type: String,
       required: true,
+      uppercase: true,
     },
     addedBy: {
       type: mongoose.Schema.Types.ObjectId,

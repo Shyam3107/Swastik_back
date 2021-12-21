@@ -1,11 +1,10 @@
 const moment = require("moment");
-const { convertCSVToJSON } = require("../../utils/utils");
 const {
   handleError,
   errorValidation,
   validateBody,
   validatePhoneNo,
-  removeFile,
+  userRankQuery,
 } = require("../../utils/utils");
 const Trip = require("../../models/Trip");
 
@@ -49,13 +48,13 @@ module.exports.getTrips = async (req, res) => {
   try {
     const user = req.user;
     const { diNo } = req.query;
-
+    const userQuery = userRankQuery(user);
     let trips;
     if (diNo) trips = await Trip.findOne({ diNo });
     else
-      trips = await Trip.find()
+      trips = await Trip.find(userQuery)
         .populate({ path: "addedBy", select: "location" })
-        .sort({ date: -1 });
+        .sort({ date: -1 }); 
 
     if (!trips) throw "This DI No. does not exist in our record";
 
@@ -69,7 +68,7 @@ module.exports.uploadTrips = async (req, res) => {
   try {
     const user = req.user;
 
-    const dataToBeInsert = await convertCSVToJSON(req.file.path);
+    const dataToBeInsert = req.body.data;
 
     let data = [];
     let tempDiNo = {};
@@ -117,8 +116,6 @@ module.exports.uploadTrips = async (req, res) => {
     }
 
     const insertData = await Trip.insertMany(data);
-
-    removeFile(req.file.path);
 
     return res.status(200).json({
       data: insertData,

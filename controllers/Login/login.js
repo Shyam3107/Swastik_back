@@ -7,14 +7,15 @@ dotenv.config();
 
 module.exports.login = async (req, res) => {
   try {
-    const userName = req.query.userName;
+    let userName = req.query.userName;
     const password = req.query.password;
     const encryptPassword = md5(password);
 
+    if (userName) userName = userName.toLowerCase();
+
     let user = await Account.findOne({ userName, password: encryptPassword });
 
-    if (!user)
-      return res.status(400).json({ error: "User or Password is Incorrect" });
+    if (!user) throw "User or Password is Incorrect";
 
     user = JSON.stringify(user);
     user = JSON.parse(user);

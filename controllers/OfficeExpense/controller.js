@@ -1,10 +1,9 @@
 const moment = require("moment");
-const { convertCSVToJSON } = require("../../utils/utils");
 const {
   handleError,
   errorValidation,
   validateBody,
-  removeFile,
+  userRankQuery,
 } = require("../../utils/utils");
 const OfficeExpense = require("../../models/OfficeExpense");
 
@@ -16,11 +15,12 @@ module.exports.getExpenses = async (req, res) => {
   try {
     const user = req.user;
     const { expenseId } = req.query;
+    const userQuery = userRankQuery(user);
     let expenses;
     if (expenseId) {
       expenses = await OfficeExpense.findOne({ _id: expenseId });
     } else
-      expenses = await OfficeExpense.find()
+      expenses = await OfficeExpense.find(userQuery)
         .populate({
           path: "addedBy",
           select: "location",

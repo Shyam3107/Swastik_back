@@ -49,7 +49,7 @@ module.exports.addAccount = [
 ];
 
 module.exports.editAccount = [
-  validateBody(modelHeader),
+  validateBody(["userName", "location"]),
   async (req, res) => {
     try {
       const errors = errorValidation(req, res);
@@ -60,7 +60,7 @@ module.exports.editAccount = [
       if (req.body.password) req.body.password = md5(req.body.password);
 
       const accountId = req.body._id;
-      const updateData = await Document.findByIdAndUpdate(
+      const updateData = await Account.findByIdAndUpdate(
         { _id: accountId },
         req.body
       );

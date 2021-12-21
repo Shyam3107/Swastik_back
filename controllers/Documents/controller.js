@@ -4,7 +4,6 @@ const {
   handleError,
   errorValidation,
   validateBody,
-  removeFile,
 } = require("../../utils/utils");
 const Document = require("../../models/Document");
 
@@ -37,7 +36,13 @@ module.exports.getDocuments = async (req, res) => {
       documents = await Document.findOne({
         vehicleNo: vehicleNo.toUpperCase(),
       });
-    else documents = await Document.find();
+    else
+      documents = await Document.find()
+        .populate({
+          path: "addedBy",
+          select: "location",
+        })
+        .sort({ date: -1 });
     if (!documents) throw "This Vechile does not exist in our record";
 
     return res.status(200).json({ data: documents });
@@ -50,7 +55,7 @@ module.exports.uploadDocuments = async (req, res) => {
   try {
     const user = req.user;
 
-    let dataToBeInsert = await convertCSVToJSON(req.file.path);
+    let dataToBeInsert = req.body.data;
 
     let data = [];
     let tempVehicleNo = {};
@@ -86,8 +91,6 @@ module.exports.uploadDocuments = async (req, res) => {
     }
 
     const insertData = await Document.insertMany(data);
-
-    removeFile(req.file.path);
 
     return res.status(200).json({
       data: insertData,

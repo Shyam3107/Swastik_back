@@ -4,7 +4,7 @@ const {
   handleError,
   errorValidation,
   validateBody,
-  removeFile,
+  userRankQuery,
 } = require("../../utils/utils");
 const VehiclesExpense = require("../../models/VehiclesExpense");
 
@@ -35,7 +35,21 @@ const modelHeader = [
 module.exports.getExpenses = async (req, res) => {
   try {
     const user = req.user;
-    const expenses = await VehiclesExpense.find();
+    const userQuery = userRankQuery(user);
+    const { expenseId } = req.query;
+
+    let expenses;
+    if (expenseId) {
+      expenses = await VehiclesExpense.findOne({ _id: expenseId });
+    } else
+      expenses = await VehiclesExpense.find(userQuery)
+        .populate({
+          path: "addedBy",
+          select: "location",
+        })
+        .sort({ date: -1 });
+
+    if (!expenses) throw "Record Nor Found";
 
     return res.status(200).json({ data: expenses });
   } catch (error) {
@@ -47,7 +61,7 @@ module.exports.uploadExpenses = async (req, res) => {
   try {
     const user = req.user;
 
-    let dataToBeInsert = await convertCSVToJSON(req.file.path);
+    let dataToBeInsert = req.body.data;
 
     let data = [];
 
@@ -81,8 +95,6 @@ module.exports.uploadExpenses = async (req, res) => {
     }
 
     const insertData = await VehiclesExpense.insertMany(data);
-
-    removeFile(req.file.path);
 
     return res.status(200).json({
       data: insertData,

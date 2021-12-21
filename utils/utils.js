@@ -8,9 +8,9 @@ module.exports.convertCSVToJSON = async (csvFilePath) => {
   return jsonArray;
 };
 
-module.exports.handleError = (res, error) => {
-  if (typeof error === "string") return res.status(400).json({ error });
-  return res.status(400).json({ error: error.message });
+module.exports.handleError = (res, errors) => {
+  if (typeof errors === "string") return res.status(400).json({ errors });
+  return res.status(400).json({ errors: errors.message });
 };
 
 module.exports.errorValidation = (req, res) => {
@@ -36,4 +36,9 @@ module.exports.validatePhoneNo = (phoneNo) => {
 
 module.exports.removeFile = (filePath) => {
   fs.unlinkSync(path.join(filePath));
+};
+
+module.exports.userRankQuery = (user) => {
+  if (!user.addedBy) return {};
+  else return { addedBy: user._id };
 };
