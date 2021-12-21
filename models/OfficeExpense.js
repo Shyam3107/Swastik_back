@@ -6,7 +6,7 @@ const expenseSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    cash: {
+    amount: {
       type: Number,
       required: true,
     },

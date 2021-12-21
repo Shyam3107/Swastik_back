@@ -33,7 +33,7 @@ const expenseSchema = new mongoose.Schema(
       type: String,
       enum: ["Driver", "Vehicle", null, "", undefined],
     },
-    cash: {
+    amount: {
       type: Number,
       required: true,
     },

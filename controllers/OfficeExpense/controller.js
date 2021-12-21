@@ -7,9 +7,9 @@ const {
 } = require("../../utils/utils");
 const OfficeExpense = require("../../models/OfficeExpense");
 
-const fileHeader = ["Date", "Cash", "Remarks"];
+const fileHeader = ["Date", "Amount", "Remarks"];
 
-const modelHeader = ["date", "cash", "remarks"];
+const modelHeader = ["date", "amount", "remarks"];
 
 module.exports.getExpenses = async (req, res) => {
   try {

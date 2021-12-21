@@ -90,7 +90,7 @@ module.exports.deleteAccount = async (req, res) => {
     return res.status(200).json({
       data: deletedData,
       message: `Account${
-        documentIds.length > 1 ? "s" : ""
+        accountIds.length > 1 ? "s" : ""
       } Deleted Successfully`,
     });
   } catch (error) {

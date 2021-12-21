@@ -12,7 +12,7 @@ const fileHeader = [
   "Date",
   "Vehicle No.",
   "Driver Name",
-  "Cash",
+  "Amount",
   "Remarks",
   "Pump Name",
   "Diesel",
@@ -24,7 +24,7 @@ const modelHeader = [
   "date",
   "vehicleNo",
   "driverName",
-  "cash",
+  "amount",
   "remarks",
   "pumpName",
   "diesel",
@@ -107,7 +107,7 @@ module.exports.uploadExpenses = async (req, res) => {
 };
 
 module.exports.addExpenses = [
-  validateBody(["date", "vehicleNo", "driverName", "cash", "remarks"]),
+  validateBody(["date", "vehicleNo", "driverName", "amount", "remarks"]),
   async (req, res) => {
     try {
       const errors = errorValidation(req, res);
@@ -132,7 +132,7 @@ module.exports.addExpenses = [
 ];
 
 module.exports.editExpenses = [
-  validateBody(["date", "vehicleNo", "driverName", "cash", "remarks"]),
+  validateBody(["date", "vehicleNo", "driverName", "amount", "remarks"]),
   async (req, res) => {
     try {
       const errors = errorValidation(req, res);

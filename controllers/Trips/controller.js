@@ -4,7 +4,6 @@ const {
   errorValidation,
   validateBody,
   validatePhoneNo,
-  userRankQuery,
 } = require("../../utils/utils");
 const Trip = require("../../models/Trip");
 
@@ -48,13 +47,12 @@ module.exports.getTrips = async (req, res) => {
   try {
     const user = req.user;
     const { diNo } = req.query;
-    const userQuery = userRankQuery(user);
     let trips;
     if (diNo) trips = await Trip.findOne({ diNo });
     else
-      trips = await Trip.find(userQuery)
+      trips = await Trip.find()
         .populate({ path: "addedBy", select: "location" })
-        .sort({ date: -1 }); 
+        .sort({ date: -1 });
 
     if (!trips) throw "This DI No. does not exist in our record";
 
