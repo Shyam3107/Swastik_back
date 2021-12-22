@@ -44,7 +44,7 @@ module.exports.uploadExpenses = async (req, res) => {
     let data = [];
 
     for await (item of dataToBeInsert) {
-      let tempVal = { addedBy: user._id };
+      let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId };
       let mssg = "";
 
       for await ([index, head] of modelHeader.entries()) {
@@ -87,6 +87,7 @@ module.exports.addExpenses = [
       const insertData = await OfficeExpense.create({
         ...req.body,
         addedBy: user._id,
+        companyAdminId: user.companyAdminId,
       });
 
       return res.status(200).json({

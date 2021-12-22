@@ -39,6 +39,6 @@ module.exports.removeFile = (filePath) => {
 };
 
 module.exports.userRankQuery = (user) => {
-  if (!user.addedBy) return {};
+  if (!user.addedBy) return { companyAdminId: user.companyAdminId };
   else return { addedBy: user._id };
 };

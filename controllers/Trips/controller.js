@@ -50,7 +50,7 @@ module.exports.getTrips = async (req, res) => {
     let trips;
     if (diNo) trips = await Trip.findOne({ diNo });
     else
-      trips = await Trip.find()
+      trips = await Trip.find({ companyAdminId: user.companyAdminId })
         .populate({ path: "addedBy", select: "location" })
         .sort({ date: -1 });
 
@@ -72,7 +72,7 @@ module.exports.uploadTrips = async (req, res) => {
     let tempDiNo = {};
 
     for await (item of dataToBeInsert) {
-      let tempVal = { addedBy: user._id };
+      let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId };
       let diNo;
       let mssg = "";
 
@@ -160,6 +160,7 @@ module.exports.addTrips = [
       const insertData = await Trip.create({
         ...req.body,
         addedBy: user._id,
+        companyAdminId: user.companyAdminId,
       });
 
       return res

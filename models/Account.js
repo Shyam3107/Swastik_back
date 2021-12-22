@@ -24,6 +24,11 @@ const accountSchema = new mongoose.Schema(
       ref: "Account",
       required: true,
     },
+    companyAdminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Account",
+      required: true,
+    },
   },
   { timestamps: true }
 );

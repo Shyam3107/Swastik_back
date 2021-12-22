@@ -37,6 +37,7 @@ module.exports.addAccount = [
       const insertData = await Account.create({
         ...req.body,
         addedBy: user._id,
+        companyAdminId: user.companyAdminId,
       });
 
       return res

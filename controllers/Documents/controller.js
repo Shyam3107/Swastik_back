@@ -1,5 +1,4 @@
 const moment = require("moment");
-const { convertCSVToJSON } = require("../../utils/utils");
 const {
   handleError,
   errorValidation,
@@ -37,7 +36,7 @@ module.exports.getDocuments = async (req, res) => {
         vehicleNo: vehicleNo.toUpperCase(),
       });
     else
-      documents = await Document.find()
+      documents = await Document.find({ companyAdminId: user.companyAdminId })
         .populate({
           path: "addedBy",
           select: "location",
@@ -61,7 +60,7 @@ module.exports.uploadDocuments = async (req, res) => {
     let tempVehicleNo = {};
 
     for await (item of dataToBeInsert) {
-      let tempVal = { addedBy: user._id };
+      let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId };
       let vehicleNo;
       let mssg = "";
 
@@ -115,6 +114,7 @@ module.exports.addDocuments = [
       const insertData = await Document.create({
         ...req.body,
         addedBy: user._id,
+        companyAdminId: user.companyAdminId,
       });
 
       return res
