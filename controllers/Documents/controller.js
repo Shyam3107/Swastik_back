@@ -111,6 +111,11 @@ module.exports.addDocuments = [
       }
       const user = req.user;
 
+      const { vehicleNo } = req.body;
+
+      const isExist = await Document.findOne({ vehicleNo });
+      if (isExist) throw `Vehicle No. ${vehicleNo} already exist`;
+
       const insertData = await Document.create({
         ...req.body,
         addedBy: user._id,
