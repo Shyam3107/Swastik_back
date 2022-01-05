@@ -84,7 +84,10 @@ module.exports.uploadTrips = async (req, res) => {
           else if (tempDiNo[value])
             mssg = `Two rows can't have same DI No. ${value}`;
           else {
-            const isExist = await Trip.findOne({ diNo: value });
+            const isExist = await Trip.findOne({
+              diNo: value,
+              companyAdminId: user.companyAdminId,
+            });
             if (isExist) mssg = `DI No. ${value} already exist`;
             diNo = value;
             tempDiNo[value] = true;
@@ -154,7 +157,10 @@ module.exports.addTrips = [
 
       if (cash && !remarks) throw "Remarks field is mandatory if given Cash";
 
-      const isExist = await Trip.findOne({ diNo });
+      const isExist = await Trip.findOne({
+        diNo,
+        companyAdminId: user.companyAdminId,
+      });
       if (isExist) throw `DI No. ${diNo} already exist`;
 
       const insertData = await Trip.create({

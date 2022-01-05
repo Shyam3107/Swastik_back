@@ -12,6 +12,7 @@ const documentRoute = require("./controllers/Documents/route");
 const accountRoute = require("./controllers/Account/route");
 const officeExpenseRoute = require("./controllers/OfficeExpense/route");
 const vehiclesExpenseRoute = require("./controllers/VehicleExpense/route");
+const receiptRoute = require("./controllers/Receipts/route");
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -50,6 +51,9 @@ app.use("/vehicles/documents", checkUser, documentRoute);
 // EXPENSES
 app.use("/expenses/office", checkUser, officeExpenseRoute);
 app.use("/expenses/vehicles", checkUser, vehiclesExpenseRoute);
+
+// RECEIPTS
+app.use("/receipts", checkUser, receiptRoute);
 
 // CONFIGURATION
 app.use("/configure/accounts", checkUser, accountRoute);

@@ -27,7 +27,7 @@ module.exports.getExpenses = async (req, res) => {
         })
         .sort({ date: -1 });
 
-    if (!expenses) throw "Record Nor Found";
+    if (!expenses) throw "Record Not Found";
 
     return res.status(200).json({ data: expenses });
   } catch (error) {
