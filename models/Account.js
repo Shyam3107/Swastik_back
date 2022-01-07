@@ -19,6 +19,14 @@ const accountSchema = new mongoose.Schema(
       required: true,
       uppercase: true,
     },
+    companyName: {
+      type: String,
+      trim: true,
+    },
+    tptCode: {
+      type: String,
+      trim: true,
+    },
     addedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Account",

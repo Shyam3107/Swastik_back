@@ -13,8 +13,14 @@ module.exports.getAccount = async (req, res) => {
     const user = req.user;
     const { accountId } = req.query;
     let accounts;
-    if (accountId) accounts = await Account.findById({ _id: accountId });
-    else accounts = await Account.find({ addedBy: user._id });
+    if (accountId)
+      accounts = await Account.findById({ _id: accountId }).select({
+        password: 0,
+      });
+    else
+      accounts = await Account.find({ addedBy: user._id }).select({
+        password: 0,
+      });
     if (!accounts) throw "This Account does not exist in our record";
 
     return res.status(200).json({ data: accounts });

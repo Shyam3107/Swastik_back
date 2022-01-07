@@ -6,13 +6,13 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 
 const { checkUser } = require("./middlewares/checkUser");
-const { login } = require("./controllers/Login/login");
 const tripRoute = require("./controllers/Trips/route");
 const documentRoute = require("./controllers/Documents/route");
 const accountRoute = require("./controllers/Account/route");
 const officeExpenseRoute = require("./controllers/OfficeExpense/route");
 const vehiclesExpenseRoute = require("./controllers/VehicleExpense/route");
 const receiptRoute = require("./controllers/Receipts/route");
+const userRoute = require("./controllers/User/route");
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -42,7 +42,8 @@ app.get("/", async (req, res) => {
   return res.status(200).json({ data: "App started" });
 });
 
-app.get("/login", login);
+// USERS
+app.use("/user", userRoute);
 
 // VEHICLES
 app.use("/vehicles/trips", checkUser, tripRoute);

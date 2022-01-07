@@ -48,7 +48,11 @@ module.exports.getTrips = async (req, res) => {
     const user = req.user;
     const { diNo } = req.query;
     let trips;
-    if (diNo) trips = await Trip.findOne({ diNo });
+    if (diNo)
+      trips = await Trip.findOne({ diNo }).populate({
+        path: "addedBy",
+        select: "location",
+      });
     else
       trips = await Trip.find({ companyAdminId: user.companyAdminId })
         .populate({ path: "addedBy", select: "location" })
@@ -113,6 +117,12 @@ module.exports.uploadTrips = async (req, res) => {
         tempVal[head] = value;
       }
 
+      if (!tempVal.pumpName) delete tempVal.pumpName;
+      if (!tempVal.diesel) delete tempVal.diesel;
+      if (!tempVal.dieselIn) delete tempVal.dieselIn;
+      if (!tempVal.cash) delete tempVal.cash;
+      if (!tempVal.remarks) delete tempVal.remarks;
+
       data.push(tempVal);
     }
 
@@ -163,6 +173,12 @@ module.exports.addTrips = [
       });
       if (isExist) throw `DI No. ${diNo} already exist`;
 
+      if (!req.body.pumpName) delete req.body.pumpName;
+      if (!req.body.diesel) delete req.body.diesel;
+      if (!req.body.dieselIn) delete req.body.dieselIn;
+      if (!req.body.cash) delete req.body.cash;
+      if (!req.body.remarks) delete req.body.remarks;
+
       const insertData = await Trip.create({
         ...req.body,
         addedBy: user._id,
@@ -200,6 +216,11 @@ module.exports.editTrips = [
       const user = req.user;
 
       const tripId = req.body._id;
+      if (!req.body.pumpName) delete req.body.pumpName;
+      if (!req.body.diesel) delete req.body.diesel;
+      if (!req.body.dieselIn) delete req.body.dieselIn;
+      if (!req.body.cash) delete req.body.cash;
+      if (!req.body.remarks) delete req.body.remarks;
       const updateData = await Trip.findByIdAndUpdate(
         { _id: tripId },
         req.body

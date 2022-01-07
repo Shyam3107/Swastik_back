@@ -59,8 +59,7 @@ const tripSchema = new mongoose.Schema(
     },
     dieselIn: {
       type: String,
-      enum: ["Litre", "Amount", null, "", undefined],
-      default: null,
+      enum: ["Litre", "Amount"],
     },
     cash: {
       type: Number,
