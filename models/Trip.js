@@ -5,7 +5,6 @@ const tripSchema = new mongoose.Schema(
     diNo: {
       type: Number,
       required: true,
-      unique: true,
     },
     lrNo: {
       type: String,

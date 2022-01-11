@@ -7,7 +7,6 @@ const documentSchema = new mongoose.Schema(
       uppercase: true,
       trim: true,
       required: true,
-      unique: true,
     },
     taxPaidOn: {
       type: Date,
