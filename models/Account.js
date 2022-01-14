@@ -19,6 +19,10 @@ const accountSchema = new mongoose.Schema(
       required: true,
       uppercase: true,
     },
+    phone: {
+      type: String,
+      required: true,
+    },
     companyName: {
       type: String,
       trim: true,

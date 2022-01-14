@@ -3,6 +3,7 @@ const {
   handleError,
   errorValidation,
   validateBody,
+  validatePhoneNo,
 } = require("../../utils/utils");
 const Account = require("../../models/Account");
 
@@ -39,6 +40,8 @@ module.exports.addAccount = [
       }
       const user = req.user;
       if (req.body.password) req.body.password = md5(req.body.password);
+      if (req.body.phone && !validatePhoneNo(req.body.phone))
+        throw "Enter Valid Phone No.";
 
       const insertData = await Account.create({
         ...req.body,

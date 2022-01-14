@@ -72,7 +72,10 @@ module.exports.uploadDocuments = async (req, res) => {
           else if (tempVehicleNo[value])
             mssg = `Two rows can't have same Vehicle No. ${value}`;
           else {
-            const isExist = await Document.findOne({ vehicleNo: value });
+            const isExist = await Document.findOne({
+              vehicleNo: value,
+              companyAdminId: user.companyAdminId,
+            });
             if (isExist) mssg = `Vehicle No. ${value} already exist`;
             vehicleNo = value;
             tempVehicleNo[value] = true;
@@ -81,7 +84,8 @@ module.exports.uploadDocuments = async (req, res) => {
 
         if (mssg) throw mssg;
 
-        if (index > 0) value = moment(value, "DD-MM-YYYY").toISOString();
+        if (index > 0)
+          value = moment(value, "DD-MM-YYYY").endOf("day").toISOString();
 
         tempVal[head] = value;
       }

@@ -14,6 +14,8 @@ const vehiclesExpenseRoute = require("./controllers/VehicleExpense/route");
 const receiptRoute = require("./controllers/Receipts/route");
 const userRoute = require("./controllers/User/route");
 
+const { getHome } = require("./controllers/Home/controller");
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
@@ -44,6 +46,9 @@ app.get("/", async (req, res) => {
 
 // USERS
 app.use("/user", userRoute);
+
+// HOME
+app.get("/home", checkUser, getHome);
 
 // VEHICLES
 app.use("/vehicles/trips", checkUser, tripRoute);
