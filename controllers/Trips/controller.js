@@ -46,21 +46,33 @@ const modelHeader = [
 module.exports.getTrips = async (req, res) => {
   try {
     const user = req.user;
-    const { diNo } = req.query;
+    let { diNo, from = moment().startOf("month"), to = moment() } = req.query;
+
+    from = moment(from).startOf("day").toISOString();
+    to = moment(to).endOf("day").toISOString();
+
     let trips;
+    let metaData = {};
+    let query = {
+      companyAdminId: user.companyAdminId,
+      date: { $gte: from, $lte: to },
+    };
+    let select = { __v: 0, createdAt: 0, updatedAt: 0, companyAdminId: 0 };
     if (diNo)
       trips = await Trip.findOne({ diNo }).populate({
         path: "addedBy",
         select: "location",
       });
-    else
-      trips = await Trip.find({ companyAdminId: user.companyAdminId })
+    else {
+      trips = await Trip.find(query)
+        .select(select)
         .populate({ path: "addedBy", select: "location" })
         .sort({ date: -1 });
-
+      metaData.totalDocuments = trips.length;
+    }
     if (!trips) throw "This DI No. does not exist in our record";
 
-    return res.status(200).json({ data: trips });
+    return res.status(200).json({ metaData, data: trips });
   } catch (error) {
     return handleError(res, error);
   }
