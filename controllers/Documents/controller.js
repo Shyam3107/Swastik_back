@@ -1,10 +1,11 @@
-const moment = require("moment");
+const moment = require("moment")
 const {
   handleError,
   errorValidation,
   validateBody,
-} = require("../../utils/utils");
-const Document = require("../../models/Document");
+  dateFormat,
+} = require("../../utils/utils")
+const Document = require("../../models/Document")
 
 const fileHeader = [
   "Vehicle No.",
@@ -14,7 +15,10 @@ const fileHeader = [
   "Insurance Paid Upto",
   "Fitness Paid On",
   "Fitness Paid Upto",
-];
+  "Pollution Paid On",
+  "Pollution Paid Upto",
+  "Google Drive Link",
+]
 
 const modelHeader = [
   "vehicleNo",
@@ -24,162 +28,170 @@ const modelHeader = [
   "insurancePaidUpto",
   "fitnessPaidOn",
   "fitnessPaidUpto",
-];
+  "pollutionPaidOn",
+  "pollutionPaidUpto",
+  "googleDriveLink",
+]
 
 module.exports.getDocuments = async (req, res) => {
   try {
-    const user = req.user;
-    const { vehicleNo } = req.query;
-    let documents;
+    const user = req.user
+    const { vehicleNo } = req.query
+    let documents
     if (vehicleNo)
       documents = await Document.findOne({
         vehicleNo: vehicleNo.toUpperCase(),
-      });
+      })
     else
       documents = await Document.find({ companyAdminId: user.companyAdminId })
         .populate({
           path: "addedBy",
           select: "location",
         })
-        .sort({ date: -1 });
-    if (!documents) throw "This Vechile does not exist in our record";
+        .sort({ date: -1 })
+    if (!documents) throw "This Vechile does not exist in our record"
 
-    return res.status(200).json({ data: documents });
+    return res.status(200).json({ data: documents })
   } catch (error) {
-    return handleError(res, error);
+    return handleError(res, error)
   }
-};
+}
 
 module.exports.uploadDocuments = async (req, res) => {
   try {
-    const user = req.user;
+    const user = req.user
 
-    let dataToBeInsert = req.body.data;
+    let dataToBeInsert = req.body.data
 
-    let data = [];
-    let tempVehicleNo = {};
+    let data = []
+    let tempVehicleNo = {}
 
     for await (item of dataToBeInsert) {
-      let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId };
-      let vehicleNo;
-      let mssg = "";
+      let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId }
+      let vehicleNo
+      let mssg = ""
 
       for await ([index, head] of modelHeader.entries()) {
-        let value = item[fileHeader[index]];
+        let value = item[fileHeader[index]]
 
         if (head === "vehicleNo") {
-          if (!value) mssg = "All Fields should have Vehicle No.";
+          if (!value) mssg = "All Fields should have Vehicle No."
           else if (tempVehicleNo[value])
-            mssg = `Two rows can't have same Vehicle No. ${value}`;
+            mssg = `Two rows can't have same Vehicle No. ${value}`
           else {
-            const isExist = await Document.findOne({
-              vehicleNo: value,
-              companyAdminId: user.companyAdminId,
-            });
-            if (isExist) mssg = `Vehicle No. ${value} already exist`;
-            vehicleNo = value;
-            tempVehicleNo[value] = true;
+            vehicleNo = value
+            tempVehicleNo[value] = true
           }
-        } else if (!value) mssg = `Enter Valid date for ${vehicleNo}`;
+        } else if (!value && head != "googleDriveLink")
+          mssg = `Enter Valid date for ${vehicleNo}`
 
-        if (mssg) throw mssg;
+        if (mssg) throw mssg
 
-        if (index > 0)
-          value = moment(value, "DD-MM-YYYY").endOf("day").toISOString();
+        if (index > 0 && index != modelHeader.length - 1) {
+          value = moment(value, dateFormat(value)).endOf("day").toISOString()
+        }
 
-        tempVal[head] = value;
+        tempVal[head] = value
       }
 
-      data.push(tempVal);
+      const updateData = await Document.findOneAndUpdate(
+        { vehicleNo: tempVal.vehicleNo },
+        tempVal,
+        { upsert: true, new: true }
+      )
+
+      if (!updateData) throw `Failed to Update Data from vehicleNo ${vehicleNo}`
+
+      data.push(tempVal)
     }
 
-    const insertData = await Document.insertMany(data);
+    //const insertData = await Document.insertMany(data)
 
     return res.status(200).json({
-      data: insertData,
-      entries: insertData.length,
-      message: `Successfully Inserted ${insertData.length} entries`,
-    });
+      data: data,
+      entries: data.length,
+      message: `Successfully Inserted ${data.length} entries`,
+    })
   } catch (error) {
-    return handleError(res, error);
+    return handleError(res, error)
   }
-};
+}
 
 module.exports.addDocuments = [
-  validateBody(modelHeader),
+  validateBody(modelHeader.slice(0, modelHeader.length - 1)),
   async (req, res) => {
     try {
-      const errors = errorValidation(req, res);
+      const errors = errorValidation(req, res)
       if (errors) {
-        return null;
+        return null
       }
-      const user = req.user;
+      const user = req.user
 
-      const { vehicleNo } = req.body;
+      const { vehicleNo } = req.body
 
-      const isExist = await Document.findOne({ vehicleNo });
-      if (isExist) throw `Vehicle No. ${vehicleNo} already exist`;
+      const isExist = await Document.findOne({ vehicleNo })
+      if (isExist) throw `Vehicle No. ${vehicleNo} already exist`
 
       const insertData = await Document.create({
         ...req.body,
         addedBy: user._id,
         companyAdminId: user.companyAdminId,
-      });
+      })
 
       return res
         .status(200)
-        .json({ data: insertData, message: "Document Added Successfully" });
+        .json({ data: insertData, message: "Document Added Successfully" })
     } catch (error) {
-      return handleError(res, error);
+      return handleError(res, error)
     }
   },
-];
+]
 
 module.exports.editDocuments = [
-  validateBody(modelHeader),
+  validateBody(modelHeader.slice(0, modelHeader.length - 1)),
   async (req, res) => {
     try {
-      const errors = errorValidation(req, res);
+      const errors = errorValidation(req, res)
       if (errors) {
-        return null;
+        return null
       }
-      const user = req.user;
+      const user = req.user
 
-      const documentId = req.body._id;
+      const documentId = req.body._id
       const updateData = await Document.findByIdAndUpdate(
         { _id: documentId },
         req.body
-      );
+      )
 
-      if (!updateData) throw "Record Not Found";
+      if (!updateData) throw "Record Not Found"
 
       return res
         .status(200)
-        .json({ data: updateData, message: "Document Edited Successfully" });
+        .json({ data: updateData, message: "Document Edited Successfully" })
     } catch (error) {
-      return handleError(res, error);
+      return handleError(res, error)
     }
   },
-];
+]
 
 module.exports.deleteDocuments = async (req, res) => {
   try {
-    const errors = errorValidation(req, res);
+    const errors = errorValidation(req, res)
     if (errors) {
-      return null;
+      return null
     }
-    const user = req.user;
-    const documentIds = req.body;
+    const user = req.user
+    const documentIds = req.body
 
-    const deletedData = await Document.deleteMany({ _id: documentIds });
+    const deletedData = await Document.deleteMany({ _id: documentIds })
 
     return res.status(200).json({
       data: deletedData,
       message: `Document${
         documentIds.length > 1 ? "s" : ""
       } Deleted Successfully`,
-    });
+    })
   } catch (error) {
-    return handleError(res, error);
+    return handleError(res, error)
   }
-};
+}

@@ -1,58 +1,68 @@
-const moment = require("moment");
-const { handleError } = require("../../utils/utils");
-const Trip = require("../../models/Trip");
-const Document = require("../../models/Document");
+const moment = require("moment")
+const { handleError } = require("../../utils/utils")
+const Trip = require("../../models/Trip")
+const Document = require("../../models/Document")
 
 module.exports.getHome = async (req, res) => {
   try {
-    const user = req.user;
-    let home = { trips: [], tax: [], insurance: [], fitness: [] };
-    let temp;
+    const user = req.user
+    let home = { trips: [], tax: [], insurance: [], fitness: [], pollution: [] }
+    let temp
 
     for (let index = 0; index < 12; index++) {
-      const startDate = moment().month(index).startOf("month");
-      const endDate = moment().month(index).endOf("month");
+      const startDate = moment().month(index).startOf("month")
+      const endDate = moment().month(index).endOf("month")
 
       const temp = await Trip.find({
         companyAdminId: user.companyAdminId,
         date: { $gte: startDate, $lte: endDate },
-      }).countDocuments();
+      }).countDocuments()
 
-      home.trips.push(temp);
+      home.trips.push(temp)
     }
 
     home.tax[0] = await Document.find({
       companyAdminId: user.companyAdminId,
       taxPaidUpto: { $gte: moment() },
-    }).countDocuments();
+    }).countDocuments()
 
     home.tax[1] = await Document.find({
       companyAdminId: user.companyAdminId,
       taxPaidUpto: { $lt: moment() },
-    }).countDocuments();
+    }).countDocuments()
 
     home.insurance[0] = await Document.find({
       companyAdminId: user.companyAdminId,
       insurancePaidUpto: { $gte: moment() },
-    }).countDocuments();
+    }).countDocuments()
 
     home.insurance[1] = await Document.find({
       companyAdminId: user.companyAdminId,
       insurancePaidUpto: { $lt: moment() },
-    }).countDocuments();
+    }).countDocuments()
 
     home.fitness[0] = await Document.find({
       companyAdminId: user.companyAdminId,
       insurancePaidUpto: { $gte: moment() },
-    }).countDocuments();
+    }).countDocuments()
 
     home.fitness[1] = await Document.find({
       companyAdminId: user.companyAdminId,
       fitnessPaidUpto: { $lt: moment() },
-    }).countDocuments();
+    }).countDocuments()
 
-    return res.status(200).json({ data: home });
+    home.pollution[0] = await Document.find({
+      companyAdminId: user.companyAdminId,
+      pollutionPaidUpto: { $gte: moment() },
+    }).countDocuments()
+
+    home.pollution[1] = await Document.find({
+      companyAdminId: user.companyAdminId,
+      pollutionPaidUpto: { $lt: moment() },
+    }).countDocuments()
+
+    return res.status(200).json({ data: home })
   } catch (error) {
-    return handleError(res, error);
+    return handleError(res, error)
   }
-};
+}
