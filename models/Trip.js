@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 const tripSchema = new mongoose.Schema(
   {
@@ -79,8 +79,8 @@ const tripSchema = new mongoose.Schema(
     },
   },
   { timestamps: true }
-);
+)
 
-const Trip = mongoose.model("Trip", tripSchema);
+const Trip = mongoose.model("Trip", tripSchema)
 
-module.exports = Trip;
+module.exports = Trip

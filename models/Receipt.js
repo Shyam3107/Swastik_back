@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 const schema = new mongoose.Schema(
   {
@@ -27,8 +27,8 @@ const schema = new mongoose.Schema(
     },
   },
   { timestamps: true }
-);
+)
 
-const Receipt = mongoose.model("Receipt", schema);
+const Receipt = mongoose.model("Receipt", schema)
 
-module.exports = Receipt;
+module.exports = Receipt

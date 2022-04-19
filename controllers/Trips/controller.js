@@ -1,11 +1,11 @@
-const moment = require("moment");
+const moment = require("moment")
 const {
   handleError,
   errorValidation,
   validateBody,
   validatePhoneNo,
-} = require("../../utils/utils");
-const Trip = require("../../models/Trip");
+} = require("../../utils/utils")
+const Trip = require("../../models/Trip")
 
 const fileHeader = [
   "DI No.",
@@ -23,7 +23,7 @@ const fileHeader = [
   "Pump Name",
   "Cash",
   "Remarks",
-];
+]
 
 const modelHeader = [
   "diNo",
@@ -41,114 +41,114 @@ const modelHeader = [
   "pumpName",
   "cash",
   "remarks",
-];
+]
 
 module.exports.getTrips = async (req, res) => {
   try {
-    const user = req.user;
-    let { diNo, from = moment().startOf("month"), to = moment() } = req.query;
+    const user = req.user
+    let { diNo, from = moment().startOf("month"), to = moment() } = req.query
 
-    from = moment(from).startOf("day").toISOString();
-    to = moment(to).endOf("day").toISOString();
+    from = moment(from).startOf("day").toISOString()
+    to = moment(to).endOf("day").toISOString()
 
-    let trips;
-    let metaData = {};
+    let trips
+    let metaData = {}
     let query = {
       companyAdminId: user.companyAdminId,
       date: { $gte: from, $lte: to },
-    };
-    let select = { __v: 0, createdAt: 0, updatedAt: 0, companyAdminId: 0 };
+    }
+    let select = { __v: 0, createdAt: 0, updatedAt: 0, companyAdminId: 0 }
     if (diNo)
       trips = await Trip.findOne({ diNo }).populate({
         path: "addedBy",
         select: "location",
-      });
+      })
     else {
       trips = await Trip.find(query)
         .select(select)
         .populate({ path: "addedBy", select: "location" })
-        .sort({ date: -1 });
-      metaData.totalDocuments = trips.length;
+        .sort({ date: -1 })
+      metaData.totalDocuments = trips.length
     }
-    if (!trips) throw "This DI No. does not exist in our record";
+    if (!trips) throw "This DI No. does not exist in our record"
 
-    return res.status(200).json({ metaData, data: trips });
+    return res.status(200).json({ metaData, data: trips })
   } catch (error) {
-    return handleError(res, error);
+    return handleError(res, error)
   }
-};
+}
 
 module.exports.uploadTrips = async (req, res) => {
   try {
-    const user = req.user;
+    const user = req.user
 
-    const dataToBeInsert = req.body.data;
+    const dataToBeInsert = req.body.data
 
-    let data = [];
-    let tempDiNo = {};
+    let data = []
+    let tempDiNo = {}
 
     for await (item of dataToBeInsert) {
-      let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId };
-      let diNo;
-      let mssg = "";
+      let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId }
+      let diNo
+      let mssg = ""
 
       for await ([index, head] of modelHeader.entries()) {
-        let value = item[fileHeader[index]];
+        let value = item[fileHeader[index]]
 
         if (head === "diNo") {
-          if (!value) mssg = "All Fields Should have DI No.";
+          if (!value) mssg = "All Fields Should have DI No."
           else if (tempDiNo[value])
-            mssg = `Two rows can't have same DI No. ${value}`;
+            mssg = `Two rows can't have same DI No. ${value}`
           else {
             const isExist = await Trip.findOne({
               diNo: value,
               companyAdminId: user.companyAdminId,
-            });
-            if (isExist) mssg = `DI No. ${value} already exist`;
-            diNo = value;
-            tempDiNo[value] = true;
+            })
+            if (isExist) mssg = `DI No. ${value} already exist`
+            diNo = value
+            tempDiNo[value] = true
           }
         } else if (index < 9 && !value)
-          mssg = `${fileHeader[index]} is required for DI No. ${diNo}`;
+          mssg = `${fileHeader[index]} is required for DI No. ${diNo}`
         else if (head === "driverPhone" && !validatePhoneNo(value))
-          mssg = `Fill Valid Driver Phone No. for DI No. ${diNo}`;
+          mssg = `Fill Valid Driver Phone No. for DI No. ${diNo}`
         else if (
           item["Diesel"] &&
           head === "dieselIn" &&
           value !== "Litre" &&
           value !== "Amount"
         )
-          mssg = `Diesel In should be Litre or Amount for DI No. ${diNo}`;
+          mssg = `Diesel In should be Litre or Amount for DI No. ${diNo}`
         else if (item["Diesel"] && !item["Pump Name"])
-          mssg = `Pump Name is mandatory if Diesel Taken for DI No. ${diNo}`;
+          mssg = `Pump Name is mandatory if Diesel Taken for DI No. ${diNo}`
 
-        if (mssg) throw mssg;
+        if (mssg) throw mssg
 
-        if (head === "date") value = moment(value, "DD-MM-YYYY").toISOString();
+        if (head === "date") value = moment(value, "DD-MM-YYYY").toISOString()
 
-        tempVal[head] = value;
+        tempVal[head] = value
       }
 
-      if (!tempVal.pumpName) delete tempVal.pumpName;
-      if (!tempVal.diesel) delete tempVal.diesel;
-      if (!tempVal.dieselIn) delete tempVal.dieselIn;
-      if (!tempVal.cash) delete tempVal.cash;
-      if (!tempVal.remarks) delete tempVal.remarks;
+      if (!tempVal.pumpName) delete tempVal.pumpName
+      if (!tempVal.diesel) delete tempVal.diesel
+      if (!tempVal.dieselIn) delete tempVal.dieselIn
+      if (!tempVal.cash) delete tempVal.cash
+      if (!tempVal.remarks) delete tempVal.remarks
 
-      data.push(tempVal);
+      data.push(tempVal)
     }
 
-    const insertData = await Trip.insertMany(data);
+    const insertData = await Trip.insertMany(data)
 
     return res.status(200).json({
       data: insertData,
       entries: insertData.length,
       message: `Successfully Inserted ${insertData.length} entries`,
-    });
+    })
   } catch (error) {
-    return handleError(res, error);
+    return handleError(res, error)
   }
-};
+}
 
 module.exports.addTrips = [
   validateBody([
@@ -165,46 +165,46 @@ module.exports.addTrips = [
   ]),
   async (req, res) => {
     try {
-      const errors = errorValidation(req, res);
+      const errors = errorValidation(req, res)
       if (errors) {
-        return null;
+        return null
       }
-      const user = req.user;
-      const { driverPhone, dieselIn, cash, remarks, diNo } = req.body;
+      const user = req.user
+      const { driverPhone, dieselIn, cash, remarks, diNo } = req.body
 
-      if (!validatePhoneNo(driverPhone)) throw "Enter Valid Phone No.";
+      if (!validatePhoneNo(driverPhone)) throw "Enter Valid Phone No."
 
       if (dieselIn && dieselIn !== "Litre" && dieselIn !== "Amount")
-        throw "Diesel In Field should be Litre or Amount";
+        throw "Diesel In Field should be Litre or Amount"
 
-      if (cash && !remarks) throw "Remarks field is mandatory if given Cash";
+      if (cash && !remarks) throw "Remarks field is mandatory if given Cash"
 
       const isExist = await Trip.findOne({
         diNo,
         companyAdminId: user.companyAdminId,
-      });
-      if (isExist) throw `DI No. ${diNo} already exist`;
+      })
+      if (isExist) throw `DI No. ${diNo} already exist`
 
-      if (!req.body.pumpName) delete req.body.pumpName;
-      if (!req.body.diesel) delete req.body.diesel;
-      if (!req.body.dieselIn) delete req.body.dieselIn;
-      if (!req.body.cash) delete req.body.cash;
-      if (!req.body.remarks) delete req.body.remarks;
+      if (!req.body.pumpName) delete req.body.pumpName
+      if (!req.body.diesel) delete req.body.diesel
+      if (!req.body.dieselIn) delete req.body.dieselIn
+      if (!req.body.cash) delete req.body.cash
+      if (!req.body.remarks) delete req.body.remarks
 
       const insertData = await Trip.create({
         ...req.body,
         addedBy: user._id,
         companyAdminId: user.companyAdminId,
-      });
+      })
 
       return res
         .status(200)
-        .json({ data: insertData, message: "Trip Added Successfully" });
+        .json({ data: insertData, message: "Trip Added Successfully" })
     } catch (error) {
-      return handleError(res, error);
+      return handleError(res, error)
     }
   },
-];
+]
 
 module.exports.editTrips = [
   validateBody([
@@ -221,50 +221,47 @@ module.exports.editTrips = [
   ]),
   async (req, res) => {
     try {
-      const errors = errorValidation(req, res);
+      const errors = errorValidation(req, res)
       if (errors) {
-        return null;
+        return null
       }
-      const user = req.user;
+      const user = req.user
 
-      const tripId = req.body._id;
-      if (!req.body.pumpName) delete req.body.pumpName;
-      if (!req.body.diesel) delete req.body.diesel;
-      if (!req.body.dieselIn) delete req.body.dieselIn;
-      if (!req.body.cash) delete req.body.cash;
-      if (!req.body.remarks) delete req.body.remarks;
-      const updateData = await Trip.findByIdAndUpdate(
-        { _id: tripId },
-        req.body
-      );
+      const tripId = req.body._id
+      if (!req.body.pumpName) delete req.body.pumpName
+      if (!req.body.diesel) delete req.body.diesel
+      if (!req.body.dieselIn) delete req.body.dieselIn
+      if (!req.body.cash) delete req.body.cash
+      if (!req.body.remarks) delete req.body.remarks
+      const updateData = await Trip.findByIdAndUpdate({ _id: tripId }, req.body)
 
-      if (!updateData) throw "Record Not Found";
+      if (!updateData) throw "Record Not Found"
 
       return res
         .status(200)
-        .json({ data: updateData, message: "Trip Edited Successfully" });
+        .json({ data: updateData, message: "Trip Edited Successfully" })
     } catch (error) {
-      return handleError(res, error);
+      return handleError(res, error)
     }
   },
-];
+]
 
 module.exports.deleteTrips = async (req, res) => {
   try {
-    const errors = errorValidation(req, res);
+    const errors = errorValidation(req, res)
     if (errors) {
-      return null;
+      return null
     }
-    const user = req.user;
-    const tripIds = req.body;
+    const user = req.user
+    const tripIds = req.body
 
-    const deletedData = await Trip.deleteMany({ _id: tripIds });
+    const deletedData = await Trip.deleteMany({ _id: tripIds })
 
     return res.status(200).json({
       data: deletedData,
       message: `Trip${tripIds.length > 1 ? "s" : ""} Deleted Successfully`,
-    });
+    })
   } catch (error) {
-    return handleError(res, error);
+    return handleError(res, error)
   }
-};
+}

@@ -48,7 +48,7 @@ module.exports.getDocuments = async (req, res) => {
           path: "addedBy",
           select: "location",
         })
-        .sort({ date: -1 })
+        .sort({ vehicleNo: 1 })
     if (!documents) throw "This Vechile does not exist in our record"
 
     return res.status(200).json({ data: documents })
