@@ -30,6 +30,8 @@ const modelHeader = [
   "fitnessPaidUpto",
   "pollutionPaidOn",
   "pollutionPaidUpto",
+  "permitPaidOn",
+  "permitPaidUpto",
   "googleDriveLink",
 ]
 
@@ -104,8 +106,6 @@ module.exports.uploadDocuments = async (req, res) => {
 
       data.push(tempVal)
     }
-
-    //const insertData = await Document.insertMany(data)
 
     return res.status(200).json({
       data: data,

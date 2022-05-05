@@ -40,6 +40,14 @@ const documentSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    permitPaidOn: {
+      type: Date,
+      required: true,
+    },
+    permitPaidUpto: {
+      type: Date,
+      required: true,
+    },
     googleDriveLink: {
       type: String,
     },
