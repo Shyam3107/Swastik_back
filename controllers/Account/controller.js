@@ -1,15 +1,15 @@
-const md5 = require("md5")
-const {
+import md5 from "md5"
+import {
   handleError,
   errorValidation,
   validateBody,
   validatePhoneNo,
-} = require("../../utils/utils")
-const Account = require("../../models/Account")
+} from "../../utils/utils.js"
+import Account from "../../models/Account.js"
 
 const modelHeader = ["userName", "password", "location"]
 
-module.exports.getAccount = async (req, res) => {
+export async function getAccount(req, res) {
   try {
     const user = req.user
     const { accountId } = req.query
@@ -30,7 +30,7 @@ module.exports.getAccount = async (req, res) => {
   }
 }
 
-module.exports.addAccount = [
+export const addAccount = [
   validateBody(modelHeader),
   async (req, res) => {
     try {
@@ -58,7 +58,7 @@ module.exports.addAccount = [
   },
 ]
 
-module.exports.editAccount = [
+export const editAccount = [
   validateBody(["userName", "location"]),
   async (req, res) => {
     try {
@@ -89,7 +89,7 @@ module.exports.editAccount = [
   },
 ]
 
-module.exports.deleteAccount = async (req, res) => {
+export async function deleteAccount(req, res) {
   try {
     const errors = errorValidation(req, res)
     if (errors) {

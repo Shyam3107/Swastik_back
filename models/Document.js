@@ -1,6 +1,7 @@
-const mongoose = require("mongoose")
+import mongoose from "mongoose"
+const { Schema, model } = mongoose
 
-const documentSchema = new mongoose.Schema(
+const documentSchema = new Schema(
   {
     vehicleNo: {
       type: String,
@@ -8,15 +9,7 @@ const documentSchema = new mongoose.Schema(
       trim: true,
       required: true,
     },
-    taxPaidOn: {
-      type: Date,
-      required: true,
-    },
     taxPaidUpto: {
-      type: Date,
-      required: true,
-    },
-    insurancePaidOn: {
       type: Date,
       required: true,
     },
@@ -24,15 +17,7 @@ const documentSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    fitnessPaidOn: {
-      type: Date,
-      required: true,
-    },
     fitnessPaidUpto: {
-      type: Date,
-      required: true,
-    },
-    pollutionPaidOn: {
       type: Date,
       required: true,
     },
@@ -40,24 +25,21 @@ const documentSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    permitPaidOn: {
-      type: Date,
-      required: true,
-    },
     permitPaidUpto: {
       type: Date,
       required: true,
     },
-    googleDriveLink: {
-      type: String,
+    nationalPermitPaidUpto: {
+      type: Date,
+      required: true,
     },
     addedBy: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Account",
       required: true,
     },
     companyAdminId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Account",
       required: true,
     },
@@ -65,6 +47,6 @@ const documentSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-const Document = mongoose.model("Document", documentSchema)
+const Document = model("Document", documentSchema)
 
-module.exports = Document
+export default Document

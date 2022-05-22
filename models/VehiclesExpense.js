@@ -1,6 +1,7 @@
-const mongoose = require("mongoose")
+import mongoose from "mongoose"
+const { Schema, model } = mongoose
 
-const expenseSchema = new mongoose.Schema(
+const expenseSchema = new Schema(
   {
     date: {
       type: Date,
@@ -44,12 +45,12 @@ const expenseSchema = new mongoose.Schema(
       default: "",
     },
     addedBy: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Account",
       required: true,
     },
     companyAdminId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Account",
       required: true,
     },
@@ -57,6 +58,6 @@ const expenseSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-const VehiclesExpense = mongoose.model("VehiclesExpense", expenseSchema)
+const VehiclesExpense = model("VehiclesExpense", expenseSchema)
 
-module.exports = VehiclesExpense
+export default VehiclesExpense

@@ -1,11 +1,11 @@
-const moment = require("moment")
-const {
+import moment from "moment"
+import {
   handleError,
   errorValidation,
   validateBody,
   validatePhoneNo,
-} = require("../../utils/utils")
-const Trip = require("../../models/Trip")
+} from "../../utils/utils.js"
+import Trip from "../../models/Trip.js"
 
 const fileHeader = [
   "DI No.",
@@ -43,7 +43,7 @@ const modelHeader = [
   "remarks",
 ]
 
-module.exports.getTrips = async (req, res) => {
+export async function getTrips(req, res) {
   try {
     const user = req.user
     let { diNo, from = moment().startOf("month"), to = moment() } = req.query
@@ -78,7 +78,7 @@ module.exports.getTrips = async (req, res) => {
   }
 }
 
-module.exports.uploadTrips = async (req, res) => {
+export async function uploadTrips(req, res) {
   try {
     const user = req.user
 
@@ -87,12 +87,14 @@ module.exports.uploadTrips = async (req, res) => {
     let data = []
     let tempDiNo = {}
 
-    for await (item of dataToBeInsert) {
+    for (let i = 0; i < dataToBeInsert.length; i++) {
+      const item = dataToBeInsert[i]
       let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId }
       let diNo
       let mssg = ""
 
-      for await ([index, head] of modelHeader.entries()) {
+      for (let index = 0; index < modelHeader.length; index++) {
+        let head = modelHeader[index]
         let value = item[fileHeader[index]]
 
         if (head === "diNo") {
@@ -150,7 +152,7 @@ module.exports.uploadTrips = async (req, res) => {
   }
 }
 
-module.exports.addTrips = [
+export const addTrips = [
   validateBody([
     "diNo",
     "lrNo",
@@ -206,7 +208,7 @@ module.exports.addTrips = [
   },
 ]
 
-module.exports.editTrips = [
+export const editTrips = [
   validateBody([
     "diNo",
     "lrNo",
@@ -246,7 +248,7 @@ module.exports.editTrips = [
   },
 ]
 
-module.exports.deleteTrips = async (req, res) => {
+export async function deleteTrips(req, res) {
   try {
     const errors = errorValidation(req, res)
     if (errors) {

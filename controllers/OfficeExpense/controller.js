@@ -1,17 +1,17 @@
-const moment = require("moment")
-const {
+import moment from "moment"
+import {
   handleError,
   errorValidation,
   validateBody,
   userRankQuery,
-} = require("../../utils/utils")
-const OfficeExpense = require("../../models/OfficeExpense")
+} from "../../utils/utils.js"
+import OfficeExpense from "../../models/OfficeExpense.js"
 
 const fileHeader = ["Date", "Amount", "Remarks"]
 
 const modelHeader = ["date", "amount", "remarks"]
 
-module.exports.getExpenses = async (req, res) => {
+export async function getExpenses(req, res) {
   try {
     const user = req.user
     const { expenseId } = req.query
@@ -35,7 +35,7 @@ module.exports.getExpenses = async (req, res) => {
   }
 }
 
-module.exports.uploadExpenses = async (req, res) => {
+export async function uploadExpenses(req, res) {
   try {
     const user = req.user
 
@@ -43,11 +43,13 @@ module.exports.uploadExpenses = async (req, res) => {
 
     let data = []
 
-    for await (item of dataToBeInsert) {
+    for (let i = 0; i < dataToBeInsert.length; i++) {
+      const item = dataToBeInsert[i]
       let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId }
       let mssg = ""
 
-      for await ([index, head] of modelHeader.entries()) {
+      for (let index = 0; index < modelHeader.length; index++) {
+        let head = modelHeader[index]
         let value = item[fileHeader[index]]
 
         if (!value) mssg = `Enter Valid ${fileHeader[index]}`
@@ -74,7 +76,7 @@ module.exports.uploadExpenses = async (req, res) => {
   }
 }
 
-module.exports.addExpenses = [
+export const addExpenses = [
   validateBody(modelHeader),
   async (req, res) => {
     try {
@@ -100,7 +102,7 @@ module.exports.addExpenses = [
   },
 ]
 
-module.exports.editExpenses = [
+export const editExpenses = [
   validateBody(modelHeader),
   async (req, res) => {
     try {
@@ -128,7 +130,7 @@ module.exports.editExpenses = [
   },
 ]
 
-module.exports.deleteExpenses = async (req, res) => {
+export async function deleteExpenses(req, res) {
   try {
     const errors = errorValidation(req, res)
     if (errors) {

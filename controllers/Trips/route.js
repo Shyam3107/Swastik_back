@@ -1,18 +1,18 @@
-const { Router } = require("express")
-const {
+import { Router } from "express"
+const router = Router()
+
+import {
   addTrips,
   getTrips,
   uploadTrips,
   editTrips,
   deleteTrips,
-} = require("./controller")
-const router = Router()
-const uploadFile = require("../../utils/uploadFile")
+} from "./controller.js"
 
 router.get("/getTrips", getTrips)
 router.post("/addTrips", addTrips)
 router.put("/editTrips", editTrips)
-router.post("/uploadTrips", uploadFile.single("file"), uploadTrips)
+router.post("/uploadTrips", uploadTrips)
 router.delete("/deleteTrips", deleteTrips)
 
-module.exports = router
+export default router

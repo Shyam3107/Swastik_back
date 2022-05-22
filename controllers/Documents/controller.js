@@ -1,41 +1,33 @@
-const moment = require("moment")
-const {
+import moment from "moment"
+import {
   handleError,
   errorValidation,
   validateBody,
   dateFormat,
-} = require("../../utils/utils")
-const Document = require("../../models/Document")
+} from "../../utils/utils.js"
+import Document from "../../models/Document.js"
 
 const fileHeader = [
   "Vehicle No.",
-  "Tax Paid On",
   "Tax Paid Upto",
-  "Insurance Paid On",
   "Insurance Paid Upto",
-  "Fitness Paid On",
   "Fitness Paid Upto",
-  "Pollution Paid On",
   "Pollution Paid Upto",
-  "Google Drive Link",
+  "Permit Paid Upto",
+  "National Permit Paid Upto",
 ]
 
 const modelHeader = [
   "vehicleNo",
-  "taxPaidOn",
   "taxPaidUpto",
-  "insurancePaidOn",
   "insurancePaidUpto",
-  "fitnessPaidOn",
   "fitnessPaidUpto",
-  "pollutionPaidOn",
   "pollutionPaidUpto",
-  "permitPaidOn",
   "permitPaidUpto",
-  "googleDriveLink",
+  "nationalPermitPaidUpto",
 ]
 
-module.exports.getDocuments = async (req, res) => {
+export async function getDocuments(req, res) {
   try {
     const user = req.user
     const { vehicleNo } = req.query
@@ -59,7 +51,7 @@ module.exports.getDocuments = async (req, res) => {
   }
 }
 
-module.exports.uploadDocuments = async (req, res) => {
+export async function uploadDocuments(req, res) {
   try {
     const user = req.user
 
@@ -68,12 +60,14 @@ module.exports.uploadDocuments = async (req, res) => {
     let data = []
     let tempVehicleNo = {}
 
-    for await (item of dataToBeInsert) {
+    for (let i = 0; i < dataToBeInsert.length; i++) {
+      const item = dataToBeInsert[i]
       let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId }
       let vehicleNo
       let mssg = ""
 
-      for await ([index, head] of modelHeader.entries()) {
+      for (let index = 0; index < modelHeader.length; index++) {
+        let head = modelHeader[index]
         let value = item[fileHeader[index]]
 
         if (head === "vehicleNo") {
@@ -84,12 +78,11 @@ module.exports.uploadDocuments = async (req, res) => {
             vehicleNo = value
             tempVehicleNo[value] = true
           }
-        } else if (!value && head != "googleDriveLink")
-          mssg = `Enter Valid date for ${vehicleNo}`
+        } else if (!value) mssg = `Enter Valid date for ${vehicleNo}`
 
         if (mssg) throw mssg
 
-        if (index > 0 && index != modelHeader.length - 1) {
+        if (index > 0) {
           value = moment(value, dateFormat(value)).endOf("day").toISOString()
         }
 
@@ -117,7 +110,7 @@ module.exports.uploadDocuments = async (req, res) => {
   }
 }
 
-module.exports.addDocuments = [
+export const addDocuments = [
   validateBody(modelHeader.slice(0, modelHeader.length - 1)),
   async (req, res) => {
     try {
@@ -147,7 +140,7 @@ module.exports.addDocuments = [
   },
 ]
 
-module.exports.editDocuments = [
+export const editDocuments = [
   validateBody(modelHeader.slice(0, modelHeader.length - 1)),
   async (req, res) => {
     try {
@@ -174,7 +167,7 @@ module.exports.editDocuments = [
   },
 ]
 
-module.exports.deleteDocuments = async (req, res) => {
+export async function deleteDocuments(req, res) {
   try {
     const errors = errorValidation(req, res)
     if (errors) {

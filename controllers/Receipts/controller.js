@@ -1,17 +1,14 @@
-const moment = require("moment")
-const {
+import {
   handleError,
   errorValidation,
   validateBody,
   userRankQuery,
-} = require("../../utils/utils")
-const Receipt = require("../../models/Receipt")
-
-const fileHeader = ["Date", "Amount", "Remarks"]
+} from "../../utils/utils.js"
+import Receipt from "../../models/Receipt.js"
 
 const modelHeader = ["date", "amount", "remarks"]
 
-module.exports.getReceipt = async (req, res) => {
+export async function getReceipt(req, res) {
   try {
     const user = req.user
     const { receiptId } = req.query
@@ -35,7 +32,7 @@ module.exports.getReceipt = async (req, res) => {
   }
 }
 
-module.exports.addReceipt = [
+export const addReceipt = [
   validateBody(modelHeader),
   async (req, res) => {
     try {
@@ -61,7 +58,7 @@ module.exports.addReceipt = [
   },
 ]
 
-module.exports.editReceipt = [
+export const editReceipt = [
   validateBody(modelHeader),
   async (req, res) => {
     try {
@@ -89,7 +86,7 @@ module.exports.editReceipt = [
   },
 ]
 
-module.exports.deleteReceipt = async (req, res) => {
+export async function deleteReceipt(req, res) {
   try {
     const errors = errorValidation(req, res)
     if (errors) {

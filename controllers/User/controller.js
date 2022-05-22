@@ -1,13 +1,15 @@
-const jwt = require("jsonwebtoken")
-const md5 = require("md5")
-const dotenv = require("dotenv")
-const { handleError } = require("../../utils/utils")
-const Account = require("../../models/Account")
-dotenv.config()
+import jsonwebtoken from "jsonwebtoken"
+const { sign } = jsonwebtoken
+import md5 from "md5"
+import { config } from "dotenv"
+
+import { handleError } from "../../utils/utils.js"
+import Account from "../../models/Account.js"
+config()
 
 const secretKey = "Singhania"
 
-module.exports.login = async (req, res) => {
+export async function login(req, res) {
   try {
     let userName = req.query.userName
     const password = req.query.password
@@ -30,7 +32,7 @@ module.exports.login = async (req, res) => {
     user = JSON.stringify(user)
     user = JSON.parse(user)
 
-    const token = jwt.sign(user, process.env.JWT_SECRET_KEY)
+    const token = sign(user, process.env.JWT_SECRET_KEY)
 
     return res.status(200).json({ user, token, message: "Login Successful" })
   } catch (error) {
@@ -38,7 +40,7 @@ module.exports.login = async (req, res) => {
   }
 }
 
-module.exports.forgotPassword = async (req, res) => {
+export async function forgotPassword(req, res) {
   try {
     let userName = req.query.userName
     const password = req.query.password

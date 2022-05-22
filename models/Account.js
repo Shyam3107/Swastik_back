@@ -1,6 +1,7 @@
-const mongoose = require("mongoose")
+import mongoose from "mongoose"
+const { Schema, model } = mongoose
 
-const accountSchema = new mongoose.Schema(
+const accountSchema = new Schema(
   {
     userName: {
       type: String,
@@ -32,12 +33,12 @@ const accountSchema = new mongoose.Schema(
       trim: true,
     },
     addedBy: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Account",
       required: true,
     },
     companyAdminId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Account",
       required: true,
     },
@@ -45,6 +46,6 @@ const accountSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-const Account = mongoose.model("Account", accountSchema)
+const Account = model("Account", accountSchema)
 
-module.exports = Account
+export default Account

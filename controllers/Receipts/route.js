@@ -1,10 +1,10 @@
-const { Router } = require("express")
-const {
+import { Router } from "express"
+import {
   addReceipt,
   getReceipt,
   deleteReceipt,
   editReceipt,
-} = require("./controller")
+} from "./controller.js"
 const router = Router()
 
 router.get("/getReceipt", getReceipt)
@@ -12,4 +12,4 @@ router.post("/addReceipt", addReceipt)
 router.put("/editReceipt", editReceipt)
 router.delete("/deleteReceipt", deleteReceipt)
 
-module.exports = router
+export default router

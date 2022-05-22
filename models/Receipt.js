@@ -1,6 +1,7 @@
-const mongoose = require("mongoose")
+import mongoose from "mongoose"
+const { Schema, model } = mongoose
 
-const schema = new mongoose.Schema(
+const schema = new Schema(
   {
     date: {
       type: Date,
@@ -16,12 +17,12 @@ const schema = new mongoose.Schema(
       required: true,
     },
     addedBy: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Account",
       required: true,
     },
     companyAdminId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Account",
       required: true,
     },
@@ -29,6 +30,6 @@ const schema = new mongoose.Schema(
   { timestamps: true }
 )
 
-const Receipt = mongoose.model("Receipt", schema)
+const Receipt = model("Receipt", schema)
 
-module.exports = Receipt
+export default Receipt

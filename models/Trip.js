@@ -1,6 +1,7 @@
-const mongoose = require("mongoose")
+import mongoose from "mongoose"
+const { Schema, model } = mongoose
 
-const tripSchema = new mongoose.Schema(
+const tripSchema = new Schema(
   {
     diNo: {
       type: Number,
@@ -68,12 +69,12 @@ const tripSchema = new mongoose.Schema(
       type: String,
     },
     addedBy: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Account",
       required: true,
     },
     companyAdminId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Account",
       required: true,
     },
@@ -81,6 +82,6 @@ const tripSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-const Trip = mongoose.model("Trip", tripSchema)
+const Trip = model("Trip", tripSchema)
 
-module.exports = Trip
+export default Trip

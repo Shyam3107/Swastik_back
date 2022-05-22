@@ -1,28 +1,24 @@
-const express = require("express")
+import express from "express"
 const app = express()
-const bodyParser = require("body-parser")
-const cors = require("cors")
-const dotenv = require("dotenv")
-const mongoose = require("mongoose")
+import bodyParser from "body-parser"
+import cors from "cors"
+import dotenv from "dotenv"
+import mongoose from "mongoose"
 
-const { checkUser } = require("./middlewares/checkUser")
-const tripRoute = require("./controllers/Trips/route")
-const documentRoute = require("./controllers/Documents/route")
-const accountRoute = require("./controllers/Account/route")
-const officeExpenseRoute = require("./controllers/OfficeExpense/route")
-const vehiclesExpenseRoute = require("./controllers/VehicleExpense/route")
-const receiptRoute = require("./controllers/Receipts/route")
-const userRoute = require("./controllers/User/route")
-
-const { getHome } = require("./controllers/Home/controller")
+import { checkUser } from "./middlewares/checkUser.js"
+import tripRoute from "./controllers/Trips/route.js"
+import documentRoute from "./controllers/Documents/route.js"
+import accountRoute from "./controllers/Account/route.js"
+import officeExpenseRoute from "./controllers/OfficeExpense/route.js"
+import vehiclesExpenseRoute from "./controllers/VehicleExpense/route.js"
+import receiptRoute from "./controllers/Receipts/route.js"
+import userRoute from "./controllers/User/route.js"
+import { getHome } from "./controllers/Home/controller.js"
+import { PORT } from "./config/constants.js"
 
 app.use(cors())
-app.use(bodyParser.json())
 app.use(express.json())
-app.use(express.static("public"))
 dotenv.config()
-
-const { PORT } = require("./config/constants")
 
 app.listen(process.env.PORT || PORT, () => {
   console.log("Application Started in Port " + PORT)

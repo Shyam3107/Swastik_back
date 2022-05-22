@@ -1,13 +1,20 @@
-const moment = require("moment")
-const { handleError } = require("../../utils/utils")
-const Trip = require("../../models/Trip")
-const Document = require("../../models/Document")
+import moment from "moment"
+import { handleError } from "../../utils/utils.js"
+import Trip from "../../models/Trip.js"
+import Document from "../../models/Document.js"
 
-module.exports.getHome = async (req, res) => {
+export async function getHome(req, res) {
   try {
     const user = req.user
-    let home = { trips: [], tax: [], insurance: [], fitness: [], pollution: [] }
-    let temp
+    let home = {
+      trips: [],
+      tax: [],
+      insurance: [],
+      fitness: [],
+      pollution: [],
+      permit: [],
+      nationalPermit:[]
+    }
 
     for (let index = 0; index < 12; index++) {
       const startDate = moment().month(index).startOf("month")
@@ -59,6 +66,26 @@ module.exports.getHome = async (req, res) => {
     home.pollution[1] = await Document.find({
       companyAdminId: user.companyAdminId,
       pollutionPaidUpto: { $lt: moment() },
+    }).countDocuments()
+
+    home.permit[0] = await Document.find({
+      companyAdminId: user.companyAdminId,
+      permitPaidUpto: { $gte: moment() },
+    }).countDocuments()
+
+    home.permit[1] = await Document.find({
+      companyAdminId: user.companyAdminId,
+      permitPaidUpto: { $lt: moment() },
+    }).countDocuments()
+
+    home.nationalPermit[0] = await Document.find({
+      companyAdminId: user.companyAdminId,
+      nationalPermitPaidUpto: { $gte: moment() },
+    }).countDocuments()
+
+    home.nationalPermit[1] = await Document.find({
+      companyAdminId: user.companyAdminId,
+      nationalPermitPaidUpto: { $lt: moment() },
     }).countDocuments()
 
     return res.status(200).json({ data: home })

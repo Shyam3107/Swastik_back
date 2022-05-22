@@ -1,9 +1,9 @@
-const multer = require("multer")
-const path = require("path")
+import multer, { diskStorage } from "multer"
+import { join } from "path"
 
-const filePathNew = path.join(__dirname, "../public")
+const filePathNew = join(__dirname, "../public")
 
-const storage = multer.diskStorage({
+const storage = diskStorage({
   destination: (req, file, cb) => {
     cb(null, filePathNew)
   },
@@ -13,4 +13,4 @@ const storage = multer.diskStorage({
 })
 
 const uploadFile = multer({ storage: storage })
-module.exports = uploadFile
+export default uploadFile
