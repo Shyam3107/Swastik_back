@@ -6,6 +6,7 @@ import {
   dateFormat,
 } from "../../utils/utils.js"
 import Document from "../../models/Document.js"
+import Account from "../../models/Account.js"
 
 const fileHeader = [
   "Vehicle No.",
@@ -44,8 +45,16 @@ export async function getDocuments(req, res) {
         })
         .sort({ vehicleNo: 1 })
     if (!documents) throw "This Vechile does not exist in our record"
+    
+    const companyAdminId = user.companyAdminId._id
+    const documentsLink = await Account.findById({
+      _id: companyAdminId,
+    }).select({ documentsLink: 1 })
+    if (!documentsLink) throw "Failed to get Documents, contact your Admin"
 
-    return res.status(200).json({ data: documents })
+    return res
+      .status(200)
+      .json({ data: documents, documentsLink: documentsLink.documentsLink })
   } catch (error) {
     return handleError(res, error)
   }

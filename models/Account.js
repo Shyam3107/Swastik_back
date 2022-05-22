@@ -22,13 +22,17 @@ const accountSchema = new Schema(
     },
     phone: {
       type: String,
-      required: true,
+      trim: true,
     },
     companyName: {
       type: String,
       trim: true,
     },
     tptCode: {
+      type: String,
+      trim: true,
+    },
+    documentsLink: {
       type: String,
       trim: true,
     },
