@@ -46,6 +46,24 @@ const accountSchema = new Schema(
       ref: "Account",
       required: true,
     },
+    access: {
+      type: [String],
+      required: true,
+      default: [],
+      enum: [
+        "TRIPS",
+        "DOCUMENTS",
+        "RECEIPTS",
+        "OFFICE EXPENSES",
+        "VEHICLE EXPENSES",
+      ],
+    },
+    operations: {
+      type: [String],
+      required: true,
+      default: [],
+      enum: ["CREATE", "UPDATE", "READ", "DELETE"],
+    },
   },
   { timestamps: true }
 )

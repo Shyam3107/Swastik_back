@@ -7,8 +7,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --experimental-modules server.js",
-    "deploy": "git push origin master && git push heroku master"
+    "start": "node --experimental-modules server.js",
+    "local": "nodemon --experimental-modules server.js"
   },
   "author": "",
   "license": "ISC",
