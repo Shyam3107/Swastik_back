@@ -1,6 +1,5 @@
 import express from "express"
 const app = express()
-import bodyParser from "body-parser"
 import cors from "cors"
 import dotenv from "dotenv"
 import mongoose from "mongoose"
@@ -15,9 +14,11 @@ import receiptRoute from "./controllers/Receipts/route.js"
 import userRoute from "./controllers/User/route.js"
 import { getHome } from "./controllers/Home/controller.js"
 import { PORT } from "./config/constants.js"
+import httpCallLogger from "./middlewares/httpCallLogger.js"
 
 app.use(cors())
 app.use(express.json())
+app.use(httpCallLogger)
 dotenv.config()
 
 app.listen(process.env.PORT || PORT, () => {
