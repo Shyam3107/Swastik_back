@@ -50,7 +50,7 @@ export async function getHome(req, res) {
 
     home.fitness[0] = await Document.find({
       companyAdminId: user.companyAdminId,
-      insurancePaidUpto: { $gte: moment() },
+      fitnessPaidUpto: { $gte: moment() },
     }).countDocuments()
 
     home.fitness[1] = await Document.find({

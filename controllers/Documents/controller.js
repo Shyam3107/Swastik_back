@@ -45,7 +45,7 @@ export async function getDocuments(req, res) {
         })
         .sort({ vehicleNo: 1 })
     if (!documents) throw "This Vechile does not exist in our record"
-    
+
     const companyAdminId = user.companyAdminId._id
     const documentsLink = await Account.findById({
       _id: companyAdminId,
@@ -99,7 +99,7 @@ export async function uploadDocuments(req, res) {
       }
 
       const updateData = await Document.findOneAndUpdate(
-        { vehicleNo: tempVal.vehicleNo },
+        { vehicleNo: tempVal.vehicleNo, companyAdminId: user.companyAdminId },
         tempVal,
         { upsert: true, new: true }
       )
