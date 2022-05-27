@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "engines": {
-    "node": "14.17.5"
+    "node": "16.14.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -15,23 +15,20 @@
   "keywords": [],
   "type": "module",
   "dependencies": {
-    "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "csvtojson": "^2.0.10",
-    "dotenv": "^10.0.0",
-    "esm": "^3.2.25",
+    "dotenv": "^16.0.1",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.1",
     "express-validator": "^6.13.0",
     "jsonwebtoken": "^8.5.1",
     "md5": "^2.3.0",
     "moment": "^2.29.1",
-    "mongoose": "^6.0.11",
-    "multer": "^1.4.3",
-    "nodemon": "^2.0.15"
+    "mongoose": "^6.0.11"
   },
   "devDependencies": {
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "unimported": "^1.19.1"
   },
   "repository": {
     "type": "git",
