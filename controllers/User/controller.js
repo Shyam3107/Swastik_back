@@ -9,7 +9,7 @@ config()
 
 const secretKey = "Singhania"
 
-export async function login(req, res) {
+export const login = async (req, res) => {
   try {
     let userName = req.query.userName
     const password = req.query.password
@@ -26,6 +26,7 @@ export async function login(req, res) {
         password: 0,
       })
       .populate({ path: "companyAdminId", select: "companyName tptCode" })
+      .populate({ path: "addedBy", select: "companyName tptCode" })
 
     if (!user) throw "User or Password is Incorrect"
 

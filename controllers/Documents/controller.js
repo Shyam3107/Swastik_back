@@ -28,7 +28,7 @@ const modelHeader = [
   "nationalPermitPaidUpto",
 ]
 
-export async function getDocuments(req, res) {
+export const getDocuments = async (req, res) => {
   try {
     const user = req.user
     const { vehicleNo } = req.query
@@ -60,7 +60,7 @@ export async function getDocuments(req, res) {
   }
 }
 
-export async function uploadDocuments(req, res) {
+export const uploadDocuments = async (req, res) => {
   try {
     const user = req.user
 
@@ -69,14 +69,14 @@ export async function uploadDocuments(req, res) {
     let data = []
     let tempVehicleNo = {}
 
-    for (let i = 0; i < dataToBeInsert.length; i++) {
-      const item = dataToBeInsert[i]
+    for (let ind = 0; ind < dataToBeInsert.length; ind++) {
+      const item = dataToBeInsert[ind]
       let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId }
       let vehicleNo
       let mssg = ""
 
       for (let index = 0; index < modelHeader.length; index++) {
-        let head = modelHeader[index]
+        const head = modelHeader[index]
         let value = item[fileHeader[index]]
 
         if (head === "vehicleNo") {
@@ -84,6 +84,11 @@ export async function uploadDocuments(req, res) {
           else if (tempVehicleNo[value])
             mssg = `Two rows can't have same Vehicle No. ${value}`
           else {
+            const isExist = await Document.findOne({
+              vehicleNo: value,
+              companyAdminId: user.companyAdminId,
+            })
+            if (isExist) mssg = `Vehicle No. ${value} already exist`
             vehicleNo = value
             tempVehicleNo[value] = true
           }
@@ -91,28 +96,21 @@ export async function uploadDocuments(req, res) {
 
         if (mssg) throw mssg
 
-        if (index > 0) {
+        if (index > 0)
           value = moment(value, dateFormat(value)).endOf("day").toISOString()
-        }
 
         tempVal[head] = value
       }
 
-      const updateData = await Document.findOneAndUpdate(
-        { vehicleNo: tempVal.vehicleNo, companyAdminId: user.companyAdminId },
-        tempVal,
-        { upsert: true, new: true }
-      )
-
-      if (!updateData) throw `Failed to Update Data from vehicleNo ${vehicleNo}`
-
       data.push(tempVal)
     }
 
+    const insertData = await Document.insertMany(data)
+
     return res.status(200).json({
-      data: data,
-      entries: data.length,
-      message: `Successfully Inserted ${data.length} entries`,
+      data: insertData,
+      entries: insertData.length,
+      message: `Successfully Inserted ${insertData.length} entries`,
     })
   } catch (error) {
     return handleError(res, error)
