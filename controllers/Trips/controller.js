@@ -43,7 +43,7 @@ const modelHeader = [
   "remarks",
 ]
 
-export async function getTrips(req, res) {
+export const getTrips = async (req, res) => {
   try {
     const user = req.user
     let { diNo, from = moment().startOf("month"), to = moment() } = req.query
@@ -78,7 +78,7 @@ export async function getTrips(req, res) {
   }
 }
 
-export async function uploadTrips(req, res) {
+export const uploadTrips = async (req, res) => {
   try {
     const user = req.user
 
@@ -248,7 +248,7 @@ export const editTrips = [
   },
 ]
 
-export async function deleteTrips(req, res) {
+export const deleteTrips = async (req, res) => {
   try {
     const errors = errorValidation(req, res)
     if (errors) {

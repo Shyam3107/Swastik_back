@@ -1,3 +1,4 @@
+import moment from 'moment'
 import {
   handleError,
   errorValidation,
@@ -8,16 +9,26 @@ import Receipt from "../../models/Receipt.js"
 
 const modelHeader = ["date", "amount", "remarks"]
 
-export async function getReceipt(req, res) {
+export const getReceipt = async (req, res) => {
   try {
     const user = req.user
-    const { receiptId } = req.query
+    let {
+      receiptId,
+      from = moment().startOf("month"),
+      to = moment(),
+    } = req.query
+    from = moment(from).startOf("day").toISOString()
+    to = moment(to).endOf("day").toISOString()
+
     const userQuery = userRankQuery(user)
     let receipts
     if (receiptId) {
       receipts = await Receipt.findOne({ _id: receiptId })
     } else
-      receipts = await Receipt.find(userQuery)
+      receipts = await Receipt.find({
+        ...userQuery,
+        date: { $gte: from, $lte: to },
+      })
         .populate({
           path: "addedBy",
           select: "location",
@@ -86,7 +97,7 @@ export const editReceipt = [
   },
 ]
 
-export async function deleteReceipt(req, res) {
+export const deleteReceipt = async (req, res) => {
   try {
     const errors = errorValidation(req, res)
     if (errors) {

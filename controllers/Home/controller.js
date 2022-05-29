@@ -3,7 +3,7 @@ import { handleError } from "../../utils/utils.js"
 import Trip from "../../models/Trip.js"
 import Document from "../../models/Document.js"
 
-export async function getHome(req, res) {
+export const getHome = async (req, res) => {
   try {
     const user = req.user
     let home = {
@@ -13,7 +13,7 @@ export async function getHome(req, res) {
       fitness: [],
       pollution: [],
       permit: [],
-      nationalPermit:[]
+      nationalPermit: [],
     }
 
     for (let index = 0; index < 12; index++) {

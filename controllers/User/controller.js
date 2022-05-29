@@ -41,7 +41,7 @@ export const login = async (req, res) => {
   }
 }
 
-export async function forgotPassword(req, res) {
+export const forgotPassword = async (req, res) => {
   try {
     let userName = req.query.userName
     const password = req.query.password

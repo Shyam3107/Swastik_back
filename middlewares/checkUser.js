@@ -1,7 +1,7 @@
 import jsonwebtoken from "jsonwebtoken"
 const { verify } = jsonwebtoken
 
-export async function checkUser(req, res, next) {
+export const checkUser = async (req, res, next) => {
   try {
     if (req.headers.authorization) {
       const token = req.headers.authorization.split(" ")[1]

@@ -4,12 +4,13 @@ import {
   errorValidation,
   validateBody,
   validatePhoneNo,
+  userRankQuery,
 } from "../../utils/utils.js"
 import Account from "../../models/Account.js"
 
 const modelHeader = ["userName", "password", "location"]
 
-export async function getAccount(req, res) {
+export const getAccount = async (req, res) => {
   try {
     const user = req.user
     const { accountId } = req.query
@@ -19,7 +20,7 @@ export async function getAccount(req, res) {
         password: 0,
       })
     else
-      accounts = await Account.find({ addedBy: user._id }).select({
+      accounts = await Account.find(userRankQuery(user)).select({
         password: 0,
       })
     if (!accounts) throw "This Account does not exist in our record"
@@ -89,7 +90,7 @@ export const editAccount = [
   },
 ]
 
-export async function deleteAccount(req, res) {
+export const deleteAccount = async (req, res) => {
   try {
     const errors = errorValidation(req, res)
     if (errors) {

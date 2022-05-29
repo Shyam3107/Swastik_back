@@ -174,7 +174,7 @@ export const editDocuments = [
   },
 ]
 
-export async function deleteDocuments(req, res) {
+export const deleteDocuments = async (req, res) => {
   try {
     const errors = errorValidation(req, res)
     if (errors) {

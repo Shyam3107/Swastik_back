@@ -3,7 +3,7 @@ import csv from "csvtojson"
 import { join } from "path"
 import { unlinkSync } from "fs"
 
-export async function convertCSVToJSON(csvFilePath) {
+export const convertCSVToJSON = async (csvFilePath) => {
   let jsonArray = await csv().fromFile(csvFilePath)
   return jsonArray
 }

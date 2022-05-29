@@ -31,17 +31,26 @@ const modelHeader = [
   "dieselFor",
 ]
 
-export async function getExpenses(req, res) {
+export const getExpenses = async (req, res) => {
   try {
     const user = req.user
     const userQuery = userRankQuery(user)
-    const { expenseId } = req.query
+    let {
+      expenseId,
+      from = moment().startOf("month"),
+      to = moment(),
+    } = req.query
+    from = moment(from).startOf("day").toISOString()
+    to = moment(to).endOf("day").toISOString()
 
     let expenses
     if (expenseId) {
       expenses = await VehiclesExpense.findOne({ _id: expenseId })
     } else
-      expenses = await VehiclesExpense.find(userQuery)
+      expenses = await VehiclesExpense.find({
+        ...userQuery,
+        date: { $gte: from, $lte: to },
+      })
         .populate({
           path: "addedBy",
           select: "location",
@@ -56,7 +65,7 @@ export async function getExpenses(req, res) {
   }
 }
 
-export async function uploadExpenses(req, res) {
+export const uploadExpenses = async (req, res) => {
   try {
     const user = req.user
 
@@ -161,7 +170,7 @@ export const editExpenses = [
   },
 ]
 
-export async function deleteExpenses(req, res) {
+export const deleteExpenses = async (req, res) => {
   try {
     const errors = errorValidation(req, res)
     if (errors) {
