@@ -59,7 +59,10 @@ export const getTrips = async (req, res) => {
     }
     let select = { __v: 0, createdAt: 0, updatedAt: 0, companyAdminId: 0 }
     if (diNo)
-      trips = await Trip.findOne({ diNo }).populate({
+      trips = await Trip.findOne({
+        diNo,
+        companyAdminId: user.companyAdminId,
+      }).populate({
         path: "addedBy",
         select: "location",
       })

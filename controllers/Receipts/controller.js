@@ -1,4 +1,4 @@
-import moment from 'moment'
+import moment from "moment"
 import {
   handleError,
   errorValidation,
@@ -23,7 +23,10 @@ export const getReceipt = async (req, res) => {
     const userQuery = userRankQuery(user)
     let receipts
     if (receiptId) {
-      receipts = await Receipt.findOne({ _id: receiptId })
+      receipts = await Receipt.findOne({
+        _id: receiptId,
+        companyAdminId: user.companyAdminId,
+      })
     } else
       receipts = await Receipt.find({
         ...userQuery,

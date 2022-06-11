@@ -35,6 +35,7 @@ export const getDocuments = async (req, res) => {
     let documents
     if (vehicleNo)
       documents = await Document.findOne({
+        companyAdminId: user.companyAdminId,
         vehicleNo: vehicleNo.toUpperCase(),
       })
     else

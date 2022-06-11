@@ -25,7 +25,10 @@ export const getExpenses = async (req, res) => {
     const userQuery = userRankQuery(user)
     let expenses
     if (expenseId) {
-      expenses = await OfficeExpense.findOne({ _id: expenseId })
+      expenses = await OfficeExpense.findOne({
+        _id: expenseId,
+        companyAdminId: user.companyAdminId,
+      })
     } else
       expenses = await OfficeExpense.find({
         ...userQuery,

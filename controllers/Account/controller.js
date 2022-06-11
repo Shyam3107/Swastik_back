@@ -16,7 +16,10 @@ export const getAccount = async (req, res) => {
     const { accountId } = req.query
     let accounts
     if (accountId)
-      accounts = await Account.findById({ _id: accountId }).select({
+      accounts = await Account.findById({
+        _id: accountId,
+        companyAdminId: user.companyAdminId,
+      }).select({
         password: 0,
       })
     else
