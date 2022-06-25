@@ -37,6 +37,9 @@ export const getDocuments = async (req, res) => {
       documents = await Document.findOne({
         companyAdminId: user.companyAdminId,
         vehicleNo: vehicleNo.toUpperCase(),
+      }).populate({
+        path: "addedBy",
+        select: "_id",
       })
     else
       documents = await Document.find({ companyAdminId: user.companyAdminId })
@@ -130,7 +133,10 @@ export const addDocuments = [
 
       const { vehicleNo } = req.body
 
-      const isExist = await Document.findOne({ vehicleNo })
+      const isExist = await Document.findOne({
+        vehicleNo,
+        companyAdminId: user.companyAdminId,
+      })
       if (isExist) throw `Vehicle No. ${vehicleNo} already exist`
 
       const insertData = await Document.create({

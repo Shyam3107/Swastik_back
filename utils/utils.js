@@ -2,6 +2,7 @@ import { validationResult, body } from "express-validator"
 import csv from "csvtojson"
 import { join } from "path"
 import { unlinkSync } from "fs"
+import moment from "moment"
 
 export const convertCSVToJSON = async (csvFilePath) => {
   let jsonArray = await csv().fromFile(csvFilePath)
@@ -48,4 +49,13 @@ export function dateFormat(date) {
   const yyyymmdd = /^\d{4}-\d{2}-\d{2}$/
   if (date.match(yyyymmdd)) return "YYYY-MM-DD"
   return "DD-MM-YYYY"
+}
+
+export function parseResponse(data) {
+  data = JSON.stringify(data)
+  return JSON.parse(data)
+}
+
+export const dateToString = (date = moment) => {
+  return moment(date).format("DD-MM-YYYY")
 }
