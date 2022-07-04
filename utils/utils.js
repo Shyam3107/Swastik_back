@@ -4,6 +4,8 @@ import { join } from "path"
 import { unlinkSync } from "fs"
 import moment from "moment"
 
+import { access, operations } from "../config/constants.js"
+
 export const convertCSVToJSON = async (csvFilePath) => {
   let jsonArray = await csv().fromFile(csvFilePath)
   return jsonArray
@@ -58,4 +60,22 @@ export function parseResponse(data) {
 
 export const dateToString = (date = moment) => {
   return moment(date).format("DD-MM-YYYY")
+}
+
+export const isAdmin = (user) => {
+  return user && user._id === user.companyAdminId._id
+}
+
+export const isOperationAllowed = (user, acc, operation = false) => {
+  if (isAdmin(user)) return true
+  let accessGiven = user?.access.indexOf(acc) !== -1
+  let operationGiven = user?.operations.indexOf(operation) !== -1
+
+  if (!operation) {
+    return accessGiven || acc === access.DOCUMENTS
+  }
+
+  if (acc === access.DOCUMENTS && operation === operations.READ) return true
+
+  return accessGiven && operationGiven
 }

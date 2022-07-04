@@ -14,7 +14,7 @@ import receiptRoute from "./controllers/Receipts/route.js"
 import userRoute from "./controllers/User/route.js"
 import reportRoute from "./controllers/Reports/route.js"
 import { getHome } from "./controllers/Home/controller.js"
-import { PORT } from "./config/constants.js"
+import { access, PORT } from "./config/constants.js"
 import httpCallLogger from "./middlewares/httpCallLogger.js"
 
 app.use(cors())
@@ -46,21 +46,21 @@ app.get("/", async (req, res) => {
 app.use("/user", userRoute)
 
 // HOME
-app.get("/home", checkUser, getHome)
+app.get("/home", checkUser(), getHome)
 
 // VEHICLES
-app.use("/vehicles/trips", checkUser, tripRoute)
-app.use("/vehicles/documents", checkUser, documentRoute)
+app.use("/vehicles/trips", checkUser(), tripRoute)
+app.use("/vehicles/documents", checkUser(), documentRoute)
 
 // EXPENSES
-app.use("/expenses/office", checkUser, officeExpenseRoute)
-app.use("/expenses/vehicles", checkUser, vehiclesExpenseRoute)
+app.use("/expenses/office", checkUser(), officeExpenseRoute)
+app.use("/expenses/vehicles", checkUser(), vehiclesExpenseRoute)
 
 // RECEIPTS
-app.use("/receipts", checkUser, receiptRoute)
+app.use("/receipts", checkUser(), receiptRoute)
 
 // CONFIGURATION
-app.use("/configure/accounts", checkUser, accountRoute)
+app.use("/configure/accounts", checkUser(access.ACCOUNTS), accountRoute)
 
 // REPORTS
-app.use("/reports", checkUser, reportRoute)
+app.use("/reports", checkUser(), reportRoute)
