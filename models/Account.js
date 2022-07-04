@@ -65,6 +65,10 @@ const accountSchema = new Schema(
       default: [],
       enum: ["CREATE", "UPDATE", "READ", "DELETE"],
     },
+    showTrips: {
+      type: String,
+      enum: [null, undefined, "ALL", "SELF"],
+    },
   },
   { timestamps: true }
 )

@@ -57,6 +57,11 @@ export const getTrips = async (req, res) => {
       companyAdminId: user.companyAdminId,
       date: { $gte: from, $lte: to },
     }
+
+    if (user?.showTrips === "SELF") {
+      query.addedBy = user._id
+    }
+
     let select = { __v: 0, createdAt: 0, updatedAt: 0, companyAdminId: 0 }
     if (diNo)
       trips = await Trip.findOne({
