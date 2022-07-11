@@ -31,6 +31,11 @@ const tripSchema = new Schema(
       trim: true,
       required: true,
     },
+    material: {
+      type: String,
+      trim: true,
+      required: true,
+    },
     vehicleNo: {
       type: String,
       uppercase: true,

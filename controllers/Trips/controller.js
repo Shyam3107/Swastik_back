@@ -16,6 +16,7 @@ const fileHeader = [
   "Location",
   "Vehicle No.",
   "Quantity",
+  "Material",
   "Driver Name",
   "Driver Phone",
   "Diesel",
@@ -34,6 +35,7 @@ const modelHeader = [
   "location",
   "vehicleNo",
   "quantity",
+  "material",
   "driverName",
   "driverPhone",
   "diesel",
@@ -69,12 +71,12 @@ export const getTrips = async (req, res) => {
         companyAdminId: user.companyAdminId,
       }).populate({
         path: "addedBy",
-        select: "location",
+        select: "location consignor branch",
       })
     else {
       trips = await Trip.find(query)
         .select(select)
-        .populate({ path: "addedBy", select: "location" })
+        .populate({ path: "addedBy", select: "location consignor branch" })
         .sort({ date: -1 })
       metaData.totalDocuments = trips.length
     }
@@ -118,7 +120,7 @@ export const uploadTrips = async (req, res) => {
             diNo = value
             tempDiNo[value] = true
           }
-        } else if (index < 9 && !value)
+        } else if (index < 10 && !value)
           mssg = `${fileHeader[index]} is required for DI No. ${diNo}`
         else if (head === "driverPhone" && !validatePhoneNo(value))
           mssg = `Fill Valid Driver Phone No. for DI No. ${diNo}`
@@ -168,6 +170,7 @@ export const addTrips = [
     "loadingPoint",
     "partyName",
     "location",
+    "material",
     "vehicleNo",
     "quantity",
     "driverName",
