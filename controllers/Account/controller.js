@@ -8,7 +8,18 @@ import {
 } from "../../utils/utils.js"
 import Account from "../../models/Account.js"
 
-const modelHeader = ["userName", "password", "location"]
+const modelHeader = ["userName", "password"]
+
+const concatLocation = (consignor, branch) => {
+  let location = ""
+  if (consignor) {
+    location = consignor
+  }
+  if (branch) {
+    location += location.length > 0 ? ", " + branch : branch
+  }
+  return location
+}
 
 export const getAccount = async (req, res) => {
   try {
@@ -49,6 +60,7 @@ export const addAccount = [
 
       const insertData = await Account.create({
         ...req.body,
+        location: concatLocation(req.body.consignor, req.body.branch),
         addedBy: user._id,
         companyAdminId: user.companyAdminId,
       })
@@ -63,7 +75,7 @@ export const addAccount = [
 ]
 
 export const editAccount = [
-  validateBody(["userName", "location"]),
+  validateBody(["userName"]),
   async (req, res) => {
     try {
       const errors = errorValidation(req, res)
@@ -77,9 +89,17 @@ export const editAccount = [
       else delete req.body.password
 
       const accountId = req.body._id
+      const findData = await Account.findById({ _id: accountId })
       const updateData = await Account.findByIdAndUpdate(
         { _id: accountId },
-        req.body
+        {
+          ...req.body,
+          location: concatLocation(
+            req.body.consignor ? req.body.consignor : findData.consignor,
+            req.body.branch ? req.body.branch : findData.branch
+          ),
+        },
+        { new: true }
       )
 
       if (!updateData) throw "Record Not Found"

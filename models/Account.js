@@ -17,8 +17,18 @@ const accountSchema = new Schema(
     },
     location: {
       type: String,
-      required: true,
       uppercase: true,
+      trim: true,
+    },
+    consignor: {
+      type: String,
+      uppercase: true,
+      trim: true,
+    },
+    branch: {
+      type: String,
+      uppercase: true,
+      trim: true,
     },
     phone: {
       type: String,
