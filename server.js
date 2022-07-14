@@ -13,6 +13,7 @@ import vehiclesExpenseRoute from "./controllers/VehicleExpense/route.js"
 import receiptRoute from "./controllers/Receipts/route.js"
 import userRoute from "./controllers/User/route.js"
 import reportRoute from "./controllers/Reports/route.js"
+import voucherRoute from "./controllers/Voucher/route.js"
 import { getHome } from "./controllers/Home/controller.js"
 import { access, PORT } from "./config/constants.js"
 import httpCallLogger from "./middlewares/httpCallLogger.js"
@@ -64,3 +65,6 @@ app.use("/configure/accounts", checkUser(access.ACCOUNTS), accountRoute)
 
 // REPORTS
 app.use("/reports", checkUser(), reportRoute)
+
+// VOUCHER
+app.use("/vehicles/vouchers", checkUser(), voucherRoute)

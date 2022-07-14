@@ -92,7 +92,7 @@ export const editReceipt = [
 
       return res.status(200).json({
         data: updateData,
-        message: "Office Expense Edited Successfully",
+        message: "Office Receipt Edited Successfully",
       })
     } catch (error) {
       return handleError(res, error)

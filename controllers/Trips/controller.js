@@ -6,44 +6,7 @@ import {
   validatePhoneNo,
 } from "../../utils/utils.js"
 import Trip from "../../models/Trip.js"
-
-const fileHeader = [
-  "DI No.",
-  "LR No.",
-  "Date",
-  "Loading Point",
-  "Party Name",
-  "Location",
-  "Vehicle No.",
-  "Quantity",
-  "Material",
-  "Driver Name",
-  "Driver Phone",
-  "Diesel",
-  "Diesel In",
-  "Pump Name",
-  "Cash",
-  "Remarks",
-]
-
-const modelHeader = [
-  "diNo",
-  "lrNo",
-  "date",
-  "loadingPoint",
-  "partyName",
-  "location",
-  "vehicleNo",
-  "quantity",
-  "material",
-  "driverName",
-  "driverPhone",
-  "diesel",
-  "dieselIn",
-  "pumpName",
-  "cash",
-  "remarks",
-]
+import { fileHeader, modelHeader, validateArr } from "./constants.js"
 
 export const getTrips = async (req, res) => {
   try {
@@ -163,19 +126,7 @@ export const uploadTrips = async (req, res) => {
 }
 
 export const addTrips = [
-  validateBody([
-    "diNo",
-    "lrNo",
-    "date",
-    "loadingPoint",
-    "partyName",
-    "location",
-    "material",
-    "vehicleNo",
-    "quantity",
-    "driverName",
-    "driverPhone",
-  ]),
+  validateBody(validateArr),
   async (req, res) => {
     try {
       const errors = errorValidation(req, res)
@@ -220,18 +171,7 @@ export const addTrips = [
 ]
 
 export const editTrips = [
-  validateBody([
-    "diNo",
-    "lrNo",
-    "date",
-    "loadingPoint",
-    "partyName",
-    "location",
-    "vehicleNo",
-    "quantity",
-    "driverName",
-    "driverPhone",
-  ]),
+  validateBody(validateArr),
   async (req, res) => {
     try {
       const errors = errorValidation(req, res)
