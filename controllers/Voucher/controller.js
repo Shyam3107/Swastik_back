@@ -25,8 +25,6 @@ export const getVoucher = async (req, res) => {
     from = moment(from).startOf("day").toISOString()
     to = moment(to).endOf("day").toISOString()
 
-    const userQuery = userRankQuery(user)
-
     let vouchers
     if (voucherId) {
       vouchers = await Voucher.aggregate([
@@ -44,6 +42,7 @@ export const getVoucher = async (req, res) => {
         {
           $match: {
             companyAdminId: mongoose.Types.ObjectId(user?.companyAdminId?._id),
+            date: { $gte: new Date(from), $lte: new Date(to) },
           },
         },
         ...aggregateBody,

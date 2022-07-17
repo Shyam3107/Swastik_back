@@ -45,6 +45,9 @@ const schema = new Schema(
     bagShortage: {
       type: String,
     },
+    other: {
+      type: String,
+    },
     total: {
       type: Number,
       required: true,
@@ -65,6 +68,8 @@ const schema = new Schema(
   },
   { timestamps: true }
 )
+
+schema.index({ diNo: 1, companyAdminId: 1 }, { unique: true })
 
 const Voucher = model("Voucher", schema)
 

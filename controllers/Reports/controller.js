@@ -48,6 +48,7 @@ export const getVehiclesReport = async (req, res) => {
         addedBy: 1,
       })
       .populate(populate)
+      .sort({ date: 1 })
 
     trips = parseResponse(trips)
 

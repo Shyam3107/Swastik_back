@@ -11,6 +11,7 @@ export const fileHeader = [
   "Advance",
   "TDS",
   "Bag Shortage",
+  "Other",
   "Total",
   "Remarks",
 ]
@@ -28,6 +29,7 @@ export const modelHeader = [
   "advance",
   "tds",
   "bagShortage",
+  "other",
   "total",
   "remarks",
 ]
@@ -99,6 +101,7 @@ export const aggregateBody = [
       diNo: 1,
       diesel: 1,
       ifsc: 1,
+      other: 1,
       paidTo: 1,
       rate: 1,
       remarks: 1,
