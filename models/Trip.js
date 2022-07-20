@@ -87,6 +87,8 @@ const tripSchema = new Schema(
   { timestamps: true }
 )
 
+tripSchema.index({ diNo: 1, companyAdminId: 1 }, { unique: true })
+
 const Trip = model("Trip", tripSchema)
 
 export default Trip

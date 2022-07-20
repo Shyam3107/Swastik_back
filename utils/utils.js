@@ -58,7 +58,7 @@ export function parseResponse(data) {
   return JSON.parse(data)
 }
 
-export const dateToString = (date = moment) => {
+export const dateToString = (date = moment()) => {
   return moment(date).format("DD-MM-YYYY")
 }
 

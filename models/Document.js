@@ -47,6 +47,8 @@ const documentSchema = new Schema(
   { timestamps: true }
 )
 
+documentSchema.index({ vehicleNo: 1, companyAdminId: 1 }, { unique: true })
+
 const Document = model("Document", documentSchema)
 
 export default Document
