@@ -1,4 +1,5 @@
 import moment from "moment"
+import momentTimezone from "moment-timezone"
 import {
   handleError,
   errorValidation,
@@ -6,6 +7,9 @@ import {
   userRankQuery,
 } from "../../utils/utils.js"
 import VehiclesExpense from "../../models/VehiclesExpense.js"
+import { INDIA_TZ } from "../../config/constants.js"
+
+momentTimezone.tz.setDefault(INDIA_TZ)
 
 const fileHeader = [
   "Date",

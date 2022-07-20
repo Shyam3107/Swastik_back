@@ -1,5 +1,7 @@
 export const PORT = 9000
 
+export const INDIA_TZ = "Asia/Kolkata"
+
 export const operations = {
   READ: "READ",
   CREATE: "CREATE",

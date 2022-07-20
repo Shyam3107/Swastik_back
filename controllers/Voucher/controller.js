@@ -1,10 +1,10 @@
 import mongoose from "mongoose"
 import moment from "moment"
+import momentTimezone from "moment-timezone"
 import {
   handleError,
   errorValidation,
   validateBody,
-  userRankQuery,
 } from "../../utils/utils.js"
 import Voucher from "../../models/Voucher.js"
 import {
@@ -13,6 +13,9 @@ import {
   modelHeader,
   fileHeader,
 } from "./constants.js"
+import { INDIA_TZ } from "../../config/constants.js"
+
+momentTimezone.tz.setDefault(INDIA_TZ)
 
 export const getVoucher = async (req, res) => {
   try {

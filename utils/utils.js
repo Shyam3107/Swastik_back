@@ -3,8 +3,11 @@ import csv from "csvtojson"
 import { join } from "path"
 import { unlinkSync } from "fs"
 import moment from "moment"
+import momentTimezone from "moment-timezone"
 
-import { access, operations } from "../config/constants.js"
+import { access, operations, INDIA_TZ } from "../config/constants.js"
+
+momentTimezone.tz.setDefault(INDIA_TZ)
 
 export const convertCSVToJSON = async (csvFilePath) => {
   let jsonArray = await csv().fromFile(csvFilePath)

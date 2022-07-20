@@ -1,4 +1,5 @@
 import moment from "moment"
+import momentTimezone from "moment-timezone"
 
 import OfficeExpense from "../../models/OfficeExpense.js"
 import Receipt from "../../models/Receipt.js"
@@ -6,6 +7,9 @@ import Trip from "../../models/Trip.js"
 import VehiclesExpense from "../../models/VehiclesExpense.js"
 import { handleError, parseResponse, dateToString } from "../../utils/utils.js"
 import { sendExcelFile } from "../../utils/sendFile.js"
+import { INDIA_TZ } from "../../config/constants.js"
+
+momentTimezone.tz.setDefault(INDIA_TZ)
 
 const columnHeaders = (header, key, width = 15) => {
   return { header, key, width }

@@ -1,7 +1,11 @@
 import moment from "moment"
+import momentTimezone from "moment-timezone"
 import { handleError } from "../../utils/utils.js"
 import Trip from "../../models/Trip.js"
 import Document from "../../models/Document.js"
+import { INDIA_TZ } from "../../config/constants.js"
+
+momentTimezone.tz.setDefault(INDIA_TZ)
 
 export const getHome = async (req, res) => {
   try {

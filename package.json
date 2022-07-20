@@ -25,6 +25,7 @@
     "jsonwebtoken": "^8.5.1",
     "md5": "^2.3.0",
     "moment": "^2.29.1",
+    "moment-timezone": "^0.5.34",
     "mongoose": "^6.0.11"
   },
   "devDependencies": {

@@ -1,4 +1,5 @@
 import moment from "moment"
+import momentTimezone from "moment-timezone"
 import {
   handleError,
   errorValidation,
@@ -7,6 +8,9 @@ import {
 } from "../../utils/utils.js"
 import Document from "../../models/Document.js"
 import Account from "../../models/Account.js"
+import { INDIA_TZ } from "../../config/constants.js"
+
+momentTimezone.tz.setDefault(INDIA_TZ)
 
 const fileHeader = [
   "Vehicle No.",
@@ -101,7 +105,10 @@ export const uploadDocuments = async (req, res) => {
         if (mssg) throw mssg
 
         if (index > 0)
-          value = moment(value, dateFormat(value)).endOf("day").toISOString()
+          value = moment(value, dateFormat(value))
+            .tz(INDIA_TZ)
+            .endOf("day")
+            .toISOString()
 
         tempVal[head] = value
       }

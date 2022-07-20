@@ -1,4 +1,5 @@
 import moment from "moment"
+import momentTimezone from "moment-timezone"
 import {
   handleError,
   errorValidation,
@@ -7,6 +8,9 @@ import {
 } from "../../utils/utils.js"
 import Trip from "../../models/Trip.js"
 import { fileHeader, modelHeader, validateArr } from "./constants.js"
+import { INDIA_TZ } from "../../config/constants.js"
+
+momentTimezone.tz.setDefault(INDIA_TZ)
 
 export const getTrips = async (req, res) => {
   try {
