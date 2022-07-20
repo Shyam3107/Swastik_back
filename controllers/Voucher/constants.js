@@ -10,9 +10,8 @@ export const fileHeader = [
   "Diesel",
   "Advance",
   "TDS",
-  "Bag Shortage",
+  "Shortage",
   "Other",
-  "Total",
   "Remarks",
 ]
 
@@ -28,9 +27,8 @@ export const modelHeader = [
   "diesel",
   "advance",
   "tds",
-  "bagShortage",
+  "shortage",
   "other",
-  "total",
   "remarks",
 ]
 
@@ -41,7 +39,6 @@ export const validateArr = [
   "rate",
   "paidTo",
   "accountNo",
-  "total",
 ]
 
 export const aggregateBody = [
@@ -95,7 +92,7 @@ export const aggregateBody = [
       "addedBy.branch": 1,
       "addedBy.location": 1,
       advance: 1,
-      bagShortage: 1,
+      shortage: 1,
       billingRate: 1,
       cash: 1,
       diNo: 1,
@@ -106,7 +103,6 @@ export const aggregateBody = [
       rate: 1,
       remarks: 1,
       tds: 1,
-      total: 1,
       "trip.lrNo": 1,
       "trip.location": 1,
       "trip.quantity": 1,

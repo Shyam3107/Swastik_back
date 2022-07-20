@@ -31,26 +31,28 @@ const schema = new Schema(
       type: String,
     },
     cash: {
-      type: String,
+      type: Number,
+      default: 0,
     },
     diesel: {
-      type: String,
+      type: Number,
+      default: 0,
     },
     advance: {
-      type: String,
+      type: Number,
+      default: 0,
     },
     tds: {
-      type: String,
+      type: Number,
+      default: 0,
     },
-    bagShortage: {
-      type: String,
+    shortage: {
+      type: Number,
+      default: 0,
     },
     other: {
-      type: String,
-    },
-    total: {
       type: Number,
-      required: true,
+      default: 0,
     },
     remarks: {
       type: String,

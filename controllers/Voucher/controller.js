@@ -102,8 +102,7 @@ export const uploadVoucher = async (req, res) => {
         let head = modelHeader[index]
         let value = item[fileHeader[index]]
 
-        if ((index < 6 || head === "total") && !value)
-          mssg = `Enter Valid ${fileHeader[index]}`
+        if (index < 6 && !value) mssg = `Enter Valid ${fileHeader[index]}`
 
         if (mssg) throw mssg
 
