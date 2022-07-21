@@ -103,6 +103,7 @@ export const uploadVoucher = async (req, res) => {
         let value = item[fileHeader[index]]
 
         if (index < 6 && !value) mssg = `Enter Valid ${fileHeader[index]}`
+        if (!value && (index >= 7 || index <= 11)) value = 0
 
         if (mssg) throw mssg
 

@@ -8,29 +8,10 @@ import {
 } from "../../utils/utils.js"
 import Document from "../../models/Document.js"
 import Account from "../../models/Account.js"
+import { fileHeader, modelHeader } from "./constants.js"
 import { INDIA_TZ } from "../../config/constants.js"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
-
-const fileHeader = [
-  "Vehicle No.",
-  "Tax Paid Upto",
-  "Insurance Paid Upto",
-  "Fitness Paid Upto",
-  "Pollution Paid Upto",
-  "Permit Paid Upto",
-  "National Permit Paid Upto",
-]
-
-const modelHeader = [
-  "vehicleNo",
-  "taxPaidUpto",
-  "insurancePaidUpto",
-  "fitnessPaidUpto",
-  "pollutionPaidUpto",
-  "permitPaidUpto",
-  "nationalPermitPaidUpto",
-]
 
 export const getDocuments = async (req, res) => {
   try {

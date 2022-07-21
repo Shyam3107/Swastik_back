@@ -63,6 +63,7 @@ const accountSchema = new Schema(
       enum: [
         "TRIPS",
         "VOUCHERS",
+        "DIESELS",
         "DOCUMENTS",
         "RECEIPTS",
         "OFFICE EXPENSES",

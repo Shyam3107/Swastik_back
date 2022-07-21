@@ -14,6 +14,7 @@ import receiptRoute from "./controllers/Receipts/route.js"
 import userRoute from "./controllers/User/route.js"
 import reportRoute from "./controllers/Reports/route.js"
 import voucherRoute from "./controllers/Voucher/route.js"
+import dieselRoute from "./controllers/Diesel/route.js"
 import { getHome } from "./controllers/Home/controller.js"
 import { access, PORT } from "./config/constants.js"
 import httpCallLogger from "./middlewares/httpCallLogger.js"
@@ -52,6 +53,8 @@ app.get("/home", checkUser(), getHome)
 // VEHICLES
 app.use("/vehicles/trips", checkUser(), tripRoute)
 app.use("/vehicles/documents", checkUser(), documentRoute)
+app.use("/vehicles/vouchers", checkUser(), voucherRoute)
+app.use("/vehicles/diesels", checkUser(), dieselRoute)
 
 // EXPENSES
 app.use("/expenses/office", checkUser(), officeExpenseRoute)
@@ -65,6 +68,3 @@ app.use("/configure/accounts", checkUser(access.ACCOUNTS), accountRoute)
 
 // REPORTS
 app.use("/reports", checkUser(), reportRoute)
-
-// VOUCHER
-app.use("/vehicles/vouchers", checkUser(), voucherRoute)
