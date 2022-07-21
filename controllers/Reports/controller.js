@@ -5,9 +5,11 @@ import OfficeExpense from "../../models/OfficeExpense.js"
 import Receipt from "../../models/Receipt.js"
 import Trip from "../../models/Trip.js"
 import VehiclesExpense from "../../models/VehiclesExpense.js"
+import Diesel from "../../models/Diesel.js"
 import { handleError, parseResponse, dateToString } from "../../utils/utils.js"
 import { sendExcelFile } from "../../utils/sendFile.js"
 import { INDIA_TZ } from "../../config/constants.js"
+import mongoose from "mongoose"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
 
@@ -135,9 +137,90 @@ export const getVehiclesReport = async (req, res) => {
 
     return sendExcelFile(
       res,
-      columns,
-      [...trips, ...vehicleExpenses, ...officeExpenses, ...receipts],
-      "Reports"
+      [columns],
+      [[...trips, ...vehicleExpenses, ...officeExpenses, ...receipts]],
+      ["Reports"]
+    )
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const getDieselsReport = async (req, res) => {
+  try {
+    const user = req.user
+    let { from = moment().startOf("month"), to = moment() } = req.query
+    from = moment(from).startOf("day").toISOString()
+    to = moment(to).endOf("day").toISOString()
+
+    let match = {
+      companyAdminId: mongoose.Types.ObjectId(user?.companyAdminId?._id),
+      date: { $gte: new Date(from), $lte: new Date(to) },
+    }
+
+    let vehicleWise = await Diesel.aggregate([
+      {
+        $match: match,
+      },
+      {
+        $group: {
+          _id: {
+            vehicleNo: "$vehicleNo",
+          },
+          quantity: { $sum: "$quantity" },
+          amount: { $sum: "$amount" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          vehicleNo: "$_id.vehicleNo",
+          quantity: 1,
+          amount: 1,
+        },
+      },
+    ])
+
+    let pumpWise = await Diesel.aggregate([
+      {
+        $match: match,
+      },
+      {
+        $group: {
+          _id: {
+            pumpName: "$pumpName",
+          },
+          quantity: { $sum: "$quantity" },
+          amount: { $sum: "$amount" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          pumpName: "$_id.pumpName",
+          quantity: 1,
+          amount: 1,
+        },
+      },
+    ])
+
+    const column1 = [
+      columnHeaders("Vehicle No.", "vehicleNo"),
+      columnHeaders("Quantity", "quantity"),
+      columnHeaders("Amount", "amount"),
+    ]
+
+    const column2 = [
+      columnHeaders("Pump Name", "pumpName"),
+      columnHeaders("Quantity", "quantity"),
+      columnHeaders("Amount", "amount"),
+    ]
+
+    return sendExcelFile(
+      res,
+      [column1, column2],
+      [vehicleWise, pumpWise],
+      ["Vehicle Wise Report", "Pump Wise Report"]
     )
   } catch (error) {
     return handleError(res, error)

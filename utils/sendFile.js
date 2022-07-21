@@ -4,17 +4,19 @@ export const sendExcelFile = async (
   res,
   columns = [],
   rows = [],
-  filename = new Date().getTime()
+  filename = []
 ) => {
   let workbook = new exceljs.Workbook()
-  let worksheet = workbook.addWorksheet(filename)
-  worksheet.columns = columns
+  filename.forEach((val, index) => {
+    let worksheet = workbook.addWorksheet(val)
+    worksheet.columns = columns[index]
 
-  worksheet.addRows(rows)
-  worksheet.autoFilter = {
-    from: "A1",
-    to: `${String.fromCharCode(64 + columns.length)}1`,
-  }
+    worksheet.addRows(rows[index])
+    worksheet.autoFilter = {
+      from: "A1",
+      to: `${String.fromCharCode(64 + columns[index].length)}1`,
+    }
+  })
 
   res.setHeader(
     "Content-Type",
@@ -22,8 +24,8 @@ export const sendExcelFile = async (
   )
   res.setHeader(
     "Content-Disposition",
-    "attachment; filename=" + `${filename}.xlsx`
+    "attachment; filename=" + `${new Date().getTime()}.xlsx`
   )
   await workbook.xlsx.write(res)
-  res.status(200).end()
+  return res.status(200).end()
 }
