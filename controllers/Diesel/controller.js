@@ -42,7 +42,7 @@ export const getDiesels = async (req, res) => {
           path: "addedBy",
           select: "location",
         })
-        .sort({ vehicleNo: 1 })
+        .sort({ date: 1 })
 
     if (!diesels) throw "Record Not Found"
 
@@ -70,8 +70,8 @@ export const uploadDiesels = async (req, res) => {
         const head = modelHeader[index]
         let value = item[fileHeader[index]]
 
-        if (head !== "remarks" && !value)
-          mssg = `Enter Valid ${fileHeader[index]}`
+        if (head !== "remarks" && head != "quantity" && !value)
+          mssg = `Enter Valid ${fileHeader[index]} for row ${ind + 2}`
 
         if (mssg) throw mssg
 
@@ -91,6 +91,11 @@ export const uploadDiesels = async (req, res) => {
       message: `Successfully Inserted ${insertData.length} entries`,
     })
   } catch (error) {
+    if (error.code === 11000) {
+      let errMssg = error?.message
+      errMssg = errMssg.split("dup key:")[1]
+      if (errMssg) error = "Duplicate Found : " + errMssg
+    }
     return handleError(res, error)
   }
 }

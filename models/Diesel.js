@@ -53,6 +53,11 @@ const dieselSchema = new Schema(
   { timestamps: true }
 )
 
+dieselSchema.index(
+  { date: 1, vehicleNo: 1, quantity: 1, amount: 1, pumpName: 1 },
+  { unique: true }
+)
+
 const Diesel = model("Diesel", dieselSchema)
 
 export default Diesel
