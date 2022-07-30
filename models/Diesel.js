@@ -35,6 +35,10 @@ const dieselSchema = new Schema(
       required: true,
       default: 0,
     },
+    remarks: {
+      type: String,
+      trim: true,
+    },
     addedBy: {
       type: Schema.Types.ObjectId,
       ref: "Account",

@@ -5,6 +5,7 @@ export const fileHeader = [
   "Amount",
   "Fuel",
   "Pump Name",
+  "Remarks",
 ]
 
 export const modelHeader = [
@@ -14,6 +15,14 @@ export const modelHeader = [
   "amount",
   "fuel",
   "pumpName",
+  "remarks",
 ]
 
-export const validateArr = [...modelHeader]
+export const validateArr = [
+  "date",
+  "vehicleNo",
+  "quantity",
+  "amount",
+  "fuel",
+  "pumpName",
+]

@@ -70,7 +70,8 @@ export const uploadDiesels = async (req, res) => {
         const head = modelHeader[index]
         let value = item[fileHeader[index]]
 
-        if (!value) mssg = `Enter Valid ${fileHeader[index]}`
+        if (head !== "remarks" && !value)
+          mssg = `Enter Valid ${fileHeader[index]}`
 
         if (mssg) throw mssg
 
