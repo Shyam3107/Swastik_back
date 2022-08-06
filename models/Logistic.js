@@ -1,16 +1,15 @@
 import mongoose from "mongoose"
 const { Schema, model } = mongoose
 
-const dieselSchema = new Schema(
+const schema = new Schema(
   {
     date: {
       type: Date,
       required: true,
     },
-    vehicleNo: {
-      type: String,
-      uppercase: true,
-      trim: true,
+    product: {
+      type: Schema.Types.ObjectId,
+      ref: "Product",
       required: true,
     },
     quantity: {
@@ -18,22 +17,19 @@ const dieselSchema = new Schema(
       required: true,
       default: 0,
     },
-    fuel: {
+    personName: {
       type: String,
-      enum: ["Diesel", "Petrol"],
-      required: true,
-      default: "Diesel",
-    },
-    pumpName: {
-      type: String,
-      uppercase: true,
       trim: true,
       required: true,
     },
-    amount: {
-      type: Number,
+    personPhone: {
+      type: String,
       required: true,
-      default: 0,
+    },
+    status: {
+      type: String,
+      required: true,
+      enum: ["RECEIVED", "ISSUED"],
     },
     remarks: {
       type: String,
@@ -53,6 +49,6 @@ const dieselSchema = new Schema(
   { timestamps: true }
 )
 
-const Diesel = model("Diesel", dieselSchema)
+const Logistic = model("Logistic", schema)
 
-export default Diesel
+export default Logistic

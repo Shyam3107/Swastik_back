@@ -75,7 +75,14 @@ export const uploadDiesels = async (req, res) => {
 
         if (mssg) throw mssg
 
-        if (head === "date") value = moment(value, "DD-MM-YYYY").toISOString()
+        if (head === "date") {
+          if (value?.length !== 8 && value?.length !== 10) {
+            throw `Date should be in DD-MM-YYYY or DD-MM-YY format for row ${
+              ind + 2
+            }`
+          }
+          value = moment(value, "DD-MM-YYYY").toISOString()
+        }
 
         tempVal[head] = value
       }
@@ -163,7 +170,9 @@ export const deleteDiesels = async (req, res) => {
 
     return res.status(200).json({
       data: deletedData,
-      message: `Diesel${dieselIds.length > 1 ? "s" : ""} Deleted Successfully`,
+      message: `Successfully Deleted ${dieselIds.length} Diesel${
+        dieselIds.length > 1 ? "s" : ""
+      }`,
     })
   } catch (error) {
     return handleError(res, error)

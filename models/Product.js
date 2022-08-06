@@ -1,36 +1,20 @@
 import mongoose from "mongoose"
 const { Schema, model } = mongoose
 
-const dieselSchema = new Schema(
+const productSchema = new Schema(
   {
     date: {
       type: Date,
       required: true,
     },
-    vehicleNo: {
+    name: {
       type: String,
       uppercase: true,
       trim: true,
       required: true,
+      unique: true,
     },
     quantity: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    fuel: {
-      type: String,
-      enum: ["Diesel", "Petrol"],
-      required: true,
-      default: "Diesel",
-    },
-    pumpName: {
-      type: String,
-      uppercase: true,
-      trim: true,
-      required: true,
-    },
-    amount: {
       type: Number,
       required: true,
       default: 0,
@@ -53,6 +37,6 @@ const dieselSchema = new Schema(
   { timestamps: true }
 )
 
-const Diesel = model("Diesel", dieselSchema)
+const Product = model("Product", productSchema)
 
-export default Diesel
+export default Product
