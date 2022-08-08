@@ -24,13 +24,7 @@ momentTimezone.tz.setDefault(INDIA_TZ)
 export const getVoucher = async (req, res) => {
   try {
     const user = req.user
-    let {
-      voucherId,
-      from = moment().startOf("month"),
-      to = moment(),
-    } = req.query
-    from = moment(from).startOf("day").toISOString()
-    to = moment(to).endOf("day").toISOString()
+    let { voucherId, from, to } = req.query
 
     let vouchers
     if (voucherId) {

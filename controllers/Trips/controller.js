@@ -19,10 +19,7 @@ momentTimezone.tz.setDefault(INDIA_TZ)
 export const getTrips = async (req, res) => {
   try {
     const user = req.user
-    let { diNo, from = moment().startOf("month"), to = moment() } = req.query
-
-    from = moment(from).startOf("day").toISOString()
-    to = moment(to).endOf("day").toISOString()
+    let { diNo, from, to } = req.query
 
     let trips
     let metaData = {}

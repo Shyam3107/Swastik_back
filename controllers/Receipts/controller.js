@@ -20,13 +20,7 @@ const modelHeader = ["date", "amount", "remarks"]
 export const getReceipt = async (req, res) => {
   try {
     const user = req.user
-    let {
-      receiptId,
-      from = moment().startOf("month"),
-      to = moment(),
-    } = req.query
-    from = moment(from).startOf("day").toISOString()
-    to = moment(to).endOf("day").toISOString()
+    let { receiptId, from, to } = req.query
 
     const userQuery = userRankQuery(user)
     let receipts

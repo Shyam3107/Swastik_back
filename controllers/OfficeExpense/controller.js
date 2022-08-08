@@ -22,13 +22,7 @@ const modelHeader = ["date", "amount", "remarks"]
 export const getExpenses = async (req, res) => {
   try {
     const user = req.user
-    let {
-      expenseId,
-      from = moment().startOf("month"),
-      to = moment(),
-    } = req.query
-    from = moment(from).startOf("day").toISOString()
-    to = moment(to).endOf("day").toISOString()
+    let { expenseId, from, to } = req.query
 
     const userQuery = userRankQuery(user)
     let expenses

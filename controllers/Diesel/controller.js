@@ -19,13 +19,7 @@ momentTimezone.tz.setDefault(INDIA_TZ)
 export const getDiesels = async (req, res) => {
   try {
     const user = req.user
-    let {
-      dieselId,
-      from = moment().startOf("month"),
-      to = moment(),
-    } = req.query
-    from = moment(from).startOf("day").toISOString()
-    to = moment(to).endOf("day").toISOString()
+    let { dieselId, from, to } = req.query
 
     const userQuery = userRankQuery(user)
     let diesels
