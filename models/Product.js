@@ -3,16 +3,11 @@ const { Schema, model } = mongoose
 
 const productSchema = new Schema(
   {
-    date: {
-      type: Date,
-      required: true,
-    },
     name: {
       type: String,
       uppercase: true,
       trim: true,
       required: true,
-      unique: true,
     },
     quantity: {
       type: Number,
@@ -36,6 +31,8 @@ const productSchema = new Schema(
   },
   { timestamps: true }
 )
+
+productSchema.index({ name: 1, companyAdminId: 1 }, { unique: true })
 
 const Product = model("Product", productSchema)
 

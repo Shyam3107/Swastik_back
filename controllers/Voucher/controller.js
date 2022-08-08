@@ -67,16 +67,14 @@ export const addVoucher = [
       if (errors) {
         return null
       }
-      const user = req.user
 
-      const insertData = await Voucher.create({
+      await Voucher.create({
         ...req.body,
-        addedBy: user._id,
-        companyAdminId: user.companyAdminId,
+        addedBy: req?.user?._id,
+        companyAdminId: req?.user?.companyAdminId,
       })
 
       return res.status(200).json({
-        data: insertData,
         message: "Voucher Added Successfully",
       })
     } catch (error) {
@@ -86,8 +84,9 @@ export const addVoucher = [
 ]
 
 export const uploadVoucher = async (req, res) => {
+  const session = await Voucher.startSession()
   try {
-    const user = req.user
+    session.startTransaction()
 
     const dataToBeInsert = req.body.data
 
@@ -95,7 +94,10 @@ export const uploadVoucher = async (req, res) => {
 
     for (let i = 0; i < dataToBeInsert.length; i++) {
       const item = dataToBeInsert[i]
-      let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId }
+      let tempVal = {
+        addedBy: req?.user?._id,
+        companyAdminId: req?.user?.companyAdminId,
+      }
       let mssg = ""
 
       for (let index = 0; index < modelHeader.length; index++) {
@@ -103,6 +105,8 @@ export const uploadVoucher = async (req, res) => {
         let value = item[fileHeader[index]]
 
         if (index < 6 && !value) mssg = `Enter Valid ${fileHeader[index]}`
+
+        // These fields are Cash, TDS, Amount ....
         if (!value && (index >= 7 || index <= 11)) value = 0
 
         if (mssg) throw mssg
@@ -115,7 +119,9 @@ export const uploadVoucher = async (req, res) => {
       data.push(tempVal)
     }
 
-    const insertData = await Voucher.insertMany(data)
+    const insertData = await Voucher.insertMany(data, { session })
+
+    await session.commitTransaction()
 
     return res.status(200).json({
       data: insertData,
@@ -123,7 +129,10 @@ export const uploadVoucher = async (req, res) => {
       message: `Successfully Inserted ${insertData.length} entries`,
     })
   } catch (error) {
+    await session.abortTransaction()
     return handleError(res, error)
+  } finally {
+    session.endSession()
   }
 }
 
@@ -136,16 +145,13 @@ export const editVoucher = [
         return null
       }
 
-      const voucherId = req.body._id
       const updateData = await Voucher.findByIdAndUpdate(
-        { _id: voucherId },
+        { _id: req.body._id },
         req.body
       )
-
       if (!updateData) throw "Record Not Found"
 
       return res.status(200).json({
-        data: updateData,
         message: "Vocher Edited Successfully",
       })
     } catch (error) {
@@ -163,13 +169,12 @@ export const deleteVoucher = async (req, res) => {
 
     const voucherIds = req.body
 
-    const deletedData = await Voucher.deleteMany({ _id: voucherIds })
+    await Voucher.deleteMany({ _id: voucherIds })
 
     return res.status(200).json({
-      data: deletedData,
-      message: `Voucher${
+      message: `Successfully Deleted ${voucherIds.length} Voucher${
         voucherIds.length > 1 ? "s" : ""
-      } Deleted Successfully`,
+      }`,
     })
   } catch (error) {
     return handleError(res, error)

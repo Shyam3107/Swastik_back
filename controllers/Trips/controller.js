@@ -56,8 +56,9 @@ export const getTrips = async (req, res) => {
 }
 
 export const uploadTrips = async (req, res) => {
+  const session = await Trip.startSession()
   try {
-    const user = req.user
+    session.startTransaction()
 
     const dataToBeInsert = req.body.data
 
@@ -66,7 +67,10 @@ export const uploadTrips = async (req, res) => {
 
     for (let i = 0; i < dataToBeInsert.length; i++) {
       const item = dataToBeInsert[i]
-      let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId }
+      let tempVal = {
+        addedBy: req.user._id,
+        companyAdminId: req.user.companyAdminId,
+      }
       let diNo
       let mssg = ""
 
@@ -78,15 +82,9 @@ export const uploadTrips = async (req, res) => {
           if (!value) mssg = "All Fields Should have DI No."
           else if (tempDiNo[value])
             mssg = `Two rows can't have same DI No. ${value}`
-          else {
-            const isExist = await Trip.findOne({
-              diNo: value,
-              companyAdminId: user.companyAdminId,
-            })
-            if (isExist) mssg = `DI No. ${value} already exist`
-            diNo = value
-            tempDiNo[value] = true
-          }
+
+          diNo = value
+          tempDiNo[value] = true
         } else if (index < 10 && !value)
           mssg = `${fileHeader[index]} is required for DI No. ${diNo}`
         else if (head === "driverPhone" && !validatePhoneNo(value))
@@ -117,7 +115,8 @@ export const uploadTrips = async (req, res) => {
       data.push(tempVal)
     }
 
-    const insertData = await Trip.insertMany(data)
+    const insertData = await Trip.insertMany(data, { session })
+    session.commitTransaction()
 
     return res.status(200).json({
       data: insertData,
@@ -125,7 +124,10 @@ export const uploadTrips = async (req, res) => {
       message: `Successfully Inserted ${insertData.length} entries`,
     })
   } catch (error) {
+    await session.abortTransaction()
     return handleError(res, error)
+  } finally {
+    session.endSession()
   }
 }
 
@@ -137,21 +139,14 @@ export const addTrips = [
       if (errors) {
         return null
       }
-      const user = req.user
-      const { driverPhone, dieselIn, cash, remarks, diNo } = req.body
+      const { dieselIn, cash, remarks } = req.body
 
-      if (!validatePhoneNo(driverPhone)) throw "Enter Valid Phone No."
+      if (!validatePhoneNo(req.body.driverPhone)) throw "Enter Valid Phone No."
 
       if (dieselIn && dieselIn !== "Litre" && dieselIn !== "Amount")
         throw "Diesel In Field should be Litre or Amount"
 
       if (cash && !remarks) throw "Remarks field is mandatory if given Cash"
-
-      const isExist = await Trip.findOne({
-        diNo,
-        companyAdminId: user.companyAdminId,
-      })
-      if (isExist) throw `DI No. ${diNo} already exist`
 
       if (!req.body.pumpName) delete req.body.pumpName
       if (!req.body.diesel) delete req.body.diesel
@@ -159,15 +154,13 @@ export const addTrips = [
       if (!req.body.cash) delete req.body.cash
       if (!req.body.remarks) delete req.body.remarks
 
-      const insertData = await Trip.create({
+      await Trip.create({
         ...req.body,
-        addedBy: user._id,
-        companyAdminId: user.companyAdminId,
+        addedBy: req?.user?._id,
+        companyAdminId: req?.user?.companyAdminId,
       })
 
-      return res
-        .status(200)
-        .json({ data: insertData, message: "Trip Added Successfully" })
+      return res.status(200).json({ message: "Trip Added Successfully" })
     } catch (error) {
       return handleError(res, error)
     }
@@ -182,7 +175,6 @@ export const editTrips = [
       if (errors) {
         return null
       }
-      const user = req.user
 
       const tripId = req.body._id
       if (!req.body.pumpName) delete req.body.pumpName
@@ -190,13 +182,12 @@ export const editTrips = [
       if (!req.body.dieselIn) delete req.body.dieselIn
       if (!req.body.cash) delete req.body.cash
       if (!req.body.remarks) delete req.body.remarks
+
       const updateData = await Trip.findByIdAndUpdate({ _id: tripId }, req.body)
 
       if (!updateData) throw "Record Not Found"
 
-      return res
-        .status(200)
-        .json({ data: updateData, message: "Trip Edited Successfully" })
+      return res.status(200).json({ message: "Trip Edited Successfully" })
     } catch (error) {
       return handleError(res, error)
     }
@@ -209,14 +200,14 @@ export const deleteTrips = async (req, res) => {
     if (errors) {
       return null
     }
-    const user = req.user
     const tripIds = req.body
 
-    const deletedData = await Trip.deleteMany({ _id: tripIds })
+    await Trip.deleteMany({ _id: tripIds })
 
     return res.status(200).json({
-      data: deletedData,
-      message: `Trip${tripIds.length > 1 ? "s" : ""} Deleted Successfully`,
+      message: `Successfully Deleted ${tripIds.length} Trip${
+        tripIds.length > 1 ? "s" : ""
+      }`,
     })
   } catch (error) {
     return handleError(res, error)

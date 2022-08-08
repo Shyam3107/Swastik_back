@@ -17,6 +17,7 @@ import reportRoute from "./controllers/Reports/route.js"
 import voucherRoute from "./controllers/Voucher/route.js"
 import dieselRoute from "./controllers/Diesel/route.js"
 import productRoute from "./controllers/Product/route.js"
+import logisticRoute from "./controllers/Logistics/route.js"
 import { getHome } from "./controllers/Home/controller.js"
 import { access, PORT } from "./config/constants.js"
 import httpCallLogger from "./middlewares/httpCallLogger.js"
@@ -81,3 +82,4 @@ app.use("/reports", checkUser(), reportRoute)
 
 // STORE
 app.use("/store/product", checkUser(), productRoute)
+app.use("/store/logistic", checkUser(), logisticRoute)

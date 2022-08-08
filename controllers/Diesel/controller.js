@@ -98,11 +98,6 @@ export const uploadDiesels = async (req, res) => {
       message: `Successfully Inserted ${insertData.length} entries`,
     })
   } catch (error) {
-    if (error.code === 11000) {
-      let errMssg = error?.message
-      errMssg = errMssg.split("dup key:")[1]
-      if (errMssg) error = "Duplicate Found : " + errMssg
-    }
     return handleError(res, error)
   }
 }

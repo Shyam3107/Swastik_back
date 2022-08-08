@@ -6,16 +6,17 @@ import Receipt from "../../models/Receipt.js"
 import Trip from "../../models/Trip.js"
 import VehiclesExpense from "../../models/VehiclesExpense.js"
 import Diesel from "../../models/Diesel.js"
-import { handleError, parseResponse, dateToString } from "../../utils/utils.js"
+import {
+  handleError,
+  parseResponse,
+  dateToString,
+  columnHeaders,
+} from "../../utils/utils.js"
 import { sendExcelFile } from "../../utils/sendFile.js"
 import { INDIA_TZ } from "../../config/constants.js"
 import mongoose from "mongoose"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
-
-const columnHeaders = (header, key, width = 15) => {
-  return { header, key, width }
-}
 
 export const getVehiclesReport = async (req, res) => {
   try {

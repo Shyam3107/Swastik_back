@@ -17,3 +17,5 @@ export const modelHeader = [
   "permitPaidUpto",
   "nationalPermitPaidUpto",
 ]
+
+export const validateArr = modelHeader

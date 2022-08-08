@@ -15,7 +15,13 @@ const schema = new Schema(
     quantity: {
       type: Number,
       required: true,
-      default: 0,
+      min: 1,
+    },
+    vehicleNo: {
+      type: String,
+      uppercase: true,
+      trim: true,
+      required: true,
     },
     personName: {
       type: String,
@@ -48,6 +54,8 @@ const schema = new Schema(
   },
   { timestamps: true }
 )
+
+schema.index({ vehicleNo: 1, companyAdminId: 1 })
 
 const Logistic = model("Logistic", schema)
 

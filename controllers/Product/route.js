@@ -2,6 +2,7 @@ import { Router } from "express"
 import {
   addProducts,
   getProducts,
+  getProductsName,
   uploadProducts,
   deleteProducts,
   editProducts,
@@ -11,6 +12,7 @@ import {
 const router = Router()
 
 router.get("/getProducts", getProducts)
+router.get("/getProductsName", getProductsName)
 router.post("/addProducts", addProducts)
 router.post("/uploadProducts", uploadProducts)
 router.put("/editProducts", editProducts)

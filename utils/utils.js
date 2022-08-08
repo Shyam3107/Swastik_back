@@ -15,6 +15,11 @@ export const convertCSVToJSON = async (csvFilePath) => {
 }
 
 export function handleError(res, errors) {
+  if (errors.code === 11000) {
+    let errMssg = errors?.message
+    errMssg = errMssg.split("dup key:")[1]
+    if (errMssg) errors = "Duplicate Found : " + errMssg
+  }
   if (typeof errors === "string") return res.status(400).json({ errors })
   return res.status(400).json({ errors: errors.message })
 }
@@ -81,4 +86,8 @@ export const isOperationAllowed = (user, acc, operation = false) => {
   if (acc === access.DOCUMENTS && operation === operations.READ) return true
 
   return accessGiven && operationGiven
+}
+
+export const columnHeaders = (header, key, width = 15) => {
+  return { header, key, width }
 }

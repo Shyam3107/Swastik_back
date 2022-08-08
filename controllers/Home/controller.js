@@ -9,7 +9,7 @@ momentTimezone.tz.setDefault(INDIA_TZ)
 
 export const getHome = async (req, res) => {
   try {
-    const user = req.user
+    const companyAdminId = req.user.companyAdminId
     let home = {
       trips: [],
       tax: [],
@@ -25,7 +25,7 @@ export const getHome = async (req, res) => {
       const endDate = moment().month(index).endOf("month")
 
       const temp = await Trip.find({
-        companyAdminId: user.companyAdminId,
+        companyAdminId,
         date: { $gte: startDate, $lte: endDate },
       }).countDocuments()
 
@@ -33,62 +33,62 @@ export const getHome = async (req, res) => {
     }
 
     home.tax[0] = await Document.find({
-      companyAdminId: user.companyAdminId,
+      companyAdminId,
       taxPaidUpto: { $gte: moment() },
     }).countDocuments()
 
     home.tax[1] = await Document.find({
-      companyAdminId: user.companyAdminId,
+      companyAdminId,
       taxPaidUpto: { $lt: moment() },
     }).countDocuments()
 
     home.insurance[0] = await Document.find({
-      companyAdminId: user.companyAdminId,
+      companyAdminId,
       insurancePaidUpto: { $gte: moment() },
     }).countDocuments()
 
     home.insurance[1] = await Document.find({
-      companyAdminId: user.companyAdminId,
+      companyAdminId,
       insurancePaidUpto: { $lt: moment() },
     }).countDocuments()
 
     home.fitness[0] = await Document.find({
-      companyAdminId: user.companyAdminId,
+      companyAdminId,
       fitnessPaidUpto: { $gte: moment() },
     }).countDocuments()
 
     home.fitness[1] = await Document.find({
-      companyAdminId: user.companyAdminId,
+      companyAdminId,
       fitnessPaidUpto: { $lt: moment() },
     }).countDocuments()
 
     home.pollution[0] = await Document.find({
-      companyAdminId: user.companyAdminId,
+      companyAdminId,
       pollutionPaidUpto: { $gte: moment() },
     }).countDocuments()
 
     home.pollution[1] = await Document.find({
-      companyAdminId: user.companyAdminId,
+      companyAdminId,
       pollutionPaidUpto: { $lt: moment() },
     }).countDocuments()
 
     home.permit[0] = await Document.find({
-      companyAdminId: user.companyAdminId,
+      companyAdminId,
       permitPaidUpto: { $gte: moment() },
     }).countDocuments()
 
     home.permit[1] = await Document.find({
-      companyAdminId: user.companyAdminId,
+      companyAdminId,
       permitPaidUpto: { $lt: moment() },
     }).countDocuments()
 
     home.nationalPermit[0] = await Document.find({
-      companyAdminId: user.companyAdminId,
+      companyAdminId,
       nationalPermitPaidUpto: { $gte: moment() },
     }).countDocuments()
 
     home.nationalPermit[1] = await Document.find({
-      companyAdminId: user.companyAdminId,
+      companyAdminId,
       nationalPermitPaidUpto: { $lt: moment() },
     }).countDocuments()
 
