@@ -5,6 +5,7 @@ import {
   uploadExpenses,
   deleteExpenses,
   editExpenses,
+  downloadExpenses,
 } from "./controller.js"
 const router = Router()
 
@@ -13,5 +14,6 @@ router.post("/addExpenses", addExpenses)
 router.post("/uploadExpenses", uploadExpenses)
 router.put("/editExpenses", editExpenses)
 router.delete("/deleteExpenses", deleteExpenses)
+router.get("/downloadExpenses", downloadExpenses)
 
 export default router

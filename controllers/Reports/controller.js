@@ -21,9 +21,7 @@ momentTimezone.tz.setDefault(INDIA_TZ)
 export const getVehiclesReport = async (req, res) => {
   try {
     const user = req.user
-    let { from = moment().startOf("month"), to = moment() } = req.query
-    from = moment(from).startOf("day").toISOString()
-    to = moment(to).endOf("day").toISOString()
+    let { from, to } = req.query
 
     let select = {
       _id: 0,
@@ -150,9 +148,7 @@ export const getVehiclesReport = async (req, res) => {
 export const getDieselsReport = async (req, res) => {
   try {
     const user = req.user
-    let { from = moment().startOf("month"), to = moment() } = req.query
-    from = moment(from).startOf("day").toISOString()
-    to = moment(to).endOf("day").toISOString()
+    let { from, to } = req.query
 
     let match = {
       companyAdminId: mongoose.Types.ObjectId(user?.companyAdminId?._id),

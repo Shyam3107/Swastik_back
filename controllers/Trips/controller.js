@@ -5,10 +5,14 @@ import {
   errorValidation,
   validateBody,
   validatePhoneNo,
+  columnHeaders,
+  parseResponse,
+  formatDateInDDMMYYY,
 } from "../../utils/utils.js"
 import Trip from "../../models/Trip.js"
 import { fileHeader, modelHeader, validateArr } from "./constants.js"
 import { INDIA_TZ } from "../../config/constants.js"
+import { sendExcelFile } from "../../utils/sendFile.js"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
 
@@ -55,6 +59,7 @@ export const getTrips = async (req, res) => {
   }
 }
 
+// TODO : REVIEW ALL VALIDATIONS
 export const uploadTrips = async (req, res) => {
   const session = await Trip.startSession()
   try {
@@ -131,6 +136,7 @@ export const uploadTrips = async (req, res) => {
   }
 }
 
+// TODO : REVIEW ALL VALIDATIONS
 export const addTrips = [
   validateBody(validateArr),
   async (req, res) => {
@@ -139,12 +145,14 @@ export const addTrips = [
       if (errors) {
         return null
       }
-      const { dieselIn, cash, remarks } = req.body
+      const { dieselIn, cash, remarks, diesel, pumpName } = req.body
 
       if (!validatePhoneNo(req.body.driverPhone)) throw "Enter Valid Phone No."
 
       if (dieselIn && dieselIn !== "Litre" && dieselIn !== "Amount")
         throw "Diesel In Field should be Litre or Amount"
+
+      if (diesel && !pumpName) throw "Pump Name is required if Diesel Taken"
 
       if (cash && !remarks) throw "Remarks field is mandatory if given Cash"
 
@@ -167,6 +175,7 @@ export const addTrips = [
   },
 ]
 
+// TODO : REVIEW ALL VALIDATIONS
 export const editTrips = [
   validateBody(validateArr),
   async (req, res) => {
@@ -209,6 +218,60 @@ export const deleteTrips = async (req, res) => {
         tripIds.length > 1 ? "s" : ""
       }`,
     })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const downloadTrips = async (req, res) => {
+  try {
+    const companyAdminId = req?.user?.companyAdminId
+    const { from, to } = req.query
+    let trips = await Trip.find({
+      companyAdminId,
+      date: { $gte: from, $lte: to },
+    })
+      .select({
+        _id: 0,
+        __v: 0,
+        createdAt: 0,
+        updatedAt: 0,
+        companyAdminId: 0,
+      })
+      .populate({ path: "addedBy", select: "location" })
+      .sort({ date: 1 })
+
+    trips = parseResponse(trips)
+
+    trips = trips.map((val) => {
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val.date),
+        addedBy: val.addedBy.location,
+      }
+    })
+
+    const column1 = [
+      columnHeaders("DI No.", "diNo"),
+      columnHeaders("LR No.", "lrNo"),
+      columnHeaders("Date", "date"),
+      columnHeaders("Loading Point", "loadingPoint"),
+      columnHeaders("Party Name", "partyName"),
+      columnHeaders("Location", "location"),
+      columnHeaders("Vehicle No.", "vehicleNo"),
+      columnHeaders("Quantity", "quantity"),
+      columnHeaders("Material", "material"),
+      columnHeaders("Driver Name", "driverName"),
+      columnHeaders("Driver Phone", "driverPhone"),
+      columnHeaders("Diesel", "diesel"),
+      columnHeaders("Diesel In", "dieselIn"),
+      columnHeaders("Pump Name", "pumpName"),
+      columnHeaders("Cash", "cash"),
+      columnHeaders("Remarks", "remarks"),
+      columnHeaders("Added By", "addedBy"),
+    ]
+
+    return sendExcelFile(res, [column1], [trips], ["Trips"])
   } catch (error) {
     return handleError(res, error)
   }

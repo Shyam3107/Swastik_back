@@ -5,10 +5,14 @@ import {
   errorValidation,
   validateBody,
   userRankQuery,
+  columnHeaders,
+  formatDateInDDMMYYY,
+  parseResponse,
 } from "../../utils/utils.js"
 import Diesel from "../../models/Diesel.js"
 import { INDIA_TZ } from "../../config/constants.js"
 import { fileHeader, modelHeader, validateArr } from "./constants.js"
+import { sendExcelFile } from "../../utils/sendFile.js"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
 
@@ -169,6 +173,56 @@ export const deleteDiesels = async (req, res) => {
         dieselIds.length > 1 ? "s" : ""
       }`,
     })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const downloadDiesels = async (req, res) => {
+  try {
+    const userQuery = userRankQuery(req.user)
+    const { from, to } = req.query
+    let data = await Diesel.find({
+      ...userQuery,
+      date: { $gte: from, $lte: to },
+    })
+      .select({
+        addedBy: 1,
+        amount: 1,
+        date: 1,
+        fuel: 1,
+        pumpName: 1,
+        quantity: 1,
+        remarks: 1,
+        vehicleNo: 1,
+      })
+      .populate({
+        path: "addedBy",
+        select: "location",
+      })
+      .sort({ date: 1 })
+
+    data = parseResponse(data)
+
+    data = data.map((val) => {
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val.date),
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    const column1 = [
+      columnHeaders("Date", "date"),
+      columnHeaders("Vehicle No.", "vehicleNo"),
+      columnHeaders("Quantity", "quantity"),
+      columnHeaders("Amount", "amount"),
+      columnHeaders("Pump Name", "pumpName"),
+      columnHeaders("Fuel", "fuel"),
+      columnHeaders("Remarks", "remarks"),
+      columnHeaders("Added By", "addedBy"),
+    ]
+    return sendExcelFile(res, [column1], [data], ["Receipts"])
   } catch (error) {
     return handleError(res, error)
   }

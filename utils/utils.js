@@ -91,3 +91,11 @@ export const isOperationAllowed = (user, acc, operation = false) => {
 export const columnHeaders = (header, key, width = 15) => {
   return { header, key, width }
 }
+
+export const formatDateInDDMMYYY = (date = new Date()) => {
+  try {
+    return moment(date).format("DD-MM-YYYY")
+  } catch (error) {
+    return "InValid Date"
+  }
+}

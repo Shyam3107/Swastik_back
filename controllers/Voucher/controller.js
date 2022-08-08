@@ -5,6 +5,9 @@ import {
   handleError,
   errorValidation,
   validateBody,
+  formatDateInDDMMYYY,
+  columnHeaders,
+  parseResponse,
 } from "../../utils/utils.js"
 import Voucher from "../../models/Voucher.js"
 import {
@@ -13,6 +16,7 @@ import {
   modelHeader,
   fileHeader,
 } from "./constants.js"
+import { sendExcelFile } from "../../utils/sendFile.js"
 import { INDIA_TZ } from "../../config/constants.js"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
@@ -176,6 +180,64 @@ export const deleteVoucher = async (req, res) => {
         voucherIds.length > 1 ? "s" : ""
       }`,
     })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const downloadVouchers = async (req, res) => {
+  try {
+    const companyAdminId = req?.user?.companyAdminId
+    const { from, to } = req.query
+    let data = await Voucher.aggregate([
+      {
+        $match: {
+          companyAdminId: mongoose.Types.ObjectId(companyAdminId?._id),
+          date: { $gte: new Date(from), $lte: new Date(to) },
+        },
+      },
+      ...aggregateBody,
+    ])
+
+    data = parseResponse(data)
+
+    data = data.map((val) => {
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val.date),
+        diDate: formatDateInDDMMYYY(val?.trip?.date),
+        vehicleNo: val?.trip?.vehicleNo,
+        lrNo: val?.trip?.lrNo,
+        designation: val?.trip?.location,
+        quantity: val?.trip?.quantity,
+        site: val?.trip?.addedBy?.branch,
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    const column1 = [
+      columnHeaders("Date", "date"),
+      columnHeaders("DI No.", "diNo"),
+      columnHeaders("Billing Rate", "billingRate"),
+      columnHeaders("Rate", "rate"),
+      columnHeaders("Paid To", "paidTo"),
+      columnHeaders("Account No.", "accountNo"),
+      columnHeaders("IFSC", "ifsc"),
+      columnHeaders("Cash", "cash"),
+      columnHeaders("Diesel", "diesel"),
+      columnHeaders("Advance", "advance"),
+      columnHeaders("TDS", "tds"),
+      columnHeaders("Shortage", "shortage"),
+      columnHeaders("Other", "other"),
+      columnHeaders("DI Date", "diDate"),
+      columnHeaders("Vehicle No.", "vehicleNo"),
+      columnHeaders("LR No.", "lrNo"),
+      columnHeaders("Designation", "designation"),
+      columnHeaders("Site", "site"),
+      columnHeaders("Remarks", "remarks"),
+      columnHeaders("AddedBy", "addedBy"),
+    ]
+    return sendExcelFile(res, [column1], [data], ["Documents"])
   } catch (error) {
     return handleError(res, error)
   }

@@ -5,12 +5,15 @@ import {
   errorValidation,
   validateBody,
   dateFormat,
+  columnHeaders,
+  formatDateInDDMMYYY,
+  parseResponse,
 } from "../../utils/utils.js"
 import Document from "../../models/Document.js"
 import Account from "../../models/Account.js"
 import { fileHeader, modelHeader, validateArr } from "./constants.js"
 import { INDIA_TZ } from "../../config/constants.js"
-import { handleDuplication } from "../../utils/mongoErrors.js"
+import { sendExcelFile } from "../../utils/sendFile.js"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
 
@@ -169,6 +172,52 @@ export const deleteDocuments = async (req, res) => {
         documentIds.length > 1 ? "s" : ""
       }`,
     })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const downloadDocuments = async (req, res) => {
+  try {
+    const companyAdminId = req?.user?.companyAdminId
+    let data = await Document.find({
+      companyAdminId,
+    })
+      .select({ _id: 0, __v: 0, companyAdminId: 0, createdAt: 0, updatedAt: 0 })
+      .populate({
+        path: "addedBy",
+        select: "location",
+      })
+      .sort({ vehicleNo: 1 })
+
+    data = parseResponse(data)
+
+    data = data.map((val) => {
+      return {
+        ...val,
+        taxPaidUpto: formatDateInDDMMYYY(val?.taxPaidUpto),
+        insurancePaidUpto: formatDateInDDMMYYY(val?.insurancePaidUpto),
+        fitnessPaidUpto: formatDateInDDMMYYY(val?.fitnessPaidUpto),
+        pollutionPaidUpto: formatDateInDDMMYYY(val?.pollutionPaidUpto),
+        permitPaidUpto: formatDateInDDMMYYY(val?.permitPaidUpto),
+        nationalPermitPaidUpto: formatDateInDDMMYYY(
+          val?.nationalPermitPaidUpto
+        ),
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    const column1 = [
+      columnHeaders("Vehicle No.", "vehicleNo"),
+      columnHeaders("Tax Paid Upto", "taxPaidUpto"),
+      columnHeaders("Insurance Paid Upto", "insurancePaidUpto"),
+      columnHeaders("Fitness Paid Upto", "fitnessPaidUpto"),
+      columnHeaders("Pollution Paid Upto", "pollutionPaidUpto"),
+      columnHeaders("Permit Paid Upto", "permitPaidUpto"),
+      columnHeaders("National Permit Paid Upto", "nationalPermitPaidUpto"),
+    ]
+
+    return sendExcelFile(res, [column1], [data], ["Documents"])
   } catch (error) {
     return handleError(res, error)
   }

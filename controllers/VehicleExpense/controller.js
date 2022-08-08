@@ -5,9 +5,13 @@ import {
   errorValidation,
   validateBody,
   userRankQuery,
+  columnHeaders,
+  parseResponse,
+  formatDateInDDMMYYY,
 } from "../../utils/utils.js"
 import VehiclesExpense from "../../models/VehiclesExpense.js"
 import { INDIA_TZ } from "../../config/constants.js"
+import { sendExcelFile } from "../../utils/sendFile.js"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
 
@@ -35,17 +39,12 @@ const modelHeader = [
   "dieselFor",
 ]
 
+// TODO : REVIEW IT
 export const getExpenses = async (req, res) => {
   try {
     const user = req.user
     const userQuery = userRankQuery(user)
-    let {
-      expenseId,
-      from = moment().startOf("month"),
-      to = moment(),
-    } = req.query
-    from = moment(from).startOf("day").toISOString()
-    to = moment(to).endOf("day").toISOString()
+    let { expenseId, from, to } = req.query
 
     let expenses
     if (expenseId) {
@@ -69,6 +68,7 @@ export const getExpenses = async (req, res) => {
   }
 }
 
+// TODO : REVIEW IT
 export const uploadExpenses = async (req, res) => {
   try {
     const user = req.user
@@ -120,6 +120,7 @@ export const uploadExpenses = async (req, res) => {
   }
 }
 
+// TODO : REVIEW IT
 export const addExpenses = [
   validateBody(["date", "vehicleNo", "driverName", "amount", "remarks"]),
   async (req, res) => {
@@ -146,6 +147,7 @@ export const addExpenses = [
   },
 ]
 
+// TODO : REVIEW IT
 export const editExpenses = [
   validateBody(["date", "vehicleNo", "driverName", "amount", "remarks"]),
   async (req, res) => {
@@ -174,6 +176,7 @@ export const editExpenses = [
   },
 ]
 
+// TODO : REVIEW IT
 export const deleteExpenses = async (req, res) => {
   try {
     const errors = errorValidation(req, res)
@@ -191,6 +194,49 @@ export const deleteExpenses = async (req, res) => {
         expenseIds.length > 1 ? "s" : ""
       } Deleted Successfully`,
     })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const downloadExpenses = async (req, res) => {
+  try {
+    const userQuery = userRankQuery(req.user)
+    const { from, to } = req.query
+    let data = await VehiclesExpense.find({
+      ...userQuery,
+      date: { $gte: from, $lte: to },
+    })
+      .select({ _id: 0, __v: 0, companyAdminId: 0, createdAt: 0, updatedAt: 0 })
+      .populate({
+        path: "addedBy",
+        select: "location",
+      })
+      .sort({ date: 1 })
+
+    data = parseResponse(data)
+
+    data = data.map((val) => {
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val.date),
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    const column1 = [
+      columnHeaders("Date", "date"),
+      columnHeaders("Vehicle No.", "vehicleNo"),
+      columnHeaders("Driver Name", "driverName"),
+      columnHeaders("Amount", "amount"),
+      columnHeaders("Pump Name", "pumpName"),
+      columnHeaders("Diesel", "dieselIn"),
+      columnHeaders("Diesel In", "dieselIn"),
+      columnHeaders("Diesel For", "dieselFor"),
+      columnHeaders("Remarks", "remarks"),
+      columnHeaders("Added By", "addedBy"),
+    ]
+    return sendExcelFile(res, [column1], [data], ["Vehicle Expenses"])
   } catch (error) {
     return handleError(res, error)
   }

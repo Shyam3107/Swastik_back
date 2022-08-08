@@ -5,8 +5,12 @@ import {
   errorValidation,
   validateBody,
   userRankQuery,
+  parseResponse,
+  formatDateInDDMMYYY,
+  columnHeaders,
 } from "../../utils/utils.js"
 import OfficeExpense from "../../models/OfficeExpense.js"
+import { sendExcelFile } from "../../utils/sendFile.js"
 import { INDIA_TZ } from "../../config/constants.js"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
@@ -164,6 +168,43 @@ export const deleteExpenses = async (req, res) => {
         expenseIds.length > 1 ? "s" : ""
       } Deleted Successfully`,
     })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const downloadExpenses = async (req, res) => {
+  try {
+    const userQuery = userRankQuery(req.user)
+    const { from, to } = req.query
+    let data = await OfficeExpense.find({
+      ...userQuery,
+      date: { $gte: from, $lte: to },
+    })
+      .select({ addedBy: 1, amount: 1, date: 1, remarks: 1 })
+      .populate({
+        path: "addedBy",
+        select: "location",
+      })
+      .sort({ date: 1 })
+
+    data = parseResponse(data)
+
+    data = data.map((val) => {
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val.date),
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    const column1 = [
+      columnHeaders("Date", "date"),
+      columnHeaders("Amount", "amount"),
+      columnHeaders("Remarks", "remarks"),
+      columnHeaders("Added By", "addedBy"),
+    ]
+    return sendExcelFile(res, [column1], [data], ["Receipts"])
   } catch (error) {
     return handleError(res, error)
   }
