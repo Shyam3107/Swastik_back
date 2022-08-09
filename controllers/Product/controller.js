@@ -5,6 +5,8 @@ import {
   errorValidation,
   validateBody,
   columnHeaders,
+  parseResponse,
+  formatDateInDDMMYYY,
 } from "../../utils/utils.js"
 import Product from "../../models/Product.js"
 import Logistic from "../../models/Logistic.js"
@@ -49,6 +51,7 @@ export const getProducts = async (req, res) => {
         {
           $match: {
             date: { $gte: new Date(from) },
+            product: mongoose.Types.ObjectId(productId),
             companyAdminId: mongoose.Types.ObjectId(companyAdminId?._id),
           },
         },
@@ -68,7 +71,8 @@ export const getProducts = async (req, res) => {
           },
         },
       ])
-      data.periodQuantity = tempQty[0].received - tempQty[0].issued
+      data.periodQuantity =
+        (tempQty[0]?.received ?? 0) - (tempQty[0]?.issued ?? 0)
     } else {
       // Find all Product of Company
       data = await Product.find({ companyAdminId })
@@ -225,18 +229,27 @@ export const downloadProducts = async (req, res) => {
     let products = await Product.find({
       companyAdminId: req.user.companyAdminId,
     })
-      .sort({ name: 1 })
       .select({
         _id: 0,
         name: 1,
         quantity: 1,
         remarks: 1,
+        addedBy: 1,
       })
+      .populate({ path: "addedBy", select: "location" })
+      .sort({ name: 1 })
+
+    products = parseResponse(products)
+
+    products = products.map((val) => {
+      return { ...val, addedBy: val?.addedBy?.location }
+    })
 
     const column1 = [
       columnHeaders("Name", "name"),
       columnHeaders("Quantity", "quantity"),
       columnHeaders("Remarks", "remarks"),
+      columnHeaders("AddedBy", "addedBy"),
     ]
 
     return sendExcelFile(res, [column1], [products], ["Products"])
@@ -250,37 +263,61 @@ export const downloadProductsById = async (req, res) => {
     const companyAdminId = req?.user?.companyAdminId
     let { productId, from, to } = req.query
 
+    if (!productId) throw "Product Id is Required"
+
+    // Get Product Infos
     let product = await Product.findById({
       _id: productId,
       companyAdminId,
-    }).select({
-      _id: 0,
-      name: 1,
-      quantity: 1,
-      remarks: 1,
     })
+      .select({
+        _id: 0,
+        name: 1,
+        quantity: 1,
+        remarks: 1,
+        addedBy: 1,
+      })
+      .populate({ path: "addedBy", select: "location" })
 
+    product = parseResponse(product)
+
+    product.addedBy = product.addedBy?.location
+
+    // Get all Logistics corresponding to that Product
     let logistics = await Logistic.find({
       date: { $gte: from, $lte: to },
       product: productId,
       companyAdminId,
     })
-      .sort({ date: 1 })
       .select({
         _id: 0,
         date: 1,
         quantity: 1,
         personName: 1,
+        vehicleNo: 1,
         personPhone: 1,
         status: 1,
         remarks: 1,
+        addedBy: 1,
       })
+      .populate({ path: "addedBy", select: "location" })
+      .sort({ date: 1 })
+
+    logistics = parseResponse(logistics)
+    logistics = logistics.map((val) => {
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val.date),
+        addedBy: val?.addedBy?.location,
+      }
+    })
 
     // Get The total Quantity we have just Before from date
     const tempQty = await Logistic.aggregate([
       {
         $match: {
           date: { $gte: new Date(from) },
+          product: mongoose.Types.ObjectId(productId),
           companyAdminId: mongoose.Types.ObjectId(companyAdminId?._id),
         },
       },
@@ -300,18 +337,19 @@ export const downloadProductsById = async (req, res) => {
         },
       },
     ])
-    const periodQuantity = tempQty[0].received - tempQty[0].issued
+
+    const periodQuantity =
+      (tempQty[0]?.received ?? 0) - (tempQty[0]?.issued ?? 0)
 
     const column1 = [
       columnHeaders("Product Name", "name"),
       columnHeaders("Quantity on Asked Date", "askQty"),
       columnHeaders("Current Quantity", "quantity"),
       columnHeaders("Remarks", "remarks"),
+      columnHeaders("AddedBy", "addedBy"),
     ]
 
     const row1 = [{ ...product, askQty: product?.quantity - periodQuantity }]
-
-    // TODO : Date should be in DD-MM-YYYY format
 
     const column2 = [
       columnHeaders("Date", "date"),
@@ -321,6 +359,7 @@ export const downloadProductsById = async (req, res) => {
       columnHeaders("Person Name", "personName"),
       columnHeaders("Person Phone", "personPhone"),
       columnHeaders("Remarks", "remarks"),
+      columnHeaders("AddedBy", "addedBy"),
     ]
 
     return sendExcelFile(

@@ -7,6 +7,8 @@ import {
   validateBody,
   validatePhoneNo,
   columnHeaders,
+  parseResponse,
+  formatDateInDDMMYYY,
 } from "../../utils/utils.js"
 import Product from "../../models/Product.js"
 import Logistic from "../../models/Logistic.js"
@@ -23,12 +25,17 @@ export const getLogistics = async (req, res) => {
 
     let data
     if (logisticId) {
-      data = await Logistic.findById({ _id: logisticId, companyAdminId })
+      data = await Logistic.findById({
+        _id: logisticId,
+        companyAdminId,
+      }).populate({ path: "product", select: "name" })
     } else {
       data = await Logistic.find({
         companyAdminId,
         date: { $gte: from, $lte: to },
-      }).sort({ date: 1 })
+      })
+        .populate({ path: "product", select: "name" })
+        .sort({ date: 1 })
     }
 
     if (!data) throw "Record Not Found"
@@ -242,6 +249,7 @@ export const deleteLogistics = async (req, res) => {
 
 export const downloadLogistics = async (req, res) => {
   try {
+    const companyAdminId = req?.user?.companyAdminId
     let { from, to } = req.query
 
     let data = await Logistic.find({
@@ -257,10 +265,22 @@ export const downloadLogistics = async (req, res) => {
         personPhone: 1,
         status: 1,
         remarks: 1,
+        addedBy: 1,
       })
+      .populate({ path: "addedBy", select: "location" })
+      .populate({ path: "product", select: "name" })
       .sort({ date: 1 })
 
-    // TODO : Handle date in dd-mm-yyy format
+    data = parseResponse(data)
+
+    data = data.map((val) => {
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val?.date),
+        product: val?.product?.name,
+        addedBy: val?.addedBy?.location,
+      }
+    })
 
     const column1 = [
       columnHeaders("Date", "date"),
@@ -271,6 +291,7 @@ export const downloadLogistics = async (req, res) => {
       columnHeaders("Person Name", "personName"),
       columnHeaders("Person Phone", "personPhone"),
       columnHeaders("Remarks", "remarks"),
+      columnHeaders("AddedBy", "addedBy"),
     ]
 
     return sendExcelFile(res, [column1], [data], ["Logistics"])
