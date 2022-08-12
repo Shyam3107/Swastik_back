@@ -44,8 +44,16 @@ export const getTrips = async (req, res) => {
     else {
       trips = await Trip.find(query)
         .select(select)
-        .populate({ path: "addedBy", select: "location consignor branch" })
+        .populate({ path: "addedBy", select: "location" })
         .sort({ date: -1 })
+      trips = parseResponse(trips)
+      trips = trips.map((val) => {
+        return {
+          ...val,
+          date: formatDateInDDMMYYY(val?.date),
+          addedBy: val?.addedBy?.location,
+        }
+      })
       metaData.totalDocuments = trips.length
     }
     if (!trips) throw "This DI No. does not exist in our record"
@@ -118,7 +126,7 @@ export const uploadTrips = async (req, res) => {
     }
 
     const insertData = await Trip.insertMany(data, { session })
-    session.commitTransaction()
+    await session.commitTransaction()
 
     return res.status(200).json({
       data: insertData,
@@ -244,7 +252,7 @@ export const downloadTrips = async (req, res) => {
       return {
         ...val,
         date: formatDateInDDMMYYY(val.date),
-        addedBy: val.addedBy.location,
+        addedBy: val?.addedBy?.location ?? "",
       }
     })
 

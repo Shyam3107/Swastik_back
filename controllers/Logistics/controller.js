@@ -9,6 +9,7 @@ import {
   columnHeaders,
   parseResponse,
   formatDateInDDMMYYY,
+  dateFormat,
 } from "../../utils/utils.js"
 import Product from "../../models/Product.js"
 import Logistic from "../../models/Logistic.js"
@@ -35,7 +36,18 @@ export const getLogistics = async (req, res) => {
         date: { $gte: from, $lte: to },
       })
         .populate({ path: "product", select: "name" })
-        .sort({ date: 1 })
+        .populate({ path: "addedBy", select: "location" })
+        .sort({ date: -1 })
+      data = parseResponse(data)
+      data = data.map((val) => {
+        return {
+          ...val,
+          date: formatDateInDDMMYYY(val.date),
+          productId: val?.product?._id,
+          product: val?.product?.name,
+          addedBy: val?.addedBy?.location,
+        }
+      })
     }
 
     if (!data) throw "Record Not Found"
@@ -90,6 +102,8 @@ export const uploadLogistics = async (req, res) => {
 
       if (!updateData)
         throw `Enter Valid Product name for row ${ind + 2} : ${tempVal.product}`
+
+      tempVal.product = updateData._id
 
       data.push(tempVal)
     }
@@ -176,18 +190,21 @@ export const editLogistics = [
       // Remove received then it will be removed
       if (updateData.status === "RECEIVED") oldQty = -oldQty
 
+      // Update quantity of old Product
+      await Product.findByIdAndUpdate(
+        { _id: updateData?.product },
+        { $inc: { quantity: oldQty } },
+        { session }
+      )
+
       let newQty = req.body?.quantity
       // Remove received then it will be removed
       if (req.body?.status === "ISSUED") newQty = -newQty
-      // If old Received, 10
-      // If new Received, 15
-      // diff is 5
-      const diff = newQty + oldQty
 
-      // Increment Diff in Product
+      // Update quantity of new product
       await Product.findByIdAndUpdate(
         { _id: req.body.product },
-        { $inc: { quantity: diff } },
+        { $inc: { quantity: newQty } },
         { session }
       )
 
@@ -213,20 +230,24 @@ export const deleteLogistics = async (req, res) => {
     session.startTransaction()
     const logisticIds = req.body
 
+    // Find all records corresponding to Ids
+    const deletedData = await Logistic.find({ _id: logisticIds }).select({
+      quantity: 1,
+      status: 1,
+      product: 1,
+    })
+
     // Delete all Logistics by that ID
-    const deletedData = await Logistic.deleteMany(
-      { _id: logisticIds },
-      { session }
-    )
+    await Logistic.deleteMany({ _id: logisticIds }, { session })
 
-    for (let index = 0; index < deletedData.length; index++) {
+    for (let index = 0; index < logisticIds.length; index++) {
       let delData = deletedData[index]
-      let rmvQty = delData.quantity
+      let rmvQty = delData._doc.quantity
 
-      if (delData.status === "RECEIVED") rmvQty = -rmvQty
+      if (delData._doc.status === "RECEIVED") rmvQty = -rmvQty
 
       await Product.findByIdAndUpdate(
-        { _id: delData.product },
+        { _id: delData._doc.product },
         { $inc: { quantity: rmvQty } },
         { session }
       )

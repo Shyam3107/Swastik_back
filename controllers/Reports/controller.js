@@ -62,7 +62,7 @@ export const getVehiclesReport = async (req, res) => {
         ...val,
         diesel: val.dieselIn === "Litre" ? val.diesel : "",
         amount: val.dieselIn === "Amount" ? val.diesel : "",
-        addedBy: val.addedBy ? val.addedBy.location : "",
+        addedBy: val?.addedBy?.location ?? "",
         debit: val.cash,
         date: dateToString(val.date),
       }
@@ -82,7 +82,7 @@ export const getVehiclesReport = async (req, res) => {
         debit: val.amount,
         diesel: val.dieselIn === "Litre" ? val.diesel : "",
         amount: val.dieselIn === "Amount" ? val.diesel : "",
-        addedBy: val.addedBy ? val.addedBy.location : "",
+        addedBy: val?.addedBy?.location ?? "",
         date: dateToString(val.date),
       }
       return val
@@ -97,7 +97,7 @@ export const getVehiclesReport = async (req, res) => {
     officeExpenses = officeExpenses.map((val) => {
       val = {
         ...val,
-        addedBy: val.addedBy ? val.addedBy.location : "",
+        addedBy: val?.addedBy?.location ?? "",
         debit: val.amount,
         date: dateToString(val.date),
       }
@@ -112,7 +112,7 @@ export const getVehiclesReport = async (req, res) => {
     receipts = receipts.map((val) => {
       val = {
         ...val,
-        addedBy: val.addedBy ? val.addedBy.location : "",
+        addedBy: val?.addedBy?.location ?? "",
         credit: val.amount,
         date: dateToString(val.date),
       }

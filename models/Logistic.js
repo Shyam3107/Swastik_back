@@ -55,7 +55,7 @@ const schema = new Schema(
   { timestamps: true }
 )
 
-schema.index({ vehicleNo: 1, companyAdminId: 1 })
+//schema.index({ vehicleNo: 1, companyAdminId: 1 })
 
 const Logistic = model("Logistic", schema)
 

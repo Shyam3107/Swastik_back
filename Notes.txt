@@ -6,3 +6,4 @@
 6. Add none in dieselIn in add trips
 7. Validate Pump name in case diesel taken
 8. Increase Voucher size
+9. jitne bhi lookup hai, usmein companyadmin ka check

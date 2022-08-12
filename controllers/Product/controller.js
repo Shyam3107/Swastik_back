@@ -30,7 +30,7 @@ export const getProducts = async (req, res) => {
       }).select({ name: 1, quantity: 1, remarks: 1 })
 
       // Find all Logistic of that Product
-      data.logistics = await Logistic.find({
+      let tempLogistics = await Logistic.find({
         date: { $gte: from, $lte: to },
         product: productId,
         companyAdminId,
@@ -43,9 +43,21 @@ export const getProducts = async (req, res) => {
           personPhone: 1,
           status: 1,
           addedBy: 1,
+          remarks: 1,
         })
         .populate({ path: "addedBy", select: "location" })
         .sort({ date: 1 })
+
+      tempLogistics = parseResponse(tempLogistics)
+      tempLogistics = tempLogistics.map((val) => {
+        return {
+          ...val,
+          date: formatDateInDDMMYYY(val.date),
+          addedBy: val?.addedBy?.location,
+        }
+      })
+
+      data.logistics = tempLogistics
 
       const tempQty = await Logistic.aggregate([
         {
@@ -81,6 +93,12 @@ export const getProducts = async (req, res) => {
           select: "location",
         })
         .sort({ name: 1 })
+
+      data = parseResponse(data)
+
+      data = data.map((val) => {
+        return { ...val, addedBy: val?.addedBy?.location }
+      })
     }
 
     if (!data) throw "Record Not Found"

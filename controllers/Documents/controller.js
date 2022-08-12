@@ -38,6 +38,35 @@ export const getDocuments = async (req, res) => {
           select: "location",
         })
         .sort({ vehicleNo: 1 })
+
+      documents = parseResponse(documents)
+
+      documents = documents.map((val) => {
+        let temp = {
+          taxStatus: val.taxPaidUpto,
+          insuranceStatus: val.insurancePaidUpto,
+          fitnessStatus: val.fitnessPaidUpto,
+          pollutionStatus: val.pollutionPaidUpto,
+          permitStatus: val.permitPaidUpto,
+          nationalPermitStatus: val.nationalPermitPaidUpto,
+        }
+
+        Object.keys(temp).forEach((key) => {
+          let diff = moment(temp[key]).diff(moment().endOf("day"), "days")
+          temp[key] =
+            diff < 0
+              ? "Expired"
+              : diff < 8
+              ? `${diff} Day${diff > 1 ? "s" : ""}`
+              : "Active"
+        })
+        return {
+          _id: val._id,
+          vehicleNo: val.vehicleNo,
+          addedBy: val?.addedBy?.location,
+          ...temp,
+        }
+      })
     }
     if (!documents) throw "This Vehicle does not exist in our record"
 
