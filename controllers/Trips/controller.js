@@ -64,7 +64,6 @@ export const getTrips = async (req, res) => {
   }
 }
 
-// TODO : REVIEW ALL VALIDATIONS
 export const uploadTrips = async (req, res) => {
   const session = await Trip.startSession()
   try {
@@ -141,7 +140,6 @@ export const uploadTrips = async (req, res) => {
   }
 }
 
-// TODO : REVIEW ALL VALIDATIONS
 export const addTrips = [
   validateBody(validateArr),
   async (req, res) => {
@@ -154,7 +152,7 @@ export const addTrips = [
 
       if (!validatePhoneNo(req.body.driverPhone)) throw "Enter Valid Phone No."
 
-      if (dieselIn && dieselIn !== "Litre" && dieselIn !== "Amount")
+      if (diesel && dieselIn !== "Litre" && dieselIn !== "Amount")
         throw "Diesel In Field should be Litre or Amount"
 
       if (diesel && !pumpName) throw "Pump Name is required if Diesel Taken"
@@ -180,7 +178,6 @@ export const addTrips = [
   },
 ]
 
-// TODO : REVIEW ALL VALIDATIONS
 export const editTrips = [
   validateBody(validateArr),
   async (req, res) => {
@@ -190,7 +187,24 @@ export const editTrips = [
         return null
       }
 
-      const tripId = req.body._id
+      const {
+        dieselIn,
+        cash,
+        remarks,
+        diesel,
+        pumpName,
+        _id: tripId,
+      } = req.body
+
+      if (!validatePhoneNo(req.body.driverPhone)) throw "Enter Valid Phone No."
+
+      if (diesel && dieselIn !== "Litre" && dieselIn !== "Amount")
+        throw "Diesel In Field should be Litre or Amount"
+
+      if (diesel && !pumpName) throw "Pump Name is required if Diesel Taken"
+
+      if (cash && !remarks) throw "Remarks field is mandatory if given Cash"
+
       if (!req.body.pumpName) delete req.body.pumpName
       if (!req.body.diesel) delete req.body.diesel
       if (!req.body.dieselIn) delete req.body.dieselIn

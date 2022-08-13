@@ -12,34 +12,10 @@ import {
 import VehiclesExpense from "../../models/VehiclesExpense.js"
 import { INDIA_TZ } from "../../config/constants.js"
 import { sendExcelFile } from "../../utils/sendFile.js"
+import { fileHeader, modelHeader, validateArr } from "./constants.js"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
 
-const fileHeader = [
-  "Date",
-  "Vehicle No.",
-  "Driver Name",
-  "Amount",
-  "Remarks",
-  "Pump Name",
-  "Diesel",
-  "Diesel In",
-  "Diesel For",
-]
-
-const modelHeader = [
-  "date",
-  "vehicleNo",
-  "driverName",
-  "amount",
-  "remarks",
-  "pumpName",
-  "diesel",
-  "dieselIn",
-  "dieselFor",
-]
-
-// TODO : REVIEW IT
 export const getExpenses = async (req, res) => {
   try {
     const user = req.user
@@ -78,7 +54,6 @@ export const getExpenses = async (req, res) => {
   }
 }
 
-// TODO : REVIEW IT
 export const uploadExpenses = async (req, res) => {
   try {
     const user = req.user
@@ -121,7 +96,6 @@ export const uploadExpenses = async (req, res) => {
     const insertData = await VehiclesExpense.insertMany(data)
 
     return res.status(200).json({
-      data: insertData,
       entries: insertData.length,
       message: `Successfully Inserted ${insertData.length} entries`,
     })
@@ -130,9 +104,8 @@ export const uploadExpenses = async (req, res) => {
   }
 }
 
-// TODO : REVIEW IT
 export const addExpenses = [
-  validateBody(["date", "vehicleNo", "driverName", "amount", "remarks"]),
+  validateBody(validateArr),
   async (req, res) => {
     try {
       const errors = errorValidation(req, res)
@@ -140,6 +113,13 @@ export const addExpenses = [
         return null
       }
       const user = req.user
+
+      const { diesel, dieselIn, pumpName } = req.body
+
+      if (diesel && dieselIn !== "Litre" && dieselIn !== "Amount")
+        throw "Diesel In should be in Litre or Amount"
+
+      if (diesel && !pumpName) throw "Pump Name is Mandatory if Diesel Taken"
 
       const insertData = await VehiclesExpense.create({
         ...req.body,
@@ -157,18 +137,22 @@ export const addExpenses = [
   },
 ]
 
-// TODO : REVIEW IT
 export const editExpenses = [
-  validateBody(["date", "vehicleNo", "driverName", "amount", "remarks"]),
+  validateBody(validateArr),
   async (req, res) => {
     try {
       const errors = errorValidation(req, res)
       if (errors) {
         return null
       }
-      const user = req.user
 
-      const expenseId = req.body._id
+      const { diesel, dieselIn, pumpName, _id: expenseId } = req.body
+
+      if (diesel && dieselIn !== "Litre" && dieselIn !== "Amount")
+        throw "Diesel In should be in Litre or Amount"
+
+      if (diesel && !pumpName) throw "Pump Name is Mandatory if Diesel Taken"
+
       const updateData = await VehiclesExpense.findByIdAndUpdate(
         { _id: expenseId },
         req.body
@@ -186,20 +170,17 @@ export const editExpenses = [
   },
 ]
 
-// TODO : REVIEW IT
 export const deleteExpenses = async (req, res) => {
   try {
     const errors = errorValidation(req, res)
     if (errors) {
       return null
     }
-    const user = req.user
     const expenseIds = req.body
 
     const deletedData = await VehiclesExpense.deleteMany({ _id: expenseIds })
 
     return res.status(200).json({
-      data: deletedData,
       message: `Vehicles Expense${
         expenseIds.length > 1 ? "s" : ""
       } Deleted Successfully`,

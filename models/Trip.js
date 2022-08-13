@@ -64,7 +64,7 @@ const tripSchema = new Schema(
     },
     dieselIn: {
       type: String,
-      enum: ["Litre", "Amount"],
+      enum: ["Litre", "Amount", null, "", undefined],
     },
     cash: {
       type: Number,

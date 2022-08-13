@@ -38,7 +38,7 @@ export const getVoucher = async (req, res) => {
         ...aggregateBody,
       ])
       vouchers = vouchers[0]
-    } else
+    } else {
       vouchers = await Voucher.aggregate([
         {
           $match: {
@@ -48,6 +48,15 @@ export const getVoucher = async (req, res) => {
         },
         ...aggregateBody,
       ])
+      vouchers = parseResponse(vouchers)
+      vouchers = vouchers.map((val) => {
+        return {
+          ...val,
+          date: formatDateInDDMMYYY(val.date),
+          addedBy: val?.addedBy?.location,
+        }
+      })
+    }
 
     if (!vouchers) throw "Record Not Found"
 
