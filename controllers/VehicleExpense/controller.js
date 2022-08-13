@@ -49,7 +49,7 @@ export const getExpenses = async (req, res) => {
     let expenses
     if (expenseId) {
       expenses = await VehiclesExpense.findOne({ _id: expenseId })
-    } else
+    } else {
       expenses = await VehiclesExpense.find({
         ...userQuery,
         date: { $gte: from, $lte: to },
@@ -59,6 +59,16 @@ export const getExpenses = async (req, res) => {
           select: "location",
         })
         .sort({ date: -1 })
+
+      expenses = parseResponse(expenses)
+      expenses = expenses.map((val) => {
+        return {
+          ...val,
+          date: formatDateInDDMMYYY(val.date),
+          addedBy: val?.addedBy?.location,
+        }
+      })
+    }
 
     if (!expenses) throw "Record Not Found"
 

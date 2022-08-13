@@ -29,7 +29,7 @@ export const getReceipt = async (req, res) => {
         _id: receiptId,
         companyAdminId: user.companyAdminId,
       })
-    } else
+    } else {
       receipts = await Receipt.find({
         ...userQuery,
         date: { $gte: from, $lte: to },
@@ -39,6 +39,15 @@ export const getReceipt = async (req, res) => {
           select: "location",
         })
         .sort({ date: -1 })
+      receipts = parseResponse(receipts)
+      receipts = receipts.map((val) => {
+        return {
+          ...val,
+          date: formatDateInDDMMYYY(val.date),
+          addedBy: val?.addedBy?.location,
+        }
+      })
+    }
 
     if (!receipts) throw "Record Not Found"
 

@@ -31,7 +31,7 @@ export const getDiesels = async (req, res) => {
         path: "addedBy",
         select: "_id",
       })
-    else
+    else {
       diesels = await Diesel.find({
         ...userQuery,
         date: { $gte: from, $lte: to },
@@ -41,6 +41,15 @@ export const getDiesels = async (req, res) => {
           select: "location",
         })
         .sort({ date: 1 })
+      diesels = parseResponse(diesels)
+      diesels = diesels.map((val) => {
+        return {
+          ...val,
+          date: formatDateInDDMMYYY(val.date),
+          addedBy: val?.addedBy?.location,
+        }
+      })
+    }
 
     if (!diesels) throw "Record Not Found"
 
