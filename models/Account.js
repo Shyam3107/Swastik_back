@@ -69,6 +69,8 @@ const accountSchema = new Schema(
         "OFFICE EXPENSES",
         "VEHICLE EXPENSES",
         "ACCOUNTS",
+        "PRODUCTS",
+        "LOGISTICS",
       ],
     },
     operations: {
