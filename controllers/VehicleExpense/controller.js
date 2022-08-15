@@ -8,6 +8,7 @@ import {
   columnHeaders,
   parseResponse,
   formatDateInDDMMYYY,
+  validateDateWhileUpload,
 } from "../../utils/utils.js"
 import VehiclesExpense from "../../models/VehiclesExpense.js"
 import { INDIA_TZ } from "../../config/constants.js"
@@ -85,7 +86,9 @@ export const uploadExpenses = async (req, res) => {
 
         if (mssg) throw mssg
 
-        if (head === "date") value = moment(value, "DD-MM-YYYY").toISOString()
+        if (head === "date") {
+          value = validateDateWhileUpload(value)
+        }
 
         tempVal[head] = value
       }

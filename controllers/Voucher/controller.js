@@ -8,6 +8,7 @@ import {
   formatDateInDDMMYYY,
   columnHeaders,
   parseResponse,
+  validateDateWhileUpload,
 } from "../../utils/utils.js"
 import Voucher from "../../models/Voucher.js"
 import {
@@ -118,7 +119,9 @@ export const uploadVoucher = async (req, res) => {
 
         if (mssg) throw mssg
 
-        if (head === "date") value = moment(value, "DD-MM-YYYY").toISOString()
+        if (head === "date") {
+          value = validateDateWhileUpload(value)
+        }
 
         tempVal[head] = value
       }

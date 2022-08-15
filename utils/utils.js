@@ -99,3 +99,10 @@ export const formatDateInDDMMYYY = (date = new Date()) => {
     return "InValid Date"
   }
 }
+
+export const validateDateWhileUpload = (date) => {
+  if (value?.length !== 8 && value?.length !== 10) {
+    throw `Date should be in DD-MM-YYYY or DD-MM-YY format for row ${ind + 2}`
+  }
+  value = moment(value, dateFormat(value)).endOf("day").toISOString()
+}

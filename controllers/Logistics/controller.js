@@ -10,6 +10,7 @@ import {
   parseResponse,
   formatDateInDDMMYYY,
   dateFormat,
+  validateDateWhileUpload,
 } from "../../utils/utils.js"
 import Product from "../../models/Product.js"
 import Logistic from "../../models/Logistic.js"
@@ -80,8 +81,9 @@ export const uploadLogistics = async (req, res) => {
 
         if (head !== "remarks" && !value) {
           mssg = `Enter Valid ${fileHeader[index]} for row ${ind + 2}`
-        } else if (head === "date")
-          value = moment(value, dateFormat(value)).endOf("day").toISOString()
+        } else if (head === "date") {
+          value = validateDateWhileUpload(value)
+        }
 
         if (mssg) throw mssg
 

@@ -8,6 +8,7 @@ import {
   columnHeaders,
   formatDateInDDMMYYY,
   parseResponse,
+  validateDateWhileUpload,
 } from "../../utils/utils.js"
 import Diesel from "../../models/Diesel.js"
 import { INDIA_TZ } from "../../config/constants.js"
@@ -83,12 +84,7 @@ export const uploadDiesels = async (req, res) => {
         if (mssg) throw mssg
 
         if (head === "date") {
-          if (value?.length !== 8 && value?.length !== 10) {
-            throw `Date should be in DD-MM-YYYY or DD-MM-YY format for row ${
-              ind + 2
-            }`
-          }
-          value = moment(value, "DD-MM-YYYY").toISOString()
+          value = validateDateWhileUpload(value)
         }
 
         tempVal[head] = value

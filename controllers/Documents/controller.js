@@ -8,6 +8,7 @@ import {
   columnHeaders,
   formatDateInDDMMYYY,
   parseResponse,
+  validateDateWhileUpload,
 } from "../../utils/utils.js"
 import Document from "../../models/Document.js"
 import Account from "../../models/Account.js"
@@ -114,8 +115,9 @@ export const uploadDocuments = async (req, res) => {
 
         if (mssg) throw mssg
 
-        if (index > 0)
-          value = moment(value, dateFormat(value)).endOf("day").toISOString()
+        if (index > 0) {
+          value = validateDateWhileUpload(value)
+        }
 
         tempVal[head] = value
       }

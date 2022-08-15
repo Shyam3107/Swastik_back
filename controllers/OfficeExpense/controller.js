@@ -8,6 +8,7 @@ import {
   parseResponse,
   formatDateInDDMMYYY,
   columnHeaders,
+  validateDateWhileUpload,
 } from "../../utils/utils.js"
 import OfficeExpense from "../../models/OfficeExpense.js"
 import { sendExcelFile } from "../../utils/sendFile.js"
@@ -80,7 +81,9 @@ export const uploadExpenses = async (req, res) => {
 
         if (mssg) throw mssg
 
-        if (head === "date") value = moment(value, "DD-MM-YYYY").toISOString()
+        if (head === "date") {
+          value = validateDateWhileUpload(value)
+        }
 
         tempVal[head] = value
       }
