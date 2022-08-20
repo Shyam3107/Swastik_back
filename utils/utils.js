@@ -100,9 +100,9 @@ export const formatDateInDDMMYYY = (date = new Date()) => {
   }
 }
 
-export const validateDateWhileUpload = (value) => {
+export const validateDateWhileUpload = (value,ind) => {
   if (value?.length < 10) {
     throw `Date should be in DD-MM-YYYY format for row ${ind + 2}`
   }
-  value = moment(value, dateFormat(value)).endOf("day").toISOString()
+  return moment(value, dateFormat(value)).endOf("day").toISOString()
 }

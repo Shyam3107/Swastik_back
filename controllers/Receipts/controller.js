@@ -67,14 +67,13 @@ export const addReceipt = [
       }
       const user = req.user
 
-      const insertData = await Receipt.create({
+      await Receipt.create({
         ...req.body,
         addedBy: user._id,
         companyAdminId: user.companyAdminId,
       })
 
       return res.status(200).json({
-        data: insertData,
         message: "Office Receipt Added Successfully",
       })
     } catch (error) {

@@ -68,8 +68,8 @@ export const uploadExpenses = async (req, res) => {
 
     let data = []
 
-    for (let i = 0; i < dataToBeInsert.length; i++) {
-      const item = dataToBeInsert[i]
+    for (let ind = 0; ind < dataToBeInsert.length; ind++) {
+      const item = dataToBeInsert[ind]
       let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId }
       let mssg = ""
 
@@ -82,7 +82,7 @@ export const uploadExpenses = async (req, res) => {
         if (mssg) throw mssg
 
         if (head === "date") {
-          value = validateDateWhileUpload(value)
+          value = validateDateWhileUpload(value, ind)
         }
 
         tempVal[head] = value
@@ -94,7 +94,6 @@ export const uploadExpenses = async (req, res) => {
     const insertData = await OfficeExpense.insertMany(data)
 
     return res.status(200).json({
-      data: insertData,
       entries: insertData.length,
       message: `Successfully Inserted ${insertData.length} entries`,
     })
@@ -113,14 +112,13 @@ export const addExpenses = [
       }
       const user = req.user
 
-      const insertData = await OfficeExpense.create({
+      await OfficeExpense.create({
         ...req.body,
         addedBy: user._id,
         companyAdminId: user.companyAdminId,
       })
 
       return res.status(200).json({
-        data: insertData,
         message: "Office Expenses Added Successfully",
       })
     } catch (error) {

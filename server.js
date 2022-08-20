@@ -15,9 +15,10 @@ import receiptRoute from "./controllers/Receipts/route.js"
 import userRoute from "./controllers/User/route.js"
 import reportRoute from "./controllers/Reports/route.js"
 import voucherRoute from "./controllers/Voucher/route.js"
-import dieselRoute from "./controllers/Diesel/route.js"
+import pumpDieselRoute from "./controllers/PumpDiesel/route.js"
 import productRoute from "./controllers/Product/route.js"
 import logisticRoute from "./controllers/Logistics/route.js"
+import vehicleOwnerRoute from "./controllers/VehicleOwner/route.js"
 import { getHome } from "./controllers/Home/controller.js"
 import { access, PORT } from "./config/constants.js"
 import httpCallLogger from "./middlewares/httpCallLogger.js"
@@ -65,7 +66,6 @@ app.get("/home", checkUser(), getHome)
 app.use("/vehicles/trips", checkUser(), tripRoute)
 app.use("/vehicles/documents", checkUser(), documentRoute)
 app.use("/vehicles/vouchers", checkUser(), voucherRoute)
-app.use("/vehicles/diesels", checkUser(), dieselRoute)
 
 // EXPENSES
 app.use("/expenses/office", checkUser(), officeExpenseRoute)
@@ -83,3 +83,7 @@ app.use("/reports", checkUser(), reportRoute)
 // STORE
 app.use("/store/product", checkUser(), productRoute)
 app.use("/store/logistic", checkUser(), logisticRoute)
+
+// DIESELS
+app.use("/diesels/vehicles", checkUser(), vehicleOwnerRoute)
+app.use("/diesels/pumpDiesel", checkUser(), pumpDieselRoute)

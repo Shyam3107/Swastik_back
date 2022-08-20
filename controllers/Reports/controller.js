@@ -160,9 +160,24 @@ export const getDieselsReport = async (req, res) => {
         $match: match,
       },
       {
+        $lookup: {
+          from: "vehicleowners",
+          localField: "vehicleNo",
+          foreignField: "vehicleNo",
+          as: "owner",
+        },
+      },
+      {
+        $unwind: {
+          path: "$owner",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $group: {
           _id: {
             vehicleNo: "$vehicleNo",
+            owner: "$owner",
           },
           quantity: { $sum: "$quantity" },
           amount: { $sum: "$amount" },
@@ -172,6 +187,7 @@ export const getDieselsReport = async (req, res) => {
         $project: {
           _id: 0,
           vehicleNo: "$_id.vehicleNo",
+          owner: "$_id.owner.owner",
           quantity: 1,
           amount: 1,
         },
@@ -205,6 +221,7 @@ export const getDieselsReport = async (req, res) => {
       columnHeaders("Vehicle No.", "vehicleNo"),
       columnHeaders("Quantity", "quantity"),
       columnHeaders("Amount", "amount"),
+      columnHeaders("Owner", "owner"),
     ]
 
     const column2 = [

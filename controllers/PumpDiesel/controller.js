@@ -84,7 +84,7 @@ export const uploadDiesels = async (req, res) => {
         if (mssg) throw mssg
 
         if (head === "date") {
-          value = validateDateWhileUpload(value)
+          value = validateDateWhileUpload(value, ind)
         }
 
         tempVal[head] = value
@@ -96,7 +96,6 @@ export const uploadDiesels = async (req, res) => {
     const insertData = await Diesel.insertMany(data)
 
     return res.status(200).json({
-      data: insertData,
       entries: insertData.length,
       message: `Successfully Inserted ${insertData.length} entries`,
     })
@@ -115,15 +114,13 @@ export const addDiesels = [
       }
       const user = req.user
 
-      const insertData = await Diesel.create({
+      await Diesel.create({
         ...req.body,
         addedBy: user._id,
         companyAdminId: user.companyAdminId,
       })
 
-      return res
-        .status(200)
-        .json({ data: insertData, message: "Diesel Added Successfully" })
+      return res.status(200).json({ message: "Diesel Added Successfully" })
     } catch (error) {
       return handleError(res, error)
     }

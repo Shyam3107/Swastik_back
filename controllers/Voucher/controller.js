@@ -100,8 +100,8 @@ export const uploadVoucher = async (req, res) => {
 
     let data = []
 
-    for (let i = 0; i < dataToBeInsert.length; i++) {
-      const item = dataToBeInsert[i]
+    for (let ind = 0; ind < dataToBeInsert.length; ind++) {
+      const item = dataToBeInsert[ind]
       let tempVal = {
         addedBy: req?.user?._id,
         companyAdminId: req?.user?.companyAdminId,
@@ -120,7 +120,7 @@ export const uploadVoucher = async (req, res) => {
         if (mssg) throw mssg
 
         if (head === "date") {
-          value = validateDateWhileUpload(value)
+          value = validateDateWhileUpload(value, ind)
         }
 
         tempVal[head] = value
@@ -134,7 +134,6 @@ export const uploadVoucher = async (req, res) => {
     await session.commitTransaction()
 
     return res.status(200).json({
-      data: insertData,
       entries: insertData.length,
       message: `Successfully Inserted ${insertData.length} entries`,
     })

@@ -58,16 +58,14 @@ export const addAccount = [
       if (req.body.phone && !validatePhoneNo(req.body.phone))
         throw "Enter Valid Phone No."
 
-      const insertData = await Account.create({
+      await Account.create({
         ...req.body,
         location: concatLocation(req.body.consignor, req.body.branch),
         addedBy: user._id,
         companyAdminId: user.companyAdminId,
       })
 
-      return res
-        .status(200)
-        .json({ data: insertData, message: "Account Added Successfully" })
+      return res.status(200).json({ message: "Account Added Successfully" })
     } catch (error) {
       return handleError(res, error)
     }

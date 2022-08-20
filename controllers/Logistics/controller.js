@@ -82,7 +82,7 @@ export const uploadLogistics = async (req, res) => {
         if (head !== "remarks" && !value) {
           mssg = `Enter Valid ${fileHeader[index]} for row ${ind + 2}`
         } else if (head === "date") {
-          value = validateDateWhileUpload(value)
+          value = validateDateWhileUpload(value, ind)
         }
 
         if (mssg) throw mssg

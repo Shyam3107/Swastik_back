@@ -116,7 +116,7 @@ export const uploadDocuments = async (req, res) => {
         if (mssg) throw mssg
 
         if (index > 0) {
-          value = validateDateWhileUpload(value)
+          value = validateDateWhileUpload(value, ind)
         }
 
         tempVal[head] = value
@@ -136,7 +136,7 @@ export const uploadDocuments = async (req, res) => {
     await session.abortTransaction()
     return handleError(res, error)
   } finally {
-    session.endSession()
+    await session.endSession()
   }
 }
 
