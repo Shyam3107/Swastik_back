@@ -73,6 +73,14 @@ const tripSchema = new Schema(
       trim: true,
       type: String,
     },
+    billingRate: {
+      type: Number,
+      default: 0,
+    },
+    rate: {
+      type: Number,
+      default: 0,
+    },
     addedBy: {
       type: Schema.Types.ObjectId,
       ref: "Account",

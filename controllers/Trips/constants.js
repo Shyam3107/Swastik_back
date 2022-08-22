@@ -15,6 +15,8 @@ export const fileHeader = [
   "Pump Name",
   "Cash",
   "Remarks",
+  "Billing Rate",
+  "Rate",
 ]
 
 export const modelHeader = [
@@ -34,6 +36,8 @@ export const modelHeader = [
   "pumpName",
   "cash",
   "remarks",
+  "billingRate",
+  "rate",
 ]
 
 export const validateArr = [

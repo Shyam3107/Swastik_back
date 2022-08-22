@@ -1,5 +1,3 @@
-import mongoose from "mongoose"
-import moment from "moment"
 import momentTimezone from "moment-timezone"
 import {
   handleError,
@@ -10,12 +8,14 @@ import {
   parseResponse,
   validateDateWhileUpload,
 } from "../../utils/utils.js"
+import Trip from "../../models/Trip.js"
 import Voucher from "../../models/Voucher.js"
 import {
-  aggregateBody,
   validateArr,
   modelHeader,
   fileHeader,
+  populateVoucherWithTotal,
+  diSelect,
 } from "./constants.js"
 import { sendExcelFile } from "../../utils/sendFile.js"
 import { INDIA_TZ } from "../../config/constants.js"
@@ -26,35 +26,57 @@ export const getVoucher = async (req, res) => {
   try {
     const user = req.user
     let { voucherId, from, to } = req.query
-
     let vouchers
+
     if (voucherId) {
-      vouchers = await Voucher.aggregate([
-        {
-          $match: {
-            _id: mongoose.Types.ObjectId(voucherId),
-            companyAdminId: mongoose.Types.ObjectId(user.companyAdminId._id),
-          },
-        },
-        ...aggregateBody,
-      ])
-      vouchers = vouchers[0]
+      vouchers = await Voucher.findById({ _id: voucherId })
+        .select({
+          createdAt: 0,
+          __v: 0,
+          companyAdminId: 0,
+          updatedAt: 0,
+        })
+        .populate({
+          path: "diNo",
+          select: diSelect,
+          populate: { path: "addedBy", select: "branch" },
+        })
+        .populate({ path: "addedBy", select: "location" })
+      vouchers = parseResponse(vouchers)
+      vouchers = populateVoucherWithTotal(vouchers)
     } else {
-      vouchers = await Voucher.aggregate([
-        {
-          $match: {
-            companyAdminId: mongoose.Types.ObjectId(user?.companyAdminId?._id),
-            date: { $gte: new Date(from), $lte: new Date(to) },
-          },
-        },
-        ...aggregateBody,
-      ])
+      vouchers = await Voucher.find({
+        date: { $gte: from, $lte: to },
+        companyAdminId: user.companyAdminId,
+      })
+        .select({
+          createdAt: 0,
+          __v: 0,
+          companyAdminId: 0,
+          updatedAt: 0,
+        })
+        .populate({
+          path: "diNo",
+          select: diSelect,
+          populate: { path: "addedBy", select: "branch" },
+        })
+        .populate({ path: "addedBy", select: "location" })
+
       vouchers = parseResponse(vouchers)
       vouchers = vouchers.map((val) => {
         return {
           ...val,
           date: formatDateInDDMMYYY(val.date),
           addedBy: val?.addedBy?.location,
+          billingRate: val?.diNo?.billingRate,
+          rate: val?.diNo?.rate,
+          cash: val?.cash,
+          diesel:
+            val?.diNo?.dieselIn === "Litre"
+              ? val.diNo.diesel * val?.dieselRate
+              : val?.diNo?.diesel,
+          diNo: val?.diNo?.diNo,
+          paidOn: val?.paidOn ? formatDateInDDMMYYY(val?.paidOn) : val?.paidOn,
         }
       })
     }
@@ -75,11 +97,19 @@ export const addVoucher = [
       if (errors) {
         return null
       }
+      const companyAdminId = req?.user?.companyAdminId
+      const { diNo } = req.body
+
+      const record = await Trip.findOne({ diNo, companyAdminId }).select({
+        _id: 1,
+      })
+      if (!record) throw "DI No. doesn't exist in our record."
 
       await Voucher.create({
         ...req.body,
+        diNo: record._id,
         addedBy: req?.user?._id,
-        companyAdminId: req?.user?.companyAdminId,
+        companyAdminId,
       })
 
       return res.status(200).json({
@@ -96,15 +126,18 @@ export const uploadVoucher = async (req, res) => {
   try {
     session.startTransaction()
 
+    const companyAdminId = req?.user?.companyAdminId
+
     const dataToBeInsert = req.body.data
 
     let data = []
+    let tempDiNo = {}
 
     for (let ind = 0; ind < dataToBeInsert.length; ind++) {
       const item = dataToBeInsert[ind]
       let tempVal = {
         addedBy: req?.user?._id,
-        companyAdminId: req?.user?.companyAdminId,
+        companyAdminId,
       }
       let mssg = ""
 
@@ -112,10 +145,18 @@ export const uploadVoucher = async (req, res) => {
         let head = modelHeader[index]
         let value = item[fileHeader[index]]
 
-        if (index < 6 && !value) mssg = `Enter Valid ${fileHeader[index]}`
+        // Check for same DI No. wihin excel sheet
+        if (head === "diNo") {
+          if (tempDiNo[value]) mssg = `Two rows can't have same DI No- ${value}`
+          tempDiNo[value] = true
+        }
 
-        // These fields are Cash, TDS, Amount ....
-        if (!value && (index >= 7 || index <= 11)) value = 0
+        if (index <= 3 && !value) {
+          mssg = `Enter Valid ${fileHeader[index]} for row: ${ind + 2}`
+        }
+
+        // These fields are TDS, Shortage, Other
+        if (!value && (index >= 5 || index < 8)) value = 0
 
         if (mssg) throw mssg
 
@@ -123,8 +164,26 @@ export const uploadVoucher = async (req, res) => {
           value = validateDateWhileUpload(value, ind)
         }
 
+        if (value && head === "paidOn") {
+          value = validateDateWhileUpload(value, ind)
+        }
+
         tempVal[head] = value
       }
+
+      // Change DI No. to its id
+      const voucherDino = await Trip.findOne({
+        diNo: tempVal.diNo,
+        companyAdminId,
+      }).select({ _id: 1 })
+
+      if (!voucherDino) {
+        throw `DI NO.: ${tempVal.diNo} doesn't exist in our record in row: ${
+          ind + 2
+        }`
+      }
+
+      tempVal.diNo = voucherDino._id
 
       data.push(tempVal)
     }
@@ -153,6 +212,17 @@ export const editVoucher = [
       if (errors) {
         return null
       }
+
+      const companyAdminId = req?.user?.companyAdminId
+      const { diNo } = req.body
+
+      const record = await Trip.findOne({ diNo, companyAdminId }).select({
+        _id: 1,
+      })
+      if (!record) throw "DI No. doesn't exist in our record."
+
+      // Update the DI No. if changed else old will be there
+      req.body.diNo = record._id
 
       const updateData = await Voucher.findByIdAndUpdate(
         { _id: req.body._id },
@@ -194,28 +264,29 @@ export const downloadVouchers = async (req, res) => {
   try {
     const companyAdminId = req?.user?.companyAdminId
     const { from, to } = req.query
-    let data = await Voucher.aggregate([
-      {
-        $match: {
-          companyAdminId: mongoose.Types.ObjectId(companyAdminId?._id),
-          date: { $gte: new Date(from), $lte: new Date(to) },
-        },
-      },
-      ...aggregateBody,
-    ])
+    let data = await Voucher.find({
+      date: { $gte: from, $lte: to },
+      companyAdminId,
+    })
+      .select({
+        createdAt: 0,
+        __v: 0,
+        companyAdminId: 0,
+        updatedAt: 0,
+      })
+      .populate({
+        path: "diNo",
+        select: diSelect,
+        populate: { path: "addedBy", select: "branch" },
+      })
+      .populate({ path: "addedBy", select: "location" })
 
     data = parseResponse(data)
 
     data = data.map((val) => {
+      val = populateVoucherWithTotal(val)
       return {
         ...val,
-        date: formatDateInDDMMYYY(val.date),
-        diDate: formatDateInDDMMYYY(val?.trip?.date),
-        vehicleNo: val?.trip?.vehicleNo,
-        lrNo: val?.trip?.lrNo,
-        designation: val?.trip?.location,
-        quantity: val?.trip?.quantity,
-        site: val?.trip?.addedBy?.branch,
         addedBy: val?.addedBy?.location,
       }
     })
@@ -230,16 +301,17 @@ export const downloadVouchers = async (req, res) => {
       columnHeaders("IFSC", "ifsc"),
       columnHeaders("Cash", "cash"),
       columnHeaders("Diesel", "diesel"),
-      columnHeaders("Advance", "advance"),
-      columnHeaders("TDS", "tds"),
+      columnHeaders("TDS (%)", "tds"),
       columnHeaders("Shortage", "shortage"),
       columnHeaders("Other", "other"),
+      columnHeaders("Total", "total"),
       columnHeaders("DI Date", "diDate"),
       columnHeaders("Vehicle No.", "vehicleNo"),
       columnHeaders("LR No.", "lrNo"),
       columnHeaders("Designation", "designation"),
       columnHeaders("Site", "site"),
       columnHeaders("Remarks", "remarks"),
+      columnHeaders("Paid On", "paidOn"),
       columnHeaders("AddedBy", "addedBy"),
     ]
     return sendExcelFile(res, [column1], [data], ["Documents"])

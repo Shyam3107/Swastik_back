@@ -8,15 +8,8 @@ const schema = new Schema(
       required: true,
     },
     diNo: {
-      type: Number,
-      required: true,
-    },
-    billingRate: {
-      type: Number,
-      required: true,
-    },
-    rate: {
-      type: Number,
+      type: Schema.Types.ObjectId,
+      ref: "Trip",
       required: true,
     },
     paidTo: {
@@ -30,15 +23,7 @@ const schema = new Schema(
     ifsc: {
       type: String,
     },
-    cash: {
-      type: Number,
-      default: 0,
-    },
-    diesel: {
-      type: Number,
-      default: 0,
-    },
-    advance: {
+    dieselRate: {
       type: Number,
       default: 0,
     },
@@ -56,6 +41,9 @@ const schema = new Schema(
     },
     remarks: {
       type: String,
+    },
+    paidOn: {
+      type: Date,
     },
     addedBy: {
       type: Schema.Types.ObjectId,

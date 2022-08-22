@@ -1,115 +1,64 @@
+import { formatDateInDDMMYYY } from "../../utils/utils.js"
+
 export const fileHeader = [
   "Date",
   "DI No.",
-  "Billing Rate",
-  "Rate",
   "Paid To",
   "Account No.",
   "IFSC",
-  "Cash",
-  "Diesel",
-  "Advance",
-  "TDS",
+  "Diesel Rate",
+  "TDS (%)",
   "Shortage",
   "Other",
   "Remarks",
+  "Paid On",
 ]
 
 export const modelHeader = [
   "date",
   "diNo",
-  "billingRate",
-  "rate",
   "paidTo",
   "accountNo",
   "ifsc",
-  "cash",
-  "diesel",
-  "advance",
+  "dieselRate",
   "tds",
   "shortage",
   "other",
   "remarks",
+  "paidOn",
 ]
 
-export const validateArr = [
-  "date",
-  "diNo",
-  "billingRate",
-  "rate",
-  "paidTo",
-  "accountNo",
-]
+export const validateArr = ["date", "diNo", "paidTo", "accountNo"]
 
-export const aggregateBody = [
-  {
-    $lookup: {
-      from: "trips",
-      localField: "diNo",
-      foreignField: "diNo",
-      as: "trip",
-    },
-  },
-  {
-    $unwind: {
-      path: "$trip",
-      preserveNullAndEmptyArrays: true,
-    },
-  },
-  {
-    $lookup: {
-      from: "accounts",
-      localField: "addedBy",
-      foreignField: "_id",
-      as: "addedBy",
-    },
-  },
-  {
-    $unwind: {
-      path: "$addedBy",
-      preserveNullAndEmptyArrays: true,
-    },
-  },
-  {
-    $lookup: {
-      from: "accounts",
-      localField: "trip.addedBy",
-      foreignField: "_id",
-      as: "trip.addedBy",
-    },
-  },
-  {
-    $unwind: {
-      path: "$trip.addedBy",
-      preserveNullAndEmptyArrays: true,
-    },
-  },
-  {
-    $project: {
-      date: 1,
-      accountNo: 1,
-      "addedBy._id": 1,
-      "addedBy.branch": 1,
-      "addedBy.location": 1,
-      advance: 1,
-      shortage: 1,
-      billingRate: 1,
-      cash: 1,
-      diNo: 1,
-      diesel: 1,
-      ifsc: 1,
-      other: 1,
-      paidTo: 1,
-      rate: 1,
-      remarks: 1,
-      tds: 1,
-      "trip.lrNo": 1,
-      "trip.location": 1,
-      "trip.quantity": 1,
-      "trip.vehicleNo": 1,
-      "trip.date": 1,
-      "trip.addedBy.location": 1,
-      "trip.addedBy.branch": 1,
-    },
-  },
-]
+export const diSelect =
+  "date diNo lrNo vehicleNo quantity addedBy billingRate rate diesel dieselIn location"
+
+export const populateVoucherWithTotal = (val) => {
+  // populate the fields inside diNo
+  val.billingRate = val?.diNo?.billingRate
+  val.rate = val?.diNo?.rate
+  val.cash = val?.diNo?.cash ?? 0
+  // Calclate Diesel as dieselIn
+  val.diesel =
+    val?.diNo?.dieselIn === "Litre"
+      ? val.diNo.diesel * val?.dieselRate ?? 0
+      : val?.diNo?.diesel ?? 0
+  val.diDate = val?.diNo?.date
+  val.vehicleNo = val?.diNo?.vehicleNo
+  val.designation = val?.diNo?.location
+  val.lrNo = val?.diNo?.lrNo
+  val.quantity = val?.diNo?.quantity
+  val.site = val?.diNo?.addedBy?.branch
+  val.diNo = val?.diNo?.diNo
+
+  // Calculate the Total amount
+  // rate*quantity - cash - diesel - shortage- others
+  const initialAmount =
+    val.rate * val.quantity - val.cash - val.diesel - val.shortage - val.other
+
+  // Tds will be
+  const tds = (initialAmount * val.tds) / 100
+  // Total will be
+  val.total = initialAmount - tds
+  return val
+}
