@@ -52,13 +52,13 @@ export const populateVoucherWithTotal = (val) => {
   val.diNo = val?.diNo?.diNo
 
   // Calculate the Total amount
-  // rate*quantity - cash - diesel - shortage- others
-  const initialAmount =
-    val.rate * val.quantity - val.cash - val.diesel - val.shortage - val.other
-
+  // rate*quantity - cash - diesel - shortage- others - (rate*quantity)*tds%
+  const freightAmount = val.rate * val.quantity
   // Tds will be
-  const tds = (initialAmount * val.tds) / 100
-  // Total will be
-  val.total = initialAmount - tds
+  const tds = (freightAmount * val.tds) / 100
+  val.total = Math.round(
+    freightAmount - val.cash - val.diesel - val.shortage - val.other - tds
+  )
+
   return val
 }
