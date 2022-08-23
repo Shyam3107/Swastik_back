@@ -43,6 +43,8 @@ export const populateVoucherWithTotal = (val) => {
     val?.diNo?.dieselIn === "Litre"
       ? val.diNo.diesel * val?.dieselRate ?? 0
       : val?.diNo?.diesel ?? 0
+  val.dieselQty = val?.diNo?.diesel
+  val.dieselIn = val?.diNo?.dieselIn
   val.diDate = val?.diNo?.date
   val.vehicleNo = val?.diNo?.vehicleNo
   val.designation = val?.diNo?.location

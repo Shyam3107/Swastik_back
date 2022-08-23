@@ -70,7 +70,7 @@ export const getVoucher = async (req, res) => {
           addedBy: val?.addedBy?.location,
           billingRate: val?.diNo?.billingRate,
           rate: val?.diNo?.rate,
-          cash: val?.cash,
+          cash: val?.diNo?.cash,
           diesel:
             val?.diNo?.dieselIn === "Litre"
               ? val.diNo.diesel * val?.dieselRate
@@ -102,8 +102,21 @@ export const addVoucher = [
 
       const record = await Trip.findOne({ diNo, companyAdminId }).select({
         _id: 1,
+        diesel: 1,
+        dieselIn: 1,
       })
       if (!record) throw "DI No. doesn't exist in our record."
+
+      // If Diesel In is in Litre, then Diesel Rate is Required
+      let { dieselRate } = req.body
+      dieselRate = dieselRate ? parseFloat(dieselRate) : 0
+      if (
+        record?._doc?.dieselIn === "Litre" &&
+        !dieselRate &&
+        record?._doc?.diesel
+      ) {
+        throw "Diesel Rate is required as Vehicle as taken Diesel in Litre"
+      }
 
       await Voucher.create({
         ...req.body,
@@ -175,12 +188,23 @@ export const uploadVoucher = async (req, res) => {
       const voucherDino = await Trip.findOne({
         diNo: tempVal.diNo,
         companyAdminId,
-      }).select({ _id: 1 })
+      }).select({ _id: 1, diesel: 1, dieselIn: 1 })
 
       if (!voucherDino) {
         throw `DI NO.: ${tempVal.diNo} doesn't exist in our record in row: ${
           ind + 2
         }`
+      }
+
+      // If Diesel In is in Litre, then Diesel Rate is Required
+      let { dieselIn, diesel } = voucherDino._doc
+      tempVal.dieselRate = tempVal.dieselRate
+        ? parseFloat(tempVal.dieselRate)
+        : 0
+      if (dieselIn === "Litre" && !tempVal.dieselRate && diesel) {
+        throw `Diesel Rate is required as Vehicle as taken Diesel in Litre for DI No :${
+          tempVal.diNo
+        } in row: ${ind + 2}`
       }
 
       tempVal.diNo = voucherDino._id
@@ -218,8 +242,21 @@ export const editVoucher = [
 
       const record = await Trip.findOne({ diNo, companyAdminId }).select({
         _id: 1,
+        diesel: 1,
+        dieselIn: 1,
       })
       if (!record) throw "DI No. doesn't exist in our record."
+
+      // If Diesel In is in Litre, then Diesel Rate is Required
+      let { dieselRate } = req.body
+      dieselRate = dieselRate ? parseFloat(dieselRate) : 0
+      if (
+        record?._doc?.dieselIn === "Litre" &&
+        !dieselRate &&
+        record?._doc?.diesel
+      ) {
+        throw "Diesel Rate is required as Vehicle as taken Diesel in Litre"
+      }
 
       // Update the DI No. if changed else old will be there
       req.body.diNo = record._id
@@ -287,6 +324,9 @@ export const downloadVouchers = async (req, res) => {
       val = populateVoucherWithTotal(val)
       return {
         ...val,
+        paidOn: val?.paidOn ? formatDateInDDMMYYY(val.paidOn) : "",
+        diDate: formatDateInDDMMYYY(val?.diDate),
+        date: formatDateInDDMMYYY(val?.date),
         addedBy: val?.addedBy?.location,
       }
     })
@@ -300,6 +340,8 @@ export const downloadVouchers = async (req, res) => {
       columnHeaders("Account No.", "accountNo"),
       columnHeaders("IFSC", "ifsc"),
       columnHeaders("Cash", "cash"),
+      columnHeaders("Diesel (Qty)", "dieselQty"),
+      columnHeaders("Diesel In", "dieselIn"),
       columnHeaders("Diesel", "diesel"),
       columnHeaders("TDS (%)", "tds"),
       columnHeaders("Shortage", "shortage"),
