@@ -187,9 +187,26 @@ export const getDieselsReport = async (req, res) => {
         $project: {
           _id: 0,
           vehicleNo: "$_id.vehicleNo",
-          owner: "$_id.owner.owner",
+          owner: {
+            // This check is to make sure it is fetching from Our Company only
+            $cond: [
+              {
+                $eq: [
+                  "$_id.owner.companyAdminId",
+                  mongoose.Types.ObjectId(user?.companyAdminId?._id),
+                ],
+              },
+              "$_id.owner.owner",
+              "",
+            ],
+          },
           quantity: 1,
           amount: 1,
+        },
+      },
+      {
+        $sort: {
+          vehicleNo: 1,
         },
       },
     ])
@@ -213,6 +230,11 @@ export const getDieselsReport = async (req, res) => {
           pumpName: "$_id.pumpName",
           quantity: 1,
           amount: 1,
+        },
+      },
+      {
+        $sort: {
+          pumpName: 1,
         },
       },
     ])
