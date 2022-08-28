@@ -71,6 +71,7 @@ const accountSchema = new Schema(
         "ACCOUNTS",
         "PRODUCTS",
         "LOGISTICS",
+        "STORE_BILLS",
       ],
     },
     operations: {

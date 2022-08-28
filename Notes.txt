@@ -2,3 +2,10 @@
 3. handle search from backend
 5. Change date picker in frontend
 9. jitne bhi lookup hai, usmein companyadmin ka check
+10. in trips, when clicked in vehicle no. show all trips for that vehicle
+11. in hardware shop bill, when click vehicle no. show all bill related to that vehicle
+12. in hard bil, when click in shop name, show all bill related to that shop
+13. while adding bill, in shop name, show options of already entered names
+14. In trip, when click in vehicle no. show all vehicle no. trips 
+15. in diesel, when clicked in vehicle no. show all diesel taken by that vehicle 
+16. in diesel, when clicked in pumpname show all that pump bills

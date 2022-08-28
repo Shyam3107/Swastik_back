@@ -1,4 +1,3 @@
-import moment from "moment"
 import momentTimezone from "moment-timezone"
 
 import OfficeExpense from "../../models/OfficeExpense.js"
@@ -15,6 +14,7 @@ import {
 import { sendExcelFile } from "../../utils/sendFile.js"
 import { INDIA_TZ } from "../../config/constants.js"
 import mongoose from "mongoose"
+import HardwareShopBill from "../../models/HardwareShopBill.js"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
 
@@ -257,6 +257,89 @@ export const getDieselsReport = async (req, res) => {
       [column1, column2],
       [vehicleWise, pumpWise],
       ["Vehicle Wise Report", "Pump Wise Report"]
+    )
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const getHardwareShopReport = async (req, res) => {
+  try {
+    const user = req.user
+    let { from, to } = req.query
+
+    let match = {
+      companyAdminId: mongoose.Types.ObjectId(user?.companyAdminId?._id),
+      date: { $gte: new Date(from), $lte: new Date(to) },
+    }
+
+    let shopWise = await HardwareShopBill.aggregate([
+      {
+        $match: match,
+      },
+      {
+        $group: {
+          _id: {
+            shopName: "$shopName",
+          },
+          amount: { $sum: "$amount" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          shopName: "$_id.shopName",
+          amount: 1,
+        },
+      },
+      {
+        $sort: {
+          shopName: 1,
+        },
+      },
+    ])
+
+    let vehicleWise = await HardwareShopBill.aggregate([
+      {
+        $match: match,
+      },
+      {
+        $group: {
+          _id: {
+            vehicleNo: "$vehicleNo",
+          },
+          amount: { $sum: "$amount" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          vehicleNo: "$_id.vehicleNo",
+          amount: 1,
+        },
+      },
+      {
+        $sort: {
+          vehicleNo: 1,
+        },
+      },
+    ])
+
+    const column1 = [
+      columnHeaders("Shop Name", "shopName"),
+      columnHeaders("Amount", "amount"),
+    ]
+
+    const column2 = [
+      columnHeaders("Vehicle No.", "vehicleNo"),
+      columnHeaders("Amount", "amount"),
+    ]
+
+    return sendExcelFile(
+      res,
+      [column1, column2],
+      [shopWise, vehicleWise],
+      ["Shop Report", "Vehicle Report"]
     )
   } catch (error) {
     return handleError(res, error)

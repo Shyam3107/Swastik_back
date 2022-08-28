@@ -7,38 +7,24 @@ const schema = new Schema(
       type: Date,
       required: true,
     },
-    product: {
-      type: Schema.Types.ObjectId,
-      ref: "Product",
-      required: true,
-    },
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
     vehicleNo: {
       type: String,
       uppercase: true,
       trim: true,
       required: true,
     },
-    personName: {
+    amount: {
+      type: Number,
+      required: true,
+    },
+    shopName: {
       type: String,
       trim: true,
       required: true,
     },
-    personPhone: {
-      type: String,
-      required: true,
-    },
-    status: {
-      type: String,
-      required: true,
-      enum: ["RECEIVED", "ISSUED"],
-    },
     remarks: {
       type: String,
+      required: true,
       trim: true,
     },
     addedBy: {
@@ -56,7 +42,8 @@ const schema = new Schema(
 )
 
 schema.index({ vehicleNo: 1, companyAdminId: 1 })
+schema.index({ shopName: 1, companyAdminId: 1 })
 
-const Logistic = model("Logistic", schema)
+const HardwareShopBill = model("HardwareShopBill", schema)
 
-export default Logistic
+export default HardwareShopBill
