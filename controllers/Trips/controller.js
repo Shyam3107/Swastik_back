@@ -319,7 +319,7 @@ export const getTripsByVehicle = async (req, res) => {
       })
       .sort({ date: 1 })
 
-    if (!data) throw "Record Not Found"
+    if (!trips) throw "Record Not Found"
 
     trips = parseResponse(trips)
     let totalQuantity = 0
@@ -332,7 +332,7 @@ export const getTripsByVehicle = async (req, res) => {
       }
     })
 
-    return res.status(200).json({ totalQuantity, data: trips })
+    return res.status(200).json({ data: { totalQuantity, data: trips } })
   } catch (error) {
     return handleError(res, error)
   }
