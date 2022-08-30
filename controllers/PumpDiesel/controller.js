@@ -243,7 +243,7 @@ export const getDieselsByVehicle = async (req, res) => {
       })
       .sort({ date: 1 })
 
-    if (!data) throw "Record Not Found"
+    if (!diesels) throw "Record Not Found"
 
     diesels = parseResponse(diesels)
     let totalQuantity = 0
@@ -258,7 +258,9 @@ export const getDieselsByVehicle = async (req, res) => {
       }
     })
 
-    return res.status(200).json({ totalAmount, totalQuantity, data: diesels })
+    return res
+      .status(200)
+      .json({ data: { totalAmount, totalQuantity, data: diesels } })
   } catch (error) {
     return handleError(res, error)
   }
@@ -328,7 +330,7 @@ export const getDieselsByPump = async (req, res) => {
       })
       .sort({ date: 1 })
 
-    if (!data) throw "Record Not Found"
+    if (!diesels) throw "Record Not Found"
     diesels = parseResponse(diesels)
 
     let totalQuantity = 0
@@ -345,7 +347,9 @@ export const getDieselsByPump = async (req, res) => {
 
     if (!diesels) throw "Record Not Found"
 
-    return res.status(200).json({ totalAmount, totalQuantity, data: diesels })
+    return res
+      .status(200)
+      .json({ data: { totalAmount, totalQuantity, data: diesels } })
   } catch (error) {
     return handleError(res, error)
   }

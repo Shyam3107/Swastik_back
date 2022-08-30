@@ -1,16 +1,13 @@
 2. add pagination
 3. handle search from backend
 5. Change date picker in frontend
-13. while adding bill, in shop name, show options of already entered names                  Back -done
 14. In trip, when click in vehicle no. show all vehicle no. trips                            Back -done download
-15. in diesel, when clicked in vehicle no. show all diesel taken by that vehicle            Back -done downoad 
-16. in diesel, when clicked in pumpname show all that pump bills                            back-done download 
 17. Add Downloads section, to download sample of all
 18, option o download multiple voucher and builty at once
+12. when adding diesel, show already added pump name
 
 19. in downloads, add section to download sample builty and voucher, ask single or double, means 1 builty in 1 page
  or 2 builty in 1 page
 
 20. report getVehicleWiseDieselReport, download trips with diesel take, diesel and vehicle expenses with diesel 
 21. change diesel report to pump wise diesel report
-22. Fix Edit bill, shop name  opions not being visible
