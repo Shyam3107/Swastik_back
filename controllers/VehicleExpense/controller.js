@@ -1,4 +1,3 @@
-import moment from "moment"
 import momentTimezone from "moment-timezone"
 import {
   handleError,
@@ -180,7 +179,7 @@ export const deleteExpenses = async (req, res) => {
     }
     const expenseIds = req.body
 
-    const deletedData = await VehiclesExpense.deleteMany({ _id: expenseIds })
+    await VehiclesExpense.deleteMany({ _id: expenseIds })
 
     return res.status(200).json({
       message: `Vehicles Expense${

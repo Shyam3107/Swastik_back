@@ -59,6 +59,25 @@ export const getBills = async (req, res) => {
   }
 }
 
+export const getUniqueShop = async (req, res) => {
+  try {
+    const companyAdminId = req?.user?.companyAdminId
+
+    let data = await HardwareShopBill.find({
+      companyAdminId,
+    })
+      .select({ shopName: 1, _id: 0 })
+      .sort({ shopName: 1 })
+      .distinct("shopName")
+
+    if (!data) throw "Record Not Found"
+
+    return res.status(200).json({ data })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
 export const uploadBills = async (req, res) => {
   const session = await HardwareShopBill.startSession()
   try {
@@ -193,6 +212,184 @@ export const downloadBills = async (req, res) => {
       })
       .populate({ path: "addedBy", select: "location" })
       .sort({ date: 1 })
+
+    data = parseResponse(data)
+
+    data = data.map((val) => {
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val?.date),
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    const column1 = [
+      columnHeaders("Date", "date"),
+      columnHeaders("Vehicle No.", "vehicleNo"),
+      columnHeaders("Amount", "amount"),
+      columnHeaders("Shop Name", "shopName"),
+      columnHeaders("Remarks", "remarks"),
+      columnHeaders("AddedBy", "addedBy"),
+    ]
+
+    return sendExcelFile(res, [column1], [data], ["Bills"])
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const getBillsByVehicle = async (req, res) => {
+  try {
+    const companyAdminId = req?.user?.companyAdminId
+    let { vehicleNo, from, to } = req.query
+
+    let data = await HardwareShopBill.find({
+      vehicleNo,
+      companyAdminId,
+      date: { $gte: from, $lte: to },
+    })
+      .select({
+        date: 1,
+        vehicleNo: 1,
+        shopName: 1,
+        addedBy: 1,
+        amount: 1,
+        remarks: 1,
+      })
+      .populate({ path: "addedBy", select: "location" })
+      .sort({ date: -1 })
+
+    if (!data) throw "Record Not Found"
+
+    let totalAmount = 0
+    data = parseResponse(data)
+    data = data.map((val) => {
+      totalAmount += val?.amount
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val.date),
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    return res.status(200).json({ data: { data, totalAmount } })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const downloadBillsByVehicle = async (req, res) => {
+  try {
+    const companyAdminId = req?.user?.companyAdminId
+    let { vehicleNo, from, to } = req.query
+
+    let data = await HardwareShopBill.find({
+      companyAdminId,
+      vehicleNo,
+      date: { $gte: from, $lte: to },
+    })
+      .select({
+        _id: 0,
+        date: 1,
+        vehicleNo: 1,
+        shopName: 1,
+        addedBy: 1,
+        amount: 1,
+        remarks: 1,
+      })
+      .populate({ path: "addedBy", select: "location" })
+      .sort({ date: 1 })
+
+    if (!data) throw "Record Not Found"
+
+    data = parseResponse(data)
+
+    data = data.map((val) => {
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val?.date),
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    const column1 = [
+      columnHeaders("Date", "date"),
+      columnHeaders("Vehicle No.", "vehicleNo"),
+      columnHeaders("Amount", "amount"),
+      columnHeaders("Shop Name", "shopName"),
+      columnHeaders("Remarks", "remarks"),
+      columnHeaders("AddedBy", "addedBy"),
+    ]
+
+    return sendExcelFile(res, [column1], [data], ["Bills"])
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const getBillsByShop = async (req, res) => {
+  try {
+    const companyAdminId = req?.user?.companyAdminId
+    let { shopName, from, to } = req.query
+
+    let data = await HardwareShopBill.find({
+      shopName,
+      companyAdminId,
+      date: { $gte: from, $lte: to },
+    })
+      .select({
+        date: 1,
+        vehicleNo: 1,
+        shopName: 1,
+        addedBy: 1,
+        amount: 1,
+        remarks: 1,
+      })
+      .populate({ path: "addedBy", select: "location" })
+      .sort({ date: -1 })
+
+    if (!data) throw "Record Not Found"
+
+    let totalAmount = 0
+    data = parseResponse(data)
+    data = data.map((val) => {
+      totalAmount += val?.amount
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val.date),
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    return res.status(200).json({ data: { data, totalAmount } })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const downloadBillsByShop = async (req, res) => {
+  try {
+    const companyAdminId = req?.user?.companyAdminId
+    let { shopName, from, to } = req.query
+
+    let data = await HardwareShopBill.find({
+      companyAdminId,
+      shopName,
+      date: { $gte: from, $lte: to },
+    })
+      .select({
+        _id: 0,
+        date: 1,
+        vehicleNo: 1,
+        shopName: 1,
+        addedBy: 1,
+        amount: 1,
+        remarks: 1,
+      })
+      .populate({ path: "addedBy", select: "location" })
+      .sort({ date: 1 })
+
+    if (!data) throw "Record Not Found"
 
     data = parseResponse(data)
 

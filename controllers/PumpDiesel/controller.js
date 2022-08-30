@@ -1,4 +1,3 @@
-import moment from "moment"
 import momentTimezone from "moment-timezone"
 import {
   handleError,
@@ -198,8 +197,181 @@ export const downloadDiesels = async (req, res) => {
       })
       .sort({ date: 1 })
 
+    if (!data) throw "Record Not Found"
+
     data = parseResponse(data)
 
+    data = data.map((val) => {
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val.date),
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    const column1 = [
+      columnHeaders("Date", "date"),
+      columnHeaders("Vehicle No.", "vehicleNo"),
+      columnHeaders("Quantity", "quantity"),
+      columnHeaders("Amount", "amount"),
+      columnHeaders("Pump Name", "pumpName"),
+      columnHeaders("Fuel", "fuel"),
+      columnHeaders("Remarks", "remarks"),
+      columnHeaders("Added By", "addedBy"),
+    ]
+    return sendExcelFile(res, [column1], [data], ["Receipts"])
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const getDieselsByVehicle = async (req, res) => {
+  try {
+    const user = req.user
+    let { vehicleNo, from, to } = req.query
+
+    const userQuery = userRankQuery(user)
+    let diesels = await Diesel.find({
+      ...userQuery,
+      vehicleNo: vehicleNo?.toUpperCase(),
+      date: { $gte: from, $lte: to },
+    })
+      .select({ companyAdminId: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+      .populate({
+        path: "addedBy",
+        select: "location",
+      })
+      .sort({ date: 1 })
+
+    if (!data) throw "Record Not Found"
+
+    diesels = parseResponse(diesels)
+    let totalQuantity = 0
+    let totalAmount = 0
+    diesels = diesels.map((val) => {
+      totalQuantity += val.quantity
+      totalAmount += val.amount
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val.date),
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    return res.status(200).json({ totalAmount, totalQuantity, data: diesels })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const downloadDieselsByVehicle = async (req, res) => {
+  try {
+    const user = req.user
+    let { vehicleNo, from, to } = req.query
+
+    const userQuery = userRankQuery(user)
+    let data = await Diesel.find({
+      ...userQuery,
+      vehicleNo: vehicleNo?.toUpperCase(),
+      date: { $gte: from, $lte: to },
+    })
+      .select({ _id: 0, companyAdminId: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+      .populate({
+        path: "addedBy",
+        select: "location",
+      })
+      .sort({ date: 1 })
+
+    if (!data) throw "Record Not Found"
+
+    data = parseResponse(data)
+
+    data = data.map((val) => {
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val.date),
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    const column1 = [
+      columnHeaders("Date", "date"),
+      columnHeaders("Vehicle No.", "vehicleNo"),
+      columnHeaders("Quantity", "quantity"),
+      columnHeaders("Amount", "amount"),
+      columnHeaders("Pump Name", "pumpName"),
+      columnHeaders("Fuel", "fuel"),
+      columnHeaders("Remarks", "remarks"),
+      columnHeaders("Added By", "addedBy"),
+    ]
+    return sendExcelFile(res, [column1], [data], ["Diesel"])
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const getDieselsByPump = async (req, res) => {
+  try {
+    const user = req.user
+    let { pumpName, from, to } = req.query
+
+    const userQuery = userRankQuery(user)
+    let diesels = await Diesel.find({
+      ...userQuery,
+      pumpName: pumpName?.toUpperCase(),
+      date: { $gte: from, $lte: to },
+    })
+      .select({ companyAdminId: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+      .populate({
+        path: "addedBy",
+        select: "location",
+      })
+      .sort({ date: 1 })
+
+    if (!data) throw "Record Not Found"
+    diesels = parseResponse(diesels)
+
+    let totalQuantity = 0
+    let totalAmount = 0
+    diesels = diesels.map((val) => {
+      totalQuantity += val.quantity
+      totalAmount += val.amount
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val.date),
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    if (!diesels) throw "Record Not Found"
+
+    return res.status(200).json({ totalAmount, totalQuantity, data: diesels })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const downloadDieselsByPump = async (req, res) => {
+  try {
+    const user = req.user
+    let { pumpName, from, to } = req.query
+
+    const userQuery = userRankQuery(user)
+    let data = await Diesel.find({
+      ...userQuery,
+      pumpName: pumpName?.toUpperCase(),
+      date: { $gte: from, $lte: to },
+    })
+      .select({ id: 0, companyAdminId: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+      .populate({
+        path: "addedBy",
+        select: "location",
+      })
+      .sort({ date: 1 })
+
+    if (!data) throw "Record Not Found"
+
+    data = parseResponse(data)
     data = data.map((val) => {
       return {
         ...val,

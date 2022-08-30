@@ -1,4 +1,3 @@
-import moment from "moment"
 import momentTimezone from "moment-timezone"
 import {
   handleError,
@@ -263,6 +262,8 @@ export const downloadTrips = async (req, res) => {
       .populate({ path: "addedBy", select: "location" })
       .sort({ date: 1 })
 
+    if (!data) throw "Record Not Found"
+
     trips = parseResponse(trips)
 
     trips = trips.map((val) => {
@@ -288,12 +289,107 @@ export const downloadTrips = async (req, res) => {
       columnHeaders("Diesel", "diesel"),
       columnHeaders("Diesel In", "dieselIn"),
       columnHeaders("Pump Name", "pumpName"),
+      columnHeaders("Billing Rate", "billingRate"),
+      columnHeaders("Rate", "rate"),
       columnHeaders("Cash", "cash"),
       columnHeaders("Remarks", "remarks"),
       columnHeaders("Added By", "addedBy"),
     ]
 
     return sendExcelFile(res, [column1], [trips], ["Trips"])
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const getTripsByVehicle = async (req, res) => {
+  try {
+    const companyAdminId = req.user.companyAdminId
+    let { vehicleNo, from, to } = req.query
+
+    let trips = await Trip.find({
+      companyAdminId,
+      vehicleNo: vehicleNo?.toUpperCase(),
+      date: { $gte: from, $lte: to },
+    })
+      .select({ companyAdminId: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+      .populate({
+        path: "addedBy",
+        select: "location",
+      })
+      .sort({ date: 1 })
+
+    if (!data) throw "Record Not Found"
+
+    trips = parseResponse(trips)
+    let totalQuantity = 0
+    trips = trips.map((val) => {
+      totalQuantity += val.quantity
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val.date),
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    return res.status(200).json({ totalQuantity, data: trips })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const downloadTripsByVehicle = async (req, res) => {
+  try {
+    const companyAdminId = req.user.companyAdminId
+    let { vehicleNo, from, to } = req.query
+
+    let data = await Trip.find({
+      companyAdminId,
+      vehicleNo: vehicleNo?.toUpperCase(),
+      date: { $gte: from, $lte: to },
+    })
+      .select({ companyAdminId: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+      .populate({
+        path: "addedBy",
+        select: "location",
+      })
+      .sort({ date: 1 })
+
+    if (!data) throw "Record Not Found"
+
+    data = parseResponse(data)
+
+    data = data.map((val) => {
+      return {
+        ...val,
+        date: formatDateInDDMMYYY(val.date),
+        addedBy: val?.addedBy?.location,
+      }
+    })
+
+    const column1 = [
+      columnHeaders("DI No.", "diNo"),
+      columnHeaders("LR No.", "lrNo"),
+      columnHeaders("Date", "date"),
+      columnHeaders("Loading Point", "loadingPoint"),
+      columnHeaders("Party Name", "partyName"),
+      columnHeaders("Location", "location"),
+      columnHeaders("Vehicle No.", "vehicleNo"),
+      columnHeaders("Quantity", "quantity"),
+      columnHeaders("Material", "material"),
+      columnHeaders("Driver Name", "driverName"),
+      columnHeaders("Driver Phone", "driverPhone"),
+      columnHeaders("Diesel", "diesel"),
+      columnHeaders("Diesel In", "dieselIn"),
+      columnHeaders("Pump Name", "pumpName"),
+      columnHeaders("Billing Rate", "billingRate"),
+      columnHeaders("Rate", "rate"),
+      columnHeaders("Cash", "cash"),
+      columnHeaders("Remarks", "remarks"),
+      columnHeaders("Added By", "addedBy"),
+    ]
+
+    return sendExcelFile(res, [column1], [data], ["Trips"])
   } catch (error) {
     return handleError(res, error)
   }

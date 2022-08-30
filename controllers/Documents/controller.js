@@ -4,7 +4,6 @@ import {
   handleError,
   errorValidation,
   validateBody,
-  dateFormat,
   columnHeaders,
   formatDateInDDMMYYY,
   parseResponse,
