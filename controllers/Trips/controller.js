@@ -262,7 +262,7 @@ export const downloadTrips = async (req, res) => {
       .populate({ path: "addedBy", select: "location" })
       .sort({ date: 1 })
 
-    if (!data) throw "Record Not Found"
+    if (!trips) throw "Record Not Found"
 
     trips = parseResponse(trips)
 
