@@ -10,4 +10,10 @@
  or 2 builty in 1 page
 
 20. report getVehicleWiseDieselReport, download trips with diesel take, diesel and vehicle expenses with diesel 
-21. change diesel report to pump wise diesel report
+21. for map, dont use index
+
+22. pass only necessar props, remove user from props where not used
+23. monu can't select his own docments data
+24. expired hone pr bhi green show ho rha hai
+25. documents expired and active ka search
+26. if "tax expired" searched then show al vehicles whose tax is expired
