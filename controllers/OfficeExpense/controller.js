@@ -134,7 +134,6 @@ export const editExpenses = [
       if (errors) {
         return null
       }
-      const user = req.user
 
       const expenseId = req.body._id
       const updateData = await OfficeExpense.findByIdAndUpdate(

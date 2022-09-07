@@ -59,6 +59,25 @@ export const getDiesels = async (req, res) => {
   }
 }
 
+export const getUniquePumpNames = async (req, res) => {
+  try {
+    const companyAdminId = req?.user?.companyAdminId
+
+    let data = await Diesel.find({
+      companyAdminId,
+    })
+      .select({ pumpName: 1, _id: 0 })
+      .sort({ pumoName: 1 })
+      .distinct("pumpName")
+
+    if (!data) throw "Record Not Found"
+
+    return res.status(200).json({ data })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
 export const uploadDiesels = async (req, res) => {
   try {
     const user = req.user

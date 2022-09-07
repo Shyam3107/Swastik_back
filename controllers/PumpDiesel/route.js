@@ -9,13 +9,15 @@ import {
   getDieselsByVehicle,
   getDieselsByPump,
   downloadDieselsByVehicle,
-  downloadDieselsByPump
+  downloadDieselsByPump,
+  getUniquePumpNames,
 } from "./controller.js"
 const router = Router()
 
 router.get("/getDiesels", getDiesels)
 router.get("/getDieselsByVehicle", getDieselsByVehicle)
 router.get("/getDieselsByPump", getDieselsByPump)
+router.get("/getUniquePumpNames", getUniquePumpNames)
 router.post("/addDiesels", addDiesels)
 router.post("/uploadDiesels", uploadDiesels)
 router.put("/editDiesels", editDiesels)
