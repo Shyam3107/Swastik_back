@@ -1,10 +1,8 @@
 2. add pagination
 3. handle search from backend
 5. Change date picker in frontend
-14. In trip, when click in vehicle no. show all vehicle no. trips                            Back -done download
 17. Add Downloads section, to download sample of all
 18, option o download multiple voucher and builty at once
-12. when adding diesel, show already added pump name
 
 19. in downloads, add section to download sample builty and voucher, ask single or double, means 1 builty in 1 page
  or 2 builty in 1 page
@@ -13,3 +11,29 @@
 21. for map, dont use index
 
 27. for upload featue, check if user has add permission or not
+
+
+import * as React from "react";
+import DatePicker from "react-datepicker";
+
+import "react-datepicker/dist/react-datepicker.css";
+
+export default function ComboBox() {
+  const [startDate, setStartDate] = React.useState(new Date("2000-07-31"));
+  console.log(startDate);
+  return (
+    <DatePicker
+      selected={startDate}
+      dateFormat="dd/MM/yyyy"
+      value={new Date()}
+      todayButton="Today"
+      isClearable
+      maxDate={new Date()}
+      onChange={(date: Date) => setStartDate(date)}
+    />
+  );
+}
+
+
+
+use Custom Input feature

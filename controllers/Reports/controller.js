@@ -345,3 +345,132 @@ export const getHardwareShopReport = async (req, res) => {
     return handleError(res, error)
   }
 }
+
+export const getVehicleDieselReport = async (req, res) => {
+  try {
+    const user = req.user
+    let { from, to } = req.query
+
+    let select = {
+      _id: 0,
+      __v: 0,
+      createdAt: 0,
+      updatedAt: 0,
+      companyAdminId: 0,
+    }
+
+    let populate = { path: "addedBy", select: "location" }
+
+    let query = {
+      companyAdminId: user.companyAdminId,
+      date: { $gte: from, $lte: to },
+    }
+
+    //{$and:[{diesel:{$ne:0}},{diesel:{$ne:null}}]}
+
+    let trips = await Trip.find(query)
+      .select({
+        _id: 0,
+        date: 1,
+        location: 1,
+        vehicleNo: 1,
+        quantity: 1,
+        pumpName: 1,
+        diesel: 1,
+        dieselIn: 1,
+        cash: 1,
+        remarks: 1,
+        addedBy: 1,
+      })
+      .populate(populate)
+      .sort({ date: 1 })
+
+    trips = parseResponse(trips)
+
+    trips = trips.map((val) => {
+      val = {
+        ...val,
+        diesel: val.dieselIn === "Litre" ? val.diesel : "",
+        amount: val.dieselIn === "Amount" ? val.diesel : "",
+        addedBy: val?.addedBy?.location ?? "",
+        debit: val.cash,
+        date: dateToString(val.date),
+      }
+      delete val.cash
+      return val
+    })
+
+    let vehicleExpenses = await VehiclesExpense.find(query)
+      .select(select)
+      .populate(populate)
+
+    vehicleExpenses = parseResponse(vehicleExpenses)
+
+    vehicleExpenses = vehicleExpenses.map((val) => {
+      val = {
+        ...val,
+        debit: val.amount,
+        diesel: val.dieselIn === "Litre" ? val.diesel : "",
+        amount: val.dieselIn === "Amount" ? val.diesel : "",
+        addedBy: val?.addedBy?.location ?? "",
+        date: dateToString(val.date),
+      }
+      return val
+    })
+
+    let officeExpenses = await OfficeExpense.find(query)
+      .select(select)
+      .populate(populate)
+
+    officeExpenses = parseResponse(officeExpenses)
+
+    officeExpenses = officeExpenses.map((val) => {
+      val = {
+        ...val,
+        addedBy: val?.addedBy?.location ?? "",
+        debit: val.amount,
+        date: dateToString(val.date),
+      }
+      delete val.amount
+      return val
+    })
+
+    let receipts = await Receipt.find(query).select(select).populate(populate)
+
+    receipts = parseResponse(receipts)
+
+    receipts = receipts.map((val) => {
+      val = {
+        ...val,
+        addedBy: val?.addedBy?.location ?? "",
+        credit: val.amount,
+        date: dateToString(val.date),
+      }
+      delete val.amount
+      return val
+    })
+
+    const columns = [
+      columnHeaders("Date", "date"),
+      columnHeaders("Vehicle No.", "vehicleNo"),
+      columnHeaders("Location", "location"),
+      columnHeaders("Qty", "quantity"),
+      columnHeaders("Diesel(ltr)", "diesel"),
+      columnHeaders("Diesel(Amt)", "amount"),
+      columnHeaders("Pump Name", "pumpName"),
+      columnHeaders("Credit", "credit"),
+      columnHeaders("Debit", "debit"),
+      columnHeaders("Remarks", "remarks"),
+      columnHeaders("Added By", "addedBy"),
+    ]
+
+    return sendExcelFile(
+      res,
+      [columns],
+      [[...trips, ...vehicleExpenses, ...officeExpenses, ...receipts]],
+      ["Reports"]
+    )
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
