@@ -7,10 +7,10 @@
 19. in downloads, add section to download sample builty and voucher, ask single or double, means 1 builty in 1 page
  or 2 builty in 1 page
 
-20. report getVehicleWiseDieselReport, download trips with diesel take, diesel and vehicle expenses with diesel 
 21. for map, dont use index
 
 27. for upload featue, check if user has add permission or not
+29. fix date issue
 
 
 import * as React from "react";
