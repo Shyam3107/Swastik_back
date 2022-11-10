@@ -27,6 +27,8 @@ export const login = async (req, res) => {
       delete query.password
     }
 
+    console.log("Query : ", query)
+
     let user = await Account.findOne(query)
       .select({
         password: 0,
@@ -34,12 +36,16 @@ export const login = async (req, res) => {
       .populate({ path: "companyAdminId", select: "companyName tptCode" })
       .populate({ path: "addedBy", select: "companyName tptCode" })
 
-    if (!user) throw "User or Password is Incorrect"
-
     user = JSON.stringify(user)
     user = JSON.parse(user)
 
+    console.log("User : ", user)
+
+    if (!user) throw "User or Password is Incorrect"
+
     const token = sign(user, process.env.JWT_SECRET_KEY)
+
+    console.log("Token : ", token)
 
     return res.status(200).json({ user, token, message: "Login Successful" })
   } catch (error) {

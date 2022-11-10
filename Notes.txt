@@ -1,5 +1,3 @@
-2. add pagination
-3. handle search from backend
 5. Change date picker in frontend
 17. Add Downloads section, to download sample of all
 18, option o download multiple voucher and builty at once
@@ -7,11 +5,12 @@
 19. in downloads, add section to download sample builty and voucher, ask single or double, means 1 builty in 1 page
  or 2 builty in 1 page
 
-21. for map, dont use index
-
-27. for upload featue, check if user has add permission or not
-29. fix date issue
-
+29. fix date issue, if given mm-dd-yyyy change accordingly
+30. Submit button for choosing from and to
+31. show button to make voucher from dino itself, if exist view voucher else make voucher
+32. button to navigate voucher to dino
+33. documents downlodloading mein page loa ho rha hai ---- done
+34. going to expire within 7 days, add yellow color in it
 
 import * as React from "react";
 import DatePicker from "react-datepicker";
