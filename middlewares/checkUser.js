@@ -25,6 +25,8 @@ export const checkUser = (accessType = false) => {
         req.query.from = moment(from).startOf("day").toISOString()
         req.query.to = moment(to).endOf("day").toISOString()
 
+        console.log("Request Query : ", req.query)
+
         return next()
       }
       throw new Error()
