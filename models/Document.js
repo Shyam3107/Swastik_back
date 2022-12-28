@@ -33,6 +33,10 @@ const documentSchema = new Schema(
       type: Date,
       required: true,
     },
+    isNationalPermit: {
+      type: Boolean,
+      default: false
+    },
     addedBy: {
       type: Schema.Types.ObjectId,
       ref: "Account",

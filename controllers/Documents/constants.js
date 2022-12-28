@@ -6,6 +6,7 @@ export const fileHeader = [
   "Pollution Paid Upto",
   "Permit Paid Upto",
   "National Permit Paid Upto",
+  "Is National Permit"
 ]
 
 export const modelHeader = [
@@ -16,6 +17,7 @@ export const modelHeader = [
   "pollutionPaidUpto",
   "permitPaidUpto",
   "nationalPermitPaidUpto",
+  "isNationalPermit"
 ]
 
 export const validateArr = modelHeader

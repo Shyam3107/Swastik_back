@@ -84,11 +84,13 @@ export const getHome = async (req, res) => {
 
     home.nationalPermit[0] = await Document.find({
       companyAdminId,
+      isNationalPermit: true,
       nationalPermitPaidUpto: { $gte: moment() },
     }).countDocuments()
 
     home.nationalPermit[1] = await Document.find({
       companyAdminId,
+      isNationalPermit: true,
       nationalPermitPaidUpto: { $lt: moment() },
     }).countDocuments()
 

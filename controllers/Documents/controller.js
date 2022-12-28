@@ -42,6 +42,8 @@ export const getDocuments = async (req, res) => {
       documents = parseResponse(documents)
 
       documents = documents.map((val) => {
+        // Want to how as it in Documents table
+        // thats why changing in expired and active
         let temp = {
           taxStatus: val.taxPaidUpto,
           insuranceStatus: val.insurancePaidUpto,
@@ -49,16 +51,21 @@ export const getDocuments = async (req, res) => {
           pollutionStatus: val.pollutionPaidUpto,
           permitStatus: val.permitPaidUpto,
           nationalPermitStatus: val.nationalPermitPaidUpto,
+          isNationalPermit: val.isNationalPermit
         }
 
         Object.keys(temp).forEach((key) => {
+          if (key === "isNationalPermit") {
+            temp[key] = temp[key] ? "YES" : "NO"
+            return
+          }
           let diff = moment(temp[key]).diff(moment().endOf("day"), "days")
           temp[key] =
             diff < 0
               ? "Expired"
               : diff < 8
-              ? `${diff} Day${diff > 1 ? "s" : ""}`
-              : "Active"
+                ? `${diff} Day${diff > 1 ? "s" : ""}`
+                : "Active"
         })
         return {
           _id: val._id,
@@ -110,11 +117,21 @@ export const uploadDocuments = async (req, res) => {
             mssg = `Two rows can't have same Vehicle No. ${value}`
           vehicleNo = value
           tempVehicleNo[value] = true
-        } else if (!value) mssg = `Enter Valid date for ${vehicleNo}`
+        } else if (!value) mssg = `Enter Valid value for ${vehicleNo} for ${head} field`
+
+        // This condition is specific for isNationalPermit Field
+        if (head === "isNationalPermit") {
+          value = value.toUpperCase()
+          if (value === "YES") value = true
+          else if (value === "NO") value = false
+          else {
+            mssg = `Enter Valid value for ${vehicleNo} for isNaionalPermit field`
+          }
+        }
 
         if (mssg) throw mssg
 
-        if (index > 0) {
+        if (head != "isNationalPermit" && index > 0) {
           value = validateDateWhileUpload(value, ind)
         }
 
@@ -198,9 +215,8 @@ export const deleteDocuments = async (req, res) => {
     await Document.deleteMany({ _id: documentIds })
 
     return res.status(200).json({
-      message: `Successfully Deleted ${documentIds.length} Document${
-        documentIds.length > 1 ? "s" : ""
-      }`,
+      message: `Successfully Deleted ${documentIds.length} Document${documentIds.length > 1 ? "s" : ""
+        }`,
     })
   } catch (error) {
     return handleError(res, error)
@@ -233,6 +249,7 @@ export const downloadDocuments = async (req, res) => {
         nationalPermitPaidUpto: formatDateInDDMMYYY(
           val?.nationalPermitPaidUpto
         ),
+        isNationalPermit: val?.isNationalPermit ? "YES" : "NO",
         addedBy: val?.addedBy?.location,
       }
     })
@@ -245,6 +262,7 @@ export const downloadDocuments = async (req, res) => {
       columnHeaders("Pollution Paid Upto", "pollutionPaidUpto"),
       columnHeaders("Permit Paid Upto", "permitPaidUpto"),
       columnHeaders("National Permit Paid Upto", "nationalPermitPaidUpto"),
+      columnHeaders("Is National Permit", "isNationalPermit"),
     ]
 
     return sendExcelFile(res, [column1], [data], ["Documents"])
