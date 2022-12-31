@@ -4,6 +4,7 @@ import cors from "cors"
 import dotenv from "dotenv"
 import mongoose from "mongoose"
 import bodyParser from "body-parser"
+import compression from "compression"
 
 import { checkUser } from "./middlewares/checkUser.js"
 import tripRoute from "./controllers/Trips/route.js"
@@ -25,6 +26,7 @@ import { access, PORT } from "./config/constants.js"
 import httpCallLogger from "./middlewares/httpCallLogger.js"
 
 app.use(cors())
+app.use(compression())
 ///app.use(express.json())
 app.use(bodyParser.json({ limit: "50mb" }))
 app.use(
