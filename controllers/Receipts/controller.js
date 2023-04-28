@@ -60,8 +60,10 @@ export const getReceipt = async (req, res) => {
 }
 
 export const uploadReceipt = async (req, res) => {
+  const session = await Receipt.startSession()
   try {
     const user = req.user
+    session.startTransaction()
 
     let dataToBeInsert = req.body.data
 
@@ -91,15 +93,18 @@ export const uploadReceipt = async (req, res) => {
     }
 
     console.log("Data : ", data)
-
-    const insertData = await Receipt.insertMany(data)
+    const insertData = await Receipt.insertMany(data, { session })
+    await session.commitTransaction()
 
     return res.status(200).json({
       entries: insertData.length,
       message: `Successfully Inserted ${insertData.length} entries`,
     })
   } catch (error) {
+    await session.abortTransaction()
     return handleError(res, error)
+  } finally {
+    session.endSession()
   }
 }
 

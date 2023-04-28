@@ -156,8 +156,8 @@ export const uploadProducts = async (req, res) => {
       data.push(tempVal)
     }
 
+    console.log("Data : ", data)
     const insertData = await Product.insertMany(data, { session })
-
     await session.commitTransaction()
 
     return res.status(200).json({

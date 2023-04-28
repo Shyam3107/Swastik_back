@@ -55,8 +55,10 @@ export const getExpenses = async (req, res) => {
 }
 
 export const uploadExpenses = async (req, res) => {
+  const session = await VehiclesExpense.startSession()
   try {
     const user = req.user
+    session.startTransaction()
 
     let dataToBeInsert = req.body.data
 
@@ -95,14 +97,19 @@ export const uploadExpenses = async (req, res) => {
       data.push(tempVal)
     }
 
-    const insertData = await VehiclesExpense.insertMany(data)
+    console.log("Data : ", data)
+    const insertData = await VehiclesExpense.insertMany(data, { session })
+    await session.commitTransaction()
 
     return res.status(200).json({
       entries: insertData.length,
       message: `Successfully Inserted ${insertData.length} entries`,
     })
   } catch (error) {
+    await session.abortTransaction()
     return handleError(res, error)
+  } finally {
+    session.endSession()
   }
 }
 
@@ -182,9 +189,8 @@ export const deleteExpenses = async (req, res) => {
     await VehiclesExpense.deleteMany({ _id: expenseIds })
 
     return res.status(200).json({
-      message: `Vehicles Expense${
-        expenseIds.length > 1 ? "s" : ""
-      } Deleted Successfully`,
+      message: `Vehicles Expense${expenseIds.length > 1 ? "s" : ""
+        } Deleted Successfully`,
     })
   } catch (error) {
     return handleError(res, error)

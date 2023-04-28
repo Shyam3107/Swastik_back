@@ -79,8 +79,10 @@ export const getUniquePumpNames = async (req, res) => {
 }
 
 export const uploadDiesels = async (req, res) => {
+  const session = await Diesel.startSession()
   try {
     const user = req.user
+    session.startTransaction()
 
     let dataToBeInsert = req.body.data
 
@@ -111,14 +113,19 @@ export const uploadDiesels = async (req, res) => {
       data.push(tempVal)
     }
 
-    const insertData = await Diesel.insertMany(data)
+    console.log("Data : ", data)
+    const insertData = await Diesel.insertMany(data, { session })
+    await session.commitTransaction()
 
     return res.status(200).json({
       entries: insertData.length,
       message: `Successfully Inserted ${insertData.length} entries`,
     })
   } catch (error) {
+    await session.abortTransaction()
     return handleError(res, error)
+  } finally {
+    session.endSession()
   }
 }
 
@@ -183,9 +190,8 @@ export const deleteDiesels = async (req, res) => {
 
     return res.status(200).json({
       data: deletedData,
-      message: `Successfully Deleted ${dieselIds.length} Diesel${
-        dieselIds.length > 1 ? "s" : ""
-      }`,
+      message: `Successfully Deleted ${dieselIds.length} Diesel${dieselIds.length > 1 ? "s" : ""
+        }`,
     })
   } catch (error) {
     return handleError(res, error)
