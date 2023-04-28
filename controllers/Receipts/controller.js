@@ -7,12 +7,15 @@ import {
   parseResponse,
   formatDateInDDMMYYY,
   columnHeaders,
+  validateDateWhileUpload,
 } from "../../utils/utils.js"
 import Receipt from "../../models/Receipt.js"
 import { sendExcelFile } from "../../utils/sendFile.js"
 import { INDIA_TZ } from "../../config/constants.js"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
+
+const fileHeader = ["Date", "Amount", "Remarks"]
 
 const modelHeader = ["date", "amount", "remarks"]
 
@@ -51,6 +54,50 @@ export const getReceipt = async (req, res) => {
     if (!receipts) throw "Record Not Found"
 
     return res.status(200).json({ data: receipts })
+  } catch (error) {
+    return handleError(res, error)
+  }
+}
+
+export const uploadReceipt = async (req, res) => {
+  try {
+    const user = req.user
+
+    let dataToBeInsert = req.body.data
+
+    let data = []
+
+    for (let ind = 0; ind < dataToBeInsert.length; ind++) {
+      const item = dataToBeInsert[ind]
+      let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId }
+      let mssg = ""
+
+      for (let index = 0; index < modelHeader.length; index++) {
+        let head = modelHeader[index]
+        let value = item[fileHeader[index]]
+
+        if (!value) mssg = `Enter Valid ${fileHeader[index]}`
+
+        if (mssg) throw mssg
+
+        if (head === "date") {
+          value = validateDateWhileUpload(value, ind)
+        }
+
+        tempVal[head] = value
+      }
+
+      data.push(tempVal)
+    }
+
+    console.log("Data : ", data)
+
+    const insertData = await Receipt.insertMany(data)
+
+    return res.status(200).json({
+      entries: insertData.length,
+      message: `Successfully Inserted ${insertData.length} entries`,
+    })
   } catch (error) {
     return handleError(res, error)
   }
@@ -122,9 +169,8 @@ export const deleteReceipt = async (req, res) => {
 
     return res.status(200).json({
       data: deletedData,
-      message: `Receipt${
-        receiptIds.length > 1 ? "s" : ""
-      } Deleted Successfully`,
+      message: `Receipt${receiptIds.length > 1 ? "s" : ""
+        } Deleted Successfully`,
     })
   } catch (error) {
     return handleError(res, error)

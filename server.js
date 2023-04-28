@@ -46,6 +46,7 @@ app.listen(process.env.PORT || PORT, () => {
 const dbURI = process.env.MONGODB_URL
 
 mongoose
+  .set('strictQuery', true)
   .connect(dbURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,

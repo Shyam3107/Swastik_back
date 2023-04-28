@@ -9,8 +9,7 @@
 30. Submit button for choosing from and to
 31. show button to make voucher from dino itself, if exist view voucher else make voucher
 32. button to navigate voucher to dino
-33. documents downlodloading mein page loa ho rha hai ---- done
-34. going to expire within 7 days, add yellow color in it
+33. Table header to be sticky and add filter operations
 
 import * as React from "react";
 import DatePicker from "react-datepicker";
