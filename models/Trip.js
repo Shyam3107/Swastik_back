@@ -46,6 +46,9 @@ const tripSchema = new Schema(
       type: Number,
       required: true,
     },
+    bags: {
+      type: Number
+    },
     driverName: {
       type: String,
       trim: true,

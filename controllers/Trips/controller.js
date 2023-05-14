@@ -16,6 +16,7 @@ import { sendExcelFile } from "../../utils/sendFile.js"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
 
+// Get the list of Trips or a trip
 export const getTrips = async (req, res) => {
   try {
     const user = req.user
@@ -33,6 +34,8 @@ export const getTrips = async (req, res) => {
     }
 
     let select = { __v: 0, createdAt: 0, updatedAt: 0, companyAdminId: 0 }
+
+    // If DI No given then fetch that specific record
     if (diNo)
       trips = await Trip.findOne({
         diNo,
@@ -42,6 +45,7 @@ export const getTrips = async (req, res) => {
         select: "location consignor branch",
       })
     else {
+      // Find all Trips
       trips = await Trip.find(query)
         .select(select)
         .populate({ path: "addedBy", select: "location" })
@@ -64,6 +68,7 @@ export const getTrips = async (req, res) => {
   }
 }
 
+// Upload the List of Trips
 export const uploadTrips = async (req, res) => {
   const session = await Trip.startSession()
   try {
@@ -72,6 +77,7 @@ export const uploadTrips = async (req, res) => {
     const dataToBeInsert = req.body.data
 
     let data = []
+    // To keep the record of DI NO. present in the list
     let tempDiNo = {}
 
     for (let ind = 0; ind < dataToBeInsert.length; ind++) {
@@ -94,7 +100,7 @@ export const uploadTrips = async (req, res) => {
 
           diNo = value
           tempDiNo[value] = true
-        } else if (index < 10 && !value) {
+        } else if ((head !== "remarks" && head !== "rate" && head !== "billingRate") && !value) {
           // Remarks, Rate and Billing Rate is not important
           mssg = `${fileHeader[index]} is required for DI No. ${diNo}`
         } else if (head === "driverPhone" && !validatePhoneNo(value))
@@ -118,6 +124,7 @@ export const uploadTrips = async (req, res) => {
         tempVal[head] = value
       }
 
+      // Removed unnecessary fields
       if (!tempVal.pumpName) delete tempVal.pumpName
       if (!tempVal.diesel) delete tempVal.diesel
       if (!tempVal.dieselIn) delete tempVal.dieselIn
@@ -143,6 +150,7 @@ export const uploadTrips = async (req, res) => {
   }
 }
 
+// Add a trip
 export const addTrips = [
   validateBody(validateArr),
   async (req, res) => {
@@ -181,6 +189,7 @@ export const addTrips = [
   },
 ]
 
+// Edit a trip
 export const editTrips = [
   validateBody(validateArr),
   async (req, res) => {
@@ -225,6 +234,7 @@ export const editTrips = [
   },
 ]
 
+// Delete the Trips as per given List of IDs
 export const deleteTrips = async (req, res) => {
   try {
     const errors = errorValidation(req, res)
@@ -236,15 +246,15 @@ export const deleteTrips = async (req, res) => {
     await Trip.deleteMany({ _id: tripIds })
 
     return res.status(200).json({
-      message: `Successfully Deleted ${tripIds.length} Trip${
-        tripIds.length > 1 ? "s" : ""
-      }`,
+      message: `Successfully Deleted ${tripIds.length} Trip${tripIds.length > 1 ? "s" : ""
+        }`,
     })
   } catch (error) {
     return handleError(res, error)
   }
 }
 
+// Download The list of trips
 export const downloadTrips = async (req, res) => {
   try {
     const companyAdminId = req?.user?.companyAdminId
@@ -303,6 +313,7 @@ export const downloadTrips = async (req, res) => {
   }
 }
 
+// Get all Trips of Specific Vehicle
 export const getTripsByVehicle = async (req, res) => {
   try {
     const companyAdminId = req.user.companyAdminId
@@ -339,6 +350,7 @@ export const getTripsByVehicle = async (req, res) => {
   }
 }
 
+// Download the list of trips of specific vehicle
 export const downloadTripsByVehicle = async (req, res) => {
   try {
     const companyAdminId = req.user.companyAdminId

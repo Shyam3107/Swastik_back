@@ -59,6 +59,7 @@ export const getProducts = async (req, res) => {
 
       data.logistics = tempLogistics
 
+      // To find the quantity Received and Issued during that period
       const tempQty = await Logistic.aggregate([
         {
           $match: {
@@ -109,6 +110,7 @@ export const getProducts = async (req, res) => {
   }
 }
 
+// Get The the List of Products 
 export const getProductsName = async (req, res) => {
   try {
     const companyAdminId = req?.user?.companyAdminId
@@ -123,6 +125,7 @@ export const getProductsName = async (req, res) => {
   }
 }
 
+// Upload the Product list
 export const uploadProducts = async (req, res) => {
   const session = await Product.startSession()
   try {
@@ -171,6 +174,7 @@ export const uploadProducts = async (req, res) => {
   }
 }
 
+// Add a Product
 export const addProducts = [
   validateBody(validateArr),
   async (req, res) => {
@@ -194,6 +198,7 @@ export const addProducts = [
   },
 ]
 
+// Update a Product
 export const editProducts = [
   validateBody(validateArr),
   async (req, res) => {
@@ -218,6 +223,7 @@ export const editProducts = [
   },
 ]
 
+// Delete List of Products
 export const deleteProducts = async (req, res) => {
   try {
     const errors = errorValidation(req, res)
@@ -242,6 +248,7 @@ export const deleteProducts = async (req, res) => {
   }
 }
 
+// Download List of all Products with its Quantity
 export const downloadProducts = async (req, res) => {
   try {
     let products = await Product.find({
@@ -276,6 +283,7 @@ export const downloadProducts = async (req, res) => {
   }
 }
 
+// Download a Product Ledger
 export const downloadProductsById = async (req, res) => {
   try {
     const companyAdminId = req?.user?.companyAdminId
