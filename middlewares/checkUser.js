@@ -10,15 +10,17 @@ export const checkUser = (accessType = false) => {
       if (req.headers.authorization) {
         const token = req.headers.authorization.split(" ")[1]
         req.user = verify(token, process.env.JWT_SECRET_KEY)
-        if (
-          accessType &&
-          req.method != "GET" &&
-          !isOperationAllowed(req.user, accessType, methods[req.method])
-        ) {
-          return res
-            .status(500)
-            .json({ errors: "You don't have permission for this" })
-        }
+
+        // MORE GENERIC, USER CAN EDIT HIS OWN ACCOUNT
+        // if (
+        //   accessType &&
+        //   req.method != "GET" &&
+        //   !isOperationAllowed(req.user, accessType, methods[req.method])
+        // ) {
+        //   return res
+        //     .status(500)
+        //     .json({ errors: "You don't have permission for this" })
+        // }
 
         // Handle From and To value in Middleware itself
         let { from = moment().startOf("month"), to = moment() } = req.query

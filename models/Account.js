@@ -34,6 +34,10 @@ const accountSchema = new Schema(
       type: String,
       trim: true,
     },
+    phone2: {
+      type: String,
+      trim: true,
+    },
     companyName: {
       type: String,
       trim: true,
