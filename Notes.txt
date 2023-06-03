@@ -10,6 +10,9 @@
 31. show button to make voucher from dino itself, if exist view voucher else make voucher
 32. button to navigate voucher to dino
 33. Table header to be sticky and add filter operations
+34. No one can delete entry >= 1 month except admin
+35. on deleting site, all entry of that site will b deleted, dialog for confirmation
+36. on deleting, data vahi rahega, date change ho jata hai
 
 import * as React from "react";
 import DatePicker from "react-datepicker";

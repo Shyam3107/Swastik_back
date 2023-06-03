@@ -38,13 +38,14 @@ export const getVehiclesReport = async (req, res) => {
       date: { $gte: from, $lte: to },
     }
 
-    let trips = await Trip.find(query)
+    let trips = Trip.find(query)
       .select({
         _id: 0,
         date: 1,
         location: 1,
         vehicleNo: 1,
         quantity: 1,
+        driverName: 1,
         pumpName: 1,
         diesel: 1,
         dieselIn: 1,
@@ -55,9 +56,20 @@ export const getVehiclesReport = async (req, res) => {
       .populate(populate)
       .sort({ date: 1 })
 
-    trips = parseResponse(trips)
+    let vehicleExpenses = VehiclesExpense.find(query)
+      .select(select)
+      .populate(populate)
 
-    trips = trips.map((val) => {
+    let officeExpenses = OfficeExpense.find(query)
+      .select(select)
+      .populate(populate)
+
+    let receipts = Receipt.find(query).select(select).populate(populate)
+
+    const data = await Promise.all([trips, vehicleExpenses, officeExpenses, receipts])
+
+    trips = data[0].map((val) => {
+      val = val._doc
       val = {
         ...val,
         diesel: val.dieselIn === "Litre" ? val.diesel : "",
@@ -70,13 +82,8 @@ export const getVehiclesReport = async (req, res) => {
       return val
     })
 
-    let vehicleExpenses = await VehiclesExpense.find(query)
-      .select(select)
-      .populate(populate)
-
-    vehicleExpenses = parseResponse(vehicleExpenses)
-
-    vehicleExpenses = vehicleExpenses.map((val) => {
+    vehicleExpenses = data[1].map((val) => {
+      val = val._doc
       val = {
         ...val,
         debit: val.amount,
@@ -88,13 +95,8 @@ export const getVehiclesReport = async (req, res) => {
       return val
     })
 
-    let officeExpenses = await OfficeExpense.find(query)
-      .select(select)
-      .populate(populate)
-
-    officeExpenses = parseResponse(officeExpenses)
-
-    officeExpenses = officeExpenses.map((val) => {
+    officeExpenses = data[2].map((val) => {
+      val = val._doc
       val = {
         ...val,
         addedBy: val?.addedBy?.location ?? "",
@@ -105,11 +107,8 @@ export const getVehiclesReport = async (req, res) => {
       return val
     })
 
-    let receipts = await Receipt.find(query).select(select).populate(populate)
-
-    receipts = parseResponse(receipts)
-
-    receipts = receipts.map((val) => {
+    receipts = data[3].map((val) => {
+      val = val._doc
       val = {
         ...val,
         addedBy: val?.addedBy?.location ?? "",
@@ -125,6 +124,7 @@ export const getVehiclesReport = async (req, res) => {
       columnHeaders("Vehicle No.", "vehicleNo"),
       columnHeaders("Location", "location"),
       columnHeaders("Qty", "quantity"),
+      columnHeaders("Driver", "driverName"),
       columnHeaders("Diesel(ltr)", "diesel"),
       columnHeaders("Diesel(Amt)", "amount"),
       columnHeaders("Pump Name", "pumpName"),
@@ -137,7 +137,7 @@ export const getVehiclesReport = async (req, res) => {
     return sendExcelFile(
       res,
       [columns],
-      [[...trips, ...vehicleExpenses, ...officeExpenses, ...receipts]],
+      [[...trips, ...vehicleExpenses, ...officeExpenses, ...receipts].sort((a, b) => a.date > b.date ? 1 : -1)],
       ["Reports"]
     )
   } catch (error) {
@@ -269,14 +269,14 @@ export const getHardwareShopReport = async (req, res) => {
     let { from, to } = req.query
 
     let match = {
-      companyAdminId: mongoose.Types.ObjectId(user?.companyAdminId?._id),
-      date: { $gte: new Date(from), $lte: new Date(to) },
+      $match: {
+        companyAdminId: mongoose.Types.ObjectId(user?.companyAdminId?._id),
+        date: { $gte: new Date(from), $lte: new Date(to) },
+      }
     }
 
     let shopWise = await HardwareShopBill.aggregate([
-      {
-        $match: match,
-      },
+      match,
       {
         $group: {
           _id: {
@@ -300,9 +300,7 @@ export const getHardwareShopReport = async (req, res) => {
     ])
 
     let vehicleWise = await HardwareShopBill.aggregate([
-      {
-        $match: match,
-      },
+      match,
       {
         $group: {
           _id: {

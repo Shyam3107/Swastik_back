@@ -27,6 +27,10 @@ export const checkUser = (accessType = false) => {
         req.query.from = moment(from).startOf("day").toISOString()
         req.query.to = moment(to).endOf("day").toISOString()
 
+        if (moment(req.query.from).isAfter(req.query.to)) {
+          return res.status(400).json({ errors: "From Date should be Before To Date" })
+        }
+
         console.log("Request Query : ", req.query)
 
         return next()

@@ -212,7 +212,7 @@ export const downloadExpenses = async (req, res) => {
       columnHeaders("Remarks", "remarks"),
       columnHeaders("Added By", "addedBy"),
     ]
-    return sendExcelFile(res, [column1], [data], ["Receipts"])
+    return sendExcelFile(res, [column1], [data], ["Office Expenses"])
   } catch (error) {
     return handleError(res, error)
   }
