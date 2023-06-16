@@ -117,7 +117,7 @@ export const uploadDocuments = async (req, res) => {
             mssg = `Two rows can't have same Vehicle No. ${value}`
           vehicleNo = value
           tempVehicleNo[value] = true
-        } else if (!value) mssg = `Enter Valid value for ${vehicleNo} for ${head} field`
+        } else if (!value) mssg = `Enter Valid value for ${vehicleNo} for ${fileHeader[index]} field`
 
         // This condition is specific for isNationalPermit Field
         if (head === "isNationalPermit") {
@@ -125,7 +125,7 @@ export const uploadDocuments = async (req, res) => {
           if (value === "YES") value = true
           else if (value === "NO") value = false
           else {
-            mssg = `Enter Valid value for ${vehicleNo} for isNaionalPermit field`
+            mssg = `Enter Valid value for ${vehicleNo} for isNaTionalPermit field`
           }
         }
 

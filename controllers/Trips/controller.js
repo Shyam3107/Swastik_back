@@ -100,8 +100,8 @@ export const uploadTrips = async (req, res) => {
 
           diNo = value
           tempDiNo[value] = true
-        } else if ((head !== "remarks" && head !== "rate" && head !== "billingRate") && !value) {
-          // Remarks, Rate and Billing Rate is not important
+        } else if ((head !== "remarks" && head !== "rate" && head !== "billingRate" && head !== "bags") && !value) {
+          // Remarks, Bags, Rate and Billing Rate is not important
           mssg = `${fileHeader[index]} is required for DI No. ${diNo}`
         } else if (head === "driverPhone" && !validatePhoneNo(value))
           mssg = `Fill Valid Driver Phone No. for DI No. ${diNo}`
