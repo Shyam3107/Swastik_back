@@ -55,3 +55,5 @@ export const validateArr = [
   "driverName",
   "driverPhone",
 ]
+
+export const unImportantFields = ["remarks", "rate", "billingRate", "bags", "diesel", "dieselIn", "pumpName"]

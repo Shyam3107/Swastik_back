@@ -10,7 +10,7 @@ import {
   validateDateWhileUpload,
 } from "../../utils/utils.js"
 import Trip from "../../models/Trip.js"
-import { fileHeader, modelHeader, validateArr } from "./constants.js"
+import { fileHeader, modelHeader, unImportantFields, validateArr } from "./constants.js"
 import { INDIA_TZ } from "../../config/constants.js"
 import { sendExcelFile } from "../../utils/sendFile.js"
 
@@ -80,6 +80,8 @@ export const uploadTrips = async (req, res) => {
     // To keep the record of DI NO. present in the list
     let tempDiNo = {}
 
+
+
     for (let ind = 0; ind < dataToBeInsert.length; ind++) {
       const item = dataToBeInsert[ind]
       let tempVal = {
@@ -97,11 +99,11 @@ export const uploadTrips = async (req, res) => {
           if (!value) mssg = "All Fields Should have DI No."
           else if (tempDiNo[value])
             mssg = `Two rows can't have same DI No. ${value}`
-
+            
           diNo = value
           tempDiNo[value] = true
-        } else if ((head !== "remarks" && head !== "rate" && head !== "billingRate" && head !== "bags") && !value) {
-          // Remarks, Bags, Rate and Billing Rate is not important
+        } else if (!unImportantFields.includes(head) && !value) {
+          // If value is empty for required fields
           mssg = `${fileHeader[index]} is required for DI No. ${diNo}`
         } else if (head === "driverPhone" && !validatePhoneNo(value))
           mssg = `Fill Valid Driver Phone No. for DI No. ${diNo}`
