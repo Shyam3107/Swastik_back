@@ -56,4 +56,4 @@ export const validateArr = [
   "driverPhone",
 ]
 
-export const unImportantFields = ["remarks", "rate", "billingRate", "bags", "diesel", "dieselIn", "pumpName"]
+export const unImportantFields = ["remarks", "rate", "billingRate", "bags", "diesel", "dieselIn", "pumpName", "cash"]
