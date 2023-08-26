@@ -133,5 +133,8 @@ export const validateDateWhileUpload = (value, ind) => {
   if (value?.length < 10) {
     throw `Date should be in DD-MM-YYYY format for row ${ind + 2}`
   }
+  const today = moment().endOf("day")
+  if (moment(value).isAfter(today))
+    throw `Future Date is not allowed for row ${ind + 2}`
   return moment(value, dateFormat(value)).endOf("day").toISOString()
 }
