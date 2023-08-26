@@ -144,8 +144,12 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
         }
     ])
 
+    let siteName = Account.findById({ _id: siteId }).select("location")
+
     // This is used to reduce Time, all query are independent
-    let data = await Promise.all([openingCred, openingTrip, openingVE, openingOE, duringCred, duringTrip, duringVE, duringOE, duringAllCred, duringAllTrips, duringAllOE, duringAllVE])
+    let data = await Promise.all([openingCred, openingTrip, openingVE, openingOE, duringCred, duringTrip, duringVE, duringOE, duringAllCred, duringAllTrips, duringAllOE, duringAllVE, siteName])
+
+    siteName = data[12]?.location ?? "SITE"
 
     // Credited - Trips - Vehicle Expense - Office Expense
     openingCred = data[0]?.shift()?.total ?? 0
@@ -201,7 +205,7 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
     // Accumulate all data and sort as per date
     const records = [...duringAllOE, ...duringAllCred, ...duringAllVE, ...duringAllTrips].sort((a, b) => a.date > b.date ? 1 : -1)
 
-    return { openingBal, periodCred, periodDeb, closingBal, tripExpense, officeExpense, vehicleExpense, noOfTrips: duringAllTrips.length, records }
+    return { siteName, openingBal, periodCred, periodDeb, closingBal, tripExpense, officeExpense, vehicleExpense, noOfTrips: duringAllTrips.length, records }
 }
 
 // Get Specifc site report includes, their opening balance. closing balance and all entry by them
