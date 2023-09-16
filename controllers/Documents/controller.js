@@ -132,7 +132,7 @@ export const uploadDocuments = async (req, res) => {
         if (mssg) throw mssg
 
         if (head != "isNationalPermit" && index > 0) {
-          value = validateDateWhileUpload(value, ind)
+          value = validateDateWhileUpload(value, ind, false)
         }
 
         tempVal[head] = value

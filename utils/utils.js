@@ -126,7 +126,7 @@ export const excelDateToJSDate = (serial) => {
   )
 }
 
-export const validateDateWhileUpload = (value, ind) => {
+export const validateDateWhileUpload = (value, ind, checkFutureDate = true) => {
   if (typeof value === "number") {
     value = moment(excelDateToJSDate(value)).toISOString()
   }
@@ -134,7 +134,8 @@ export const validateDateWhileUpload = (value, ind) => {
     throw `Date should be in DD-MM-YYYY format for row ${ind + 2}`
   }
   const today = moment().endOf("day")
-  if (moment(value).isAfter(today))
+  value = moment(value, dateFormat(value)).endOf("day").toISOString()
+  if (checkFutureDate && moment(value).isAfter(today))
     throw `Future Date is not allowed for row ${ind + 2}`
-  return moment(value, dateFormat(value)).endOf("day").toISOString()
+  return value
 }
