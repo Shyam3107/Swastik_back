@@ -80,7 +80,7 @@ export const uploadTrips = async (req, res) => {
     // To keep the record of DI NO. present in the list
     let tempDiNo = {}
 
-
+    console.log("Date to be Insert: ", dataToBeInsert)
 
     for (let ind = 0; ind < dataToBeInsert.length; ind++) {
       const item = dataToBeInsert[ind]
@@ -96,10 +96,10 @@ export const uploadTrips = async (req, res) => {
         let value = item[fileHeader[index]]
 
         if (head === "diNo") {
-          if (!value) mssg = "All Fields Should have DI No."
-          else if (tempDiNo[value])
+          if (!value) mssg = `All Fields Should have DI No. ,row no. ${ind + 2}`
+          else if (tempDiNo[value]) // For same DI No.
             mssg = `Two rows can't have same DI No. ${value}`
-            
+
           diNo = value
           tempDiNo[value] = true
         } else if (!unImportantFields.includes(head) && !value) {
@@ -107,14 +107,14 @@ export const uploadTrips = async (req, res) => {
           mssg = `${fileHeader[index]} is required for DI No. ${diNo}`
         } else if (head === "driverPhone" && !validatePhoneNo(value))
           mssg = `Fill Valid Driver Phone No. for DI No. ${diNo}`
-        else if (
+        else if ( // If Diesel has value but unit ie Litre or Amount is not defined
           item["Diesel"] &&
           head === "dieselIn" &&
           value !== "Litre" &&
           value !== "Amount"
         )
           mssg = `Diesel In should be Litre or Amount for DI No. ${diNo}`
-        else if (item["Diesel"] && !item["Pump Name"])
+        else if (item["Diesel"] && !item["Pump Name"]) // Diesel Taken but Pump name not defined
           mssg = `Pump Name is mandatory if Diesel Taken for DI No. ${diNo}`
 
         if (mssg) throw mssg
@@ -126,7 +126,7 @@ export const uploadTrips = async (req, res) => {
         tempVal[head] = value
       }
 
-      // Removed unnecessary fields
+      // Removed unnecessary fields only if it doesn't have any value
       if (!tempVal.pumpName) delete tempVal.pumpName
       if (!tempVal.diesel) delete tempVal.diesel
       if (!tempVal.dieselIn) delete tempVal.dieselIn

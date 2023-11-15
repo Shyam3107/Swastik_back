@@ -98,6 +98,7 @@ export const uploadDiesels = async (req, res) => {
         const head = modelHeader[index]
         let value = item[fileHeader[index]]
 
+        // Check for Values
         if (head !== "remarks" && head != "quantity" && !value)
           mssg = `Enter Valid ${fileHeader[index]} for row ${ind + 2}`
 

@@ -77,6 +77,7 @@ export const uploadLogistics = async (req, res) => {
         const head = modelHeader[index]
         let value = item[fileHeader[index]]
 
+        // Check For values
         if (head !== "remarks" && !value) {
           mssg = `Enter Valid ${fileHeader[index]} for row ${ind + 2}`
         } else if (head === "date") {
@@ -91,6 +92,7 @@ export const uploadLogistics = async (req, res) => {
 
       if (tempVal.status === "ISSUED") qty = -qty
 
+      // Update Quantity of Product
       const updateData = await Product.findOneAndUpdate(
         {
           name: tempVal?.product?.toUpperCase(),

@@ -73,17 +73,18 @@ export const uploadExpenses = async (req, res) => {
         let head = modelHeader[index]
         let value = item[fileHeader[index]]
 
-        if (index < 5 && !value) mssg = `Enter Valid ${fileHeader[index]}`
+        // Check for Values in Important Fields
+        if (index < 5 && !value) mssg = `Enter Valid ${fileHeader[index]} for row no. ${ind + 2}`
 
-        if (
+        if ( // If Diesel has value but unit ie Litre or Amount is not defined
           item["Diesel"] &&
           head === "dieselIn" &&
           value !== "Litre" &&
           value !== "Amount"
         )
-          mssg = `Diesel In should be Litre or Amount `
-        else if (item["Diesel"] && !item["Pump Name"])
-          mssg = `Pump Name is mandatory if Diesel Taken`
+          mssg = `Diesel In should be Litre or Amount for row no. ${ind + 2}`
+        else if (item["Diesel"] && !item["Pump Name"]) // Diesel Taken but Pump name not defined
+          mssg = `Pump Name is mandatory if Diesel Taken for row no. ${ind + 2}`
 
         if (mssg) throw mssg
 
