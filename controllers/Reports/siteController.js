@@ -94,6 +94,8 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
     ])
 
     // Total Amount Credited and Debited During Period
+
+    // Condition for Aggregate Query
     const duringMatch = {
         $match: {
             date: { $gte: new Date(from), $lte: new Date(to) },
@@ -167,9 +169,10 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
 
     const closingBal = openingBal + periodCred - periodDeb
 
+    // Formatting the Entries/values in specific Period
     duringAllCred = data[8].map(val => {
         return {
-            date: dateToString(val.date),
+            date: val.date,
             remarks: val.remarks,
             credit: val.amount
         }
@@ -177,7 +180,7 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
 
     duringAllTrips = data[9].map(val => {
         return {
-            date: dateToString(val.date),
+            date: val.date,
             remarks: val.remarks,
             debit: val.cash ?? 0,
             location: val.location,
@@ -187,7 +190,7 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
 
     duringAllOE = data[10].map(val => {
         return {
-            date: dateToString(val.date),
+            date: val.date,
             remarks: val.remarks,
             debit: val.amount
         }
@@ -195,7 +198,7 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
 
     duringAllVE = data[11].map(val => {
         return {
-            date: dateToString(val.date),
+            date: val.date,
             vehicleNo: val.vehicleNo,
             remarks: val.remarks,
             debit: val.amount
@@ -203,7 +206,12 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
     })
 
     // Accumulate all data and sort as per date
-    const records = [...duringAllOE, ...duringAllCred, ...duringAllVE, ...duringAllTrips].sort((a, b) => a.date > b.date ? 1 : -1)
+    const records = [...duringAllOE, ...duringAllCred, ...duringAllVE, ...duringAllTrips].sort((a, b) => a.date > b.date ? 1 : -1).map(val => {
+        return {
+            ...val,
+            date: dateToString(val.date),
+        }
+    })
 
     return { siteName, openingBal, periodCred, periodDeb, closingBal, tripExpense, officeExpense, vehicleExpense, noOfTrips: duringAllTrips.length, records }
 }
