@@ -1,13 +1,8 @@
 import exceljs from "exceljs"
 
-export const sendExcelFile = async (
-  res,
-  columns = [],
-  rows = [],
-  filename = []
-) => {
+export const createExcelFile = (columns = [], rows = [], workSheets = []) => {
   let workbook = new exceljs.Workbook()
-  filename.forEach((val, index) => {
+  workSheets.forEach((val, index) => {
     let worksheet = workbook.addWorksheet(val)
     worksheet.columns = columns[index]
 
@@ -17,6 +12,17 @@ export const sendExcelFile = async (
       to: `${String.fromCharCode(64 + columns[index].length)}1`,
     }
   })
+  console.log("Work Book created for ", workSheets)
+  return workbook
+}
+
+export const sendExcelFile = async (
+  res,
+  columns = [], // values will be Array of objects
+  rows = [], // Array of objects
+  workSheets = [] // Size determines the number of worksheet
+) => {
+  let workbook = createExcelFile(columns, rows, workSheets)
 
   res.setHeader(
     "Content-Type",

@@ -4,6 +4,7 @@ import {
   getDieselsReport,
   getHardwareShopReport,
   getVehicleDieselReport,
+  downloadAllVehicleWiseReport
 } from "./controller.js"
 import {
   getAllSiteReport,
@@ -19,5 +20,6 @@ router.get("/getVehicleDieselReport", getVehicleDieselReport)
 router.get("/getAllSiteReport", getAllSiteReport)
 router.get("/getSiteReport", getSiteReport)
 router.get("/downloadSiteReport", downloadSiteReport)
+router.get("/downloadAllVehicleWiseReport", downloadAllVehicleWiseReport)
 
 export default router
