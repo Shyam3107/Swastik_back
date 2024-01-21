@@ -7,7 +7,7 @@ export const createZipFile = async (files = []) => {
     console.log("Number of Files to added : ", files.length)
 
     files.forEach(file => {
-        zip.addFile(file.fileName, file.file)
+        zip.addFile("Files/" + file.fileName, file.file)
     })
 
     // get everything as a buffer
