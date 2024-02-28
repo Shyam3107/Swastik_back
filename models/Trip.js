@@ -4,7 +4,9 @@ const { Schema, model } = mongoose
 const tripSchema = new Schema(
   {
     diNo: {
-      type: Number,
+      type: String,
+      trim: true,
+      uppercase: true,
       required: true,
     },
     lrNo: {
@@ -47,6 +49,14 @@ const tripSchema = new Schema(
       required: true,
     },
     bags: {
+      type: Number
+    },
+    shortage: {
+      type: String,
+      uppercase: true,
+      trim: true,
+    },
+    shortageAmount: {
       type: Number
     },
     driverName: {

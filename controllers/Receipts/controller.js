@@ -78,7 +78,7 @@ export const uploadReceipt = async (req, res) => {
         let head = modelHeader[index]
         let value = item[fileHeader[index]]
 
-        if (!value) mssg = `Enter Valid ${fileHeader[index]}`
+        if (!value) mssg = `Enter Valid ${fileHeader[index]} for row no. ${ind + 2}`
 
         if (mssg) throw mssg
 

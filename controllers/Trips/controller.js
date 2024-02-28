@@ -297,6 +297,8 @@ export const downloadTrips = async (req, res) => {
       columnHeaders("Vehicle No.", "vehicleNo"),
       columnHeaders("Quantity", "quantity"),
       columnHeaders("Material", "material"),
+      columnHeaders("Shortage","shortage"),
+      columnHeaders("Shortage Amount","shortageAmount"),
       columnHeaders("Driver Name", "driverName"),
       columnHeaders("Driver Phone", "driverPhone"),
       columnHeaders("Diesel", "diesel"),

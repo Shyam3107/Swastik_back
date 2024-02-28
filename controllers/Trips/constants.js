@@ -9,6 +9,8 @@ export const fileHeader = [
   "Quantity",
   "Bags",
   "Material",
+  "Shortage",
+  "Shortage Amount",
   "Driver Name",
   "Driver Phone",
   "Diesel",
@@ -31,6 +33,8 @@ export const modelHeader = [
   "quantity",
   "bags",
   "material",
+  "shortage",
+  "shortageAmount",
   "driverName",
   "driverPhone",
   "diesel",
@@ -56,4 +60,4 @@ export const validateArr = [
   "driverPhone",
 ]
 
-export const unImportantFields = ["remarks", "rate", "billingRate", "bags", "diesel", "dieselIn", "pumpName", "cash"]
+export const unImportantFields = ["remarks", "rate", "billingRate", "bags","shortage","shortageAmount", "diesel", "dieselIn", "pumpName", "cash"]
