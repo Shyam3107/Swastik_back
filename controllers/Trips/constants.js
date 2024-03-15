@@ -46,6 +46,12 @@ export const modelHeader = [
   "rate",
 ]
 
+export const rateFileHeader = [
+  "DI No.",
+  "Vehicle No.",
+  "Rate"
+]
+
 export const validateArr = [
   "diNo",
   "lrNo",
@@ -60,4 +66,4 @@ export const validateArr = [
   "driverPhone",
 ]
 
-export const unImportantFields = ["remarks", "rate", "billingRate", "bags","shortage","shortageAmount", "diesel", "dieselIn", "pumpName", "cash"]
+export const unImportantFields = ["remarks", "rate", "billingRate", "bags", "shortage", "shortageAmount", "diesel", "dieselIn", "pumpName", "cash"]

@@ -56,6 +56,8 @@ export const getVehiclesReport = async (req, res) => {
         dieselIn: 1,
         cash: 1,
         remarks: 1,
+        billingRate: 1,
+        rate: 1,
         addedBy: 1,
       })
       .populate(populate)
@@ -136,6 +138,8 @@ export const getVehiclesReport = async (req, res) => {
       columnHeaders("Credit", "credit"),
       columnHeaders("Debit", "debit"),
       columnHeaders("Remarks", "remarks"),
+      columnHeaders("Billing Rate", "billingRate"),
+      columnHeaders("Rate", "rate"),
       columnHeaders("Added By", "addedBy"),
     ]
 
@@ -488,7 +492,7 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
     }
 
     let tripsData = Trip.find(query)
-      .select({ ...select, diNo: 0, lrNo: 0, partyName: 0, bags: 0, driverPhone: 0, rate: 0, billingRate: 0 })
+      .select({ ...select, diNo: 0, lrNo: 0, partyName: 0, bags: 0, driverPhone: 0 })
       .sort({ date: 1 })
 
     let expenseData = VehiclesExpense.find(query)
@@ -571,6 +575,8 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       columnHeaders("Amount (Bill)", "amountFromPump"),
       columnHeaders("Pump Name (Bill)", "pumpNameFromPump"),
       columnHeaders("Amount", "amount"),
+      columnHeaders("Billing Rate", "billingRate"),
+      columnHeaders("Rate", "rate"),
       columnHeaders("Remarks", "remarks"),
     ]
 

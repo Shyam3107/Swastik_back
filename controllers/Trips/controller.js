@@ -152,6 +152,68 @@ export const uploadTrips = async (req, res) => {
   }
 }
 
+// Upload the Rate of Trips
+export const uploadRates = async (req, res) => {
+  const session = await Trip.startSession()
+  try {
+    session.startTransaction()
+
+    const dataToBeUpdate = req.body.data ?? []
+
+    console.log("Date to be Update: ", dataToBeUpdate)
+
+    // For Excel, DI whose rate hasn't been updated
+    const column1 = [
+      columnHeaders("DI No.", "DI No."),
+      columnHeaders("Date", "Date"),
+      columnHeaders("Vehicle No.", "Vehicle No."),
+      columnHeaders("Billing Rate", "Billing Rate"),
+      columnHeaders("Rate", "Rate"),
+      columnHeaders("Reason", "reason")
+    ]
+
+    let row = []
+
+    for (let ind = 0; ind < dataToBeUpdate.length; ind++) {
+      const item = dataToBeUpdate[ind]
+
+      let diNo = item["DI No."]
+      let vehicleNo = item["Vehicle No."]
+      let rate = item["Rate"]
+      let billingRate = item["Billing Rate"]
+
+      let tempObj = { ...item, reason: "" }
+      if (billingRate === null || billingRate === undefined)
+        throw `Billing Rate is required for row no. ${ind + 2}`
+      if (rate === null || rate === undefined)
+        throw `Rate is required for row no. ${ind + 2}`
+
+      const updateRate = await Trip.findOneAndUpdate({ diNo, vehicleNo }, { $set: { billingRate, rate } }, { session })
+
+      // If not updated, means DI no. with vehicle doesn't exist
+      if (!updateRate) {
+        tempObj.reason = "Record doesn't exist"
+        row.push(tempObj)
+      }
+    }
+
+    console.log("No. of Total Entry : " + dataToBeUpdate.length)
+    console.log("No. of Success Entry : " + (dataToBeUpdate.length - row.length))
+    console.log("No. of Failed Entry : " + row.length)
+
+    console.log("Row : ", row)
+    await session.commitTransaction()
+
+    // TODO : EXCEL DOWNLOADING IN CORRUPT FORMAT
+    return sendExcelFile(res, [column1], [row], ["Entries"])
+  } catch (error) {
+    await session.abortTransaction()
+    return handleError(res, error)
+  } finally {
+    session.endSession()
+  }
+}
+
 // Add a trip
 export const addTrips = [
   validateBody(validateArr),
@@ -297,8 +359,8 @@ export const downloadTrips = async (req, res) => {
       columnHeaders("Vehicle No.", "vehicleNo"),
       columnHeaders("Quantity", "quantity"),
       columnHeaders("Material", "material"),
-      columnHeaders("Shortage","shortage"),
-      columnHeaders("Shortage Amount","shortageAmount"),
+      columnHeaders("Shortage", "shortage"),
+      columnHeaders("Shortage Amount", "shortageAmount"),
       columnHeaders("Driver Name", "driverName"),
       columnHeaders("Driver Phone", "driverPhone"),
       columnHeaders("Diesel", "diesel"),
