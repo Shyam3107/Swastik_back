@@ -158,7 +158,7 @@ export const uploadRates = async (req, res) => {
   try {
     session.startTransaction()
 
-    const dataToBeUpdate = req.body.data ?? []
+    const dataToBeUpdate = req.query.data ?? []
 
     console.log("Date to be Update: ", dataToBeUpdate)
 
@@ -175,7 +175,7 @@ export const uploadRates = async (req, res) => {
     let row = []
 
     for (let ind = 0; ind < dataToBeUpdate.length; ind++) {
-      const item = dataToBeUpdate[ind]
+      const item = JSON.parse(dataToBeUpdate[ind])
 
       let diNo = item["DI No."]
       let vehicleNo = item["Vehicle No."]
@@ -204,7 +204,6 @@ export const uploadRates = async (req, res) => {
     console.log("Row : ", row)
     await session.commitTransaction()
 
-    // TODO : EXCEL DOWNLOADING IN CORRUPT FORMAT
     return sendExcelFile(res, [column1], [row], ["Entries"])
   } catch (error) {
     await session.abortTransaction()
