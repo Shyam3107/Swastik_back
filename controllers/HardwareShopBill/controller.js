@@ -110,7 +110,6 @@ export const uploadBills = async (req, res) => {
       data.push(tempVal)
     }
 
-    console.log("Data : ", data)
     const insertData = await HardwareShopBill.insertMany(data, { session })
     await session.commitTransaction()
 

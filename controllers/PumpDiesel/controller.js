@@ -114,7 +114,6 @@ export const uploadDiesels = async (req, res) => {
       data.push(tempVal)
     }
 
-    console.log("Data : ", data)
     const insertData = await Diesel.insertMany(data, { session })
     await session.commitTransaction()
 

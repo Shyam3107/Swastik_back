@@ -45,8 +45,6 @@ export const login = async (req, res) => {
 
     const token = sign(user, process.env.JWT_SECRET_KEY)
 
-    console.log("Token : ", token)
-
     return res.status(200).json({ user, token, message: "Login Successful" })
   } catch (error) {
     return handleError(res, error)

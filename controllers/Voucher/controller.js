@@ -212,7 +212,6 @@ export const uploadVoucher = async (req, res) => {
       data.push(tempVal)
     }
 
-    console.log("Data : ", data)
     const insertData = await Voucher.insertMany(data, { session })
     await session.commitTransaction()
 

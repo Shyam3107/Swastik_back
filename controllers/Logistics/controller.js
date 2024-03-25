@@ -110,7 +110,6 @@ export const uploadLogistics = async (req, res) => {
       data.push(tempVal)
     }
 
-    console.log("Data : ", data)
     const insertData = await Logistic.insertMany(data, { session })
     await session.commitTransaction()
 

@@ -80,8 +80,6 @@ export const uploadTrips = async (req, res) => {
     // To keep the record of DI NO. present in the list
     let tempDiNo = {}
 
-    console.log("Date to be Insert: ", dataToBeInsert)
-
     for (let ind = 0; ind < dataToBeInsert.length; ind++) {
       const item = dataToBeInsert[ind]
       let tempVal = {
@@ -136,7 +134,6 @@ export const uploadTrips = async (req, res) => {
       data.push(tempVal)
     }
 
-    console.log("Data : ", data)
     const insertData = await Trip.insertMany(data, { session })
     await session.commitTransaction()
 
@@ -159,8 +156,6 @@ export const uploadRates = async (req, res) => {
     session.startTransaction()
 
     const dataToBeUpdate = req.query.data ?? []
-
-    console.log("Date to be Update: ", dataToBeUpdate)
 
     // For Excel, DI whose rate hasn't been updated
     const column1 = [
@@ -201,7 +196,6 @@ export const uploadRates = async (req, res) => {
     console.log("No. of Success Entry : " + (dataToBeUpdate.length - row.length))
     console.log("No. of Failed Entry : " + row.length)
 
-    console.log("Row : ", row)
     await session.commitTransaction()
 
     return sendExcelFile(res, [column1], [row], ["Entries"])

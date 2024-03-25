@@ -92,7 +92,6 @@ export const uploadReceipt = async (req, res) => {
       data.push(tempVal)
     }
 
-    console.log("Data : ", data)
     const insertData = await Receipt.insertMany(data, { session })
     await session.commitTransaction()
 

@@ -92,7 +92,6 @@ export const uploadExpenses = async (req, res) => {
       data.push(tempVal)
     }
 
-    console.log("Data : ", data)
     const insertData = await OfficeExpense.insertMany(data, { session })
     await session.commitTransaction()
 

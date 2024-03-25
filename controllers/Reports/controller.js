@@ -583,7 +583,6 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
     let excelFiles = []
 
     const vehicleNoList = Object.keys(data)
-    console.log("List of Vehicle No. ", vehicleNoList)
 
     vehicleNoList.forEach(vehicleNo => {
       excelFiles.push(createExcelFile([column1], [data[vehicleNo]], [vehicleNo]).xlsx.writeBuffer())
