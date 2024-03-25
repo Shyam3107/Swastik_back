@@ -14,6 +14,10 @@ export const convertCSVToJSON = async (csvFilePath) => {
   return jsonArray
 }
 
+export function isStringANumber(val) {
+  return Number(val) == val ? Number(val).toFixed(2) : false
+}
+
 export function handleError(res, errors) {
   if (errors.code === 11000) {
     let errMssg = errors?.message

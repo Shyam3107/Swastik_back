@@ -52,9 +52,7 @@ const tripSchema = new Schema(
       type: Number
     },
     shortage: {
-      type: String,
-      uppercase: true,
-      trim: true,
+      type: Number
     },
     shortageAmount: {
       type: Number

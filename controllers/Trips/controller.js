@@ -8,6 +8,7 @@ import {
   parseResponse,
   formatDateInDDMMYYY,
   validateDateWhileUpload,
+  isStringANumber,
 } from "../../utils/utils.js"
 import Trip from "../../models/Trip.js"
 import { fileHeader, modelHeader, unImportantFields, validateArr } from "./constants.js"
@@ -52,6 +53,8 @@ export const getTrips = async (req, res) => {
         .sort({ date: -1 })
       trips = parseResponse(trips)
       trips = trips.map((val) => {
+        if (val?.shortage) val.shortage = isStringANumber(val.shortage) ?? val.shortage
+        if (val?.shortageAmount) val.shortageAmount = isStringANumber(val.shortageAmount) ?? val.shortageAmount
         return {
           ...val,
           date: formatDateInDDMMYYY(val?.date),
@@ -114,6 +117,10 @@ export const uploadTrips = async (req, res) => {
           mssg = `Diesel In should be Litre or Amount for DI No. ${diNo}`
         else if (item["Diesel"] && !item["Pump Name"]) // Diesel Taken but Pump name not defined
           mssg = `Pump Name is mandatory if Diesel Taken for DI No. ${diNo}`
+
+        // Shortage and amount should be 2 decimal
+        if (head == "shortage" && value) value = value?.toFixed(2) ?? value
+        if (head == "shortageAmount" && value) value = value?.toFixed(2) ?? value
 
         if (mssg) throw mssg
 
