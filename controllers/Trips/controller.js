@@ -14,6 +14,7 @@ import Trip from "../../models/Trip.js"
 import { fileHeader, modelHeader, unImportantFields, validateArr } from "./constants.js"
 import { INDIA_TZ } from "../../config/constants.js"
 import { sendExcelFile } from "../../utils/sendFile.js"
+import moment from "moment-timezone"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
 
@@ -55,6 +56,7 @@ export const getTrips = async (req, res) => {
       trips = trips.map((val) => {
         if (val?.shortage) val.shortage = isStringANumber(val.shortage) ?? val.shortage
         if (val?.shortageAmount) val.shortageAmount = isStringANumber(val.shortageAmount) ?? val.shortageAmount
+        if (val?.bags) val.bags = isStringANumber(val.bags) ?? val.bags
         return {
           ...val,
           date: formatDateInDDMMYYY(val?.date),
@@ -121,6 +123,7 @@ export const uploadTrips = async (req, res) => {
         // Shortage and amount should be 2 decimal
         if (head == "shortage" && value) value = value?.toFixed(2) ?? value
         if (head == "shortageAmount" && value) value = value?.toFixed(2) ?? value
+        if (head == "bags" && value) value = value?.toFixed(2) ?? value
 
         if (mssg) throw mssg
 
@@ -162,13 +165,14 @@ export const uploadRates = async (req, res) => {
   try {
     session.startTransaction()
 
-    const dataToBeUpdate = req.query.data ?? []
+    const dataToBeUpdate = req.body.data ?? []
 
     // For Excel, DI whose rate hasn't been updated
     const column1 = [
       columnHeaders("DI No.", "DI No."),
       columnHeaders("Date", "Date"),
       columnHeaders("Vehicle No.", "Vehicle No."),
+      columnHeaders("Quantity", "Quantity"),
       columnHeaders("Billing Rate", "Billing Rate"),
       columnHeaders("Rate", "Rate"),
       columnHeaders("Reason", "reason")
@@ -177,7 +181,7 @@ export const uploadRates = async (req, res) => {
     let row = []
 
     for (let ind = 0; ind < dataToBeUpdate.length; ind++) {
-      const item = JSON.parse(dataToBeUpdate[ind])
+      const item = dataToBeUpdate[ind]
 
       let diNo = item["DI No."]
       let vehicleNo = item["Vehicle No."]
@@ -189,6 +193,7 @@ export const uploadRates = async (req, res) => {
         throw `Billing Rate is required for row no. ${ind + 2}`
       if (rate === null || rate === undefined)
         throw `Rate is required for row no. ${ind + 2}`
+
 
       const updateRate = await Trip.findOneAndUpdate({ diNo, vehicleNo }, { $set: { billingRate, rate } }, { session })
 
@@ -471,5 +476,35 @@ export const downloadTripsByVehicle = async (req, res) => {
     return sendExcelFile(res, [column1], [data], ["Trips"])
   } catch (error) {
     return handleError(res, error)
+  }
+}
+
+// Perform any operation, not linked with frontend
+export const tempController = async (req, res) => {
+  const session = await Trip.startSession()
+  try {
+    session.startTransaction()
+
+    const from = moment().month(1).date(3).year(2024).startOf('day').toISOString()
+    const to = moment().month(1).date(3).year(2024).endOf('day').toISOString()
+
+    const updateDi = await Trip.find({ date: { $gte: from, $lte: to }, })
+
+    for (let ind = 0; ind < updateDi.length; ind++) {
+      const x = updateDi[ind]
+      console.log(x.diNo)
+      const sarch = await Trip.findOne({ diNo: '6970921337' })
+      console.log(sarch)
+      const updatedDi = await Trip.updateOne({ diNo: x.diNo }, { $set: { diNo: x.diNo.toString() } })
+    }
+
+    await session.commitTransaction()
+
+    return res.status(200).json({ updateDi })
+  } catch (error) {
+    await session.abortTransaction()
+    return handleError(res, error)
+  } finally {
+    session.endSession()
   }
 }

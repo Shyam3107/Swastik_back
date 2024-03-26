@@ -48,7 +48,10 @@ export const modelHeader = [
 
 export const rateFileHeader = [
   "DI No.",
+  "Date",
   "Vehicle No.",
+  "Quantity",
+  "Billing Rate",
   "Rate"
 ]
 
