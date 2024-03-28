@@ -195,7 +195,8 @@ export const uploadRates = async (req, res) => {
         throw `Rate is required for row no. ${ind + 2}`
 
 
-      const updateRate = await Trip.findOneAndUpdate({ diNo, vehicleNo }, { $set: { billingRate, rate } }, { session })
+      const updateRate = await Trip.findOneAndUpdate({ diNo, vehicleNo, companyAdminId: req.user.companyAdminId, },
+        { $set: { billingRate, rate } }, { session })
 
       // If not updated, means DI no. with vehicle doesn't exist
       if (!updateRate) {
@@ -204,7 +205,6 @@ export const uploadRates = async (req, res) => {
       }
     }
 
-    console.log("No. of Total Entry : " + dataToBeUpdate.length)
     console.log("No. of Success Entry : " + (dataToBeUpdate.length - row.length))
     console.log("No. of Failed Entry : " + row.length)
 
