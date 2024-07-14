@@ -11,6 +11,7 @@ import {
   isStringANumber,
 } from "../../utils/utils.js"
 import Trip from "../../models/Trip.js"
+import Driver from "../../models/Driver.js"
 import { fileHeader, modelHeader, unImportantFields, validateArr } from "./constants.js"
 import { INDIA_TZ } from "../../config/constants.js"
 import { sendExcelFile } from "../../utils/sendFile.js"
@@ -223,7 +224,13 @@ export const uploadRates = async (req, res) => {
 export const addTrips = [
   validateBody(validateArr),
   async (req, res) => {
+    const session = await Trip.startSession()
+    const driverSession = await Driver.startSession()
     try {
+      session.startTransaction()
+      driverSession.startTransaction()
+
+      const user = req?.user
       const errors = errorValidation(req, res)
       if (errors) {
         return null
@@ -245,15 +252,34 @@ export const addTrips = [
       if (!req.body.cash) delete req.body.cash
       if (!req.body.remarks) delete req.body.remarks
 
-      await Trip.create({
+      await Trip.create([{
         ...req.body,
-        addedBy: req?.user?._id,
+        addedBy: user._id,
+        companyAdminId: user?.companyAdminId,
+      }], { session })
+
+      const { vehicleNo, driverName, driverPhone } = req.body
+
+      await Driver.updateOne({ vehicleNo }, {
+        driverName,
+        driverPhone,
+        lastUpdateBy: user._id,
+        addedBy: user._id,
         companyAdminId: req?.user?.companyAdminId,
-      })
+      }, { upsert: true, driverSession })
+
+      await session.commitTransaction()
+      await driverSession.commitTransaction()
 
       return res.status(200).json({ message: "Trip Added Successfully" })
     } catch (error) {
+      await session.abortTransaction()
+      await driverSession.abortTransaction()
       return handleError(res, error)
+    }
+    finally {
+      await driverSession.endSession()
+      await session.endSession()
     }
   },
 ]

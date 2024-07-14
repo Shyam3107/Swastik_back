@@ -9,6 +9,7 @@ import compression from "compression"
 import { checkUser } from "./middlewares/checkUser.js"
 import tripRoute from "./controllers/Trips/route.js"
 import documentRoute from "./controllers/Documents/route.js"
+import driverRoute from "./controllers/Driver/route.js"
 import accountRoute from "./controllers/Account/route.js"
 import officeExpenseRoute from "./controllers/OfficeExpense/route.js"
 import vehiclesExpenseRoute from "./controllers/VehicleExpense/route.js"
@@ -68,6 +69,7 @@ app.get("/home", checkUser(), getHome)
 
 // VEHICLES
 app.use("/vehicles/trips", checkUser(), tripRoute)
+app.use("/vehicles/drivers", checkUser(), driverRoute)
 app.use("/vehicles/documents", checkUser(), documentRoute)
 app.use("/vehicles/vouchers", checkUser(), voucherRoute)
 
