@@ -13,6 +13,7 @@ import VehiclesExpense from "../../models/VehiclesExpense.js"
 import { INDIA_TZ } from "../../config/constants.js"
 import { sendExcelFile } from "../../utils/sendFile.js"
 import { fileHeader, modelHeader, validateArr } from "./constants.js"
+import Driver from "../../models/Driver.js"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
 
@@ -116,7 +117,12 @@ export const uploadExpenses = async (req, res) => {
 export const addExpenses = [
   validateBody(validateArr),
   async (req, res) => {
+    const session = await VehiclesExpense.startSession()
+    const driverSession = await Driver.startSession()
     try {
+      session.startTransaction()
+      driverSession.startTransaction()
+
       const errors = errorValidation(req, res)
       if (errors) {
         return null
@@ -130,17 +136,36 @@ export const addExpenses = [
 
       if (diesel && !pumpName) throw "Pump Name is Mandatory if Diesel Taken"
 
-      const insertData = await VehiclesExpense.create({
+      await VehiclesExpense.create([{
         ...req.body,
         addedBy: user._id,
         companyAdminId: user.companyAdminId,
-      })
+      }], { session })
+
+      const { vehicleNo, driverName, driverPhone } = req.body
+
+      await Driver.updateOne({ vehicleNo }, {
+        driverName,
+        driverPhone: driverPhone ?? "9999999999",
+        lastUpdateBy: user._id,
+        addedBy: user._id,
+        companyAdminId: req?.user?.companyAdminId,
+      }, { upsert: true, driverSession })
+
+      await session.commitTransaction()
+      await driverSession.commitTransaction()
 
       return res.status(200).json({
         message: "Vehicles Expenses Added Successfully",
       })
     } catch (error) {
+      await session.abortTransaction()
+      await driverSession.abortTransaction()
       return handleError(res, error)
+    }
+    finally {
+      await driverSession.endSession()
+      await session.endSession()
     }
   },
 ]
