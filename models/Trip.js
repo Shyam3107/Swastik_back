@@ -28,6 +28,10 @@ const tripSchema = new Schema(
       trim: true,
       required: true,
     },
+    partyName2: {
+      type: String,
+      trim: true,
+    },
     location: {
       type: String,
       trim: true,

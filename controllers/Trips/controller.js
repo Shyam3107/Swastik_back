@@ -45,7 +45,7 @@ export const getTrips = async (req, res) => {
         companyAdminId: user.companyAdminId,
       }).populate({
         path: "addedBy",
-        select: "location consignor branch",
+        select: "location consignor branch phone phone2 tptCode",
       })
     else {
       // Find all Trips
