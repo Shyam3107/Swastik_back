@@ -22,7 +22,7 @@ import { createExcelFile } from "../../utils/sendFile.js"
 
 momentTimezone.tz.setDefault(INDIA_TZ)
 
-// Get Excel File Trips + Office Exp + Vehicle Exp
+// Get Excel File Trips + Office Exp + Vehicle Exp + Receipts
 export const getVehiclesReport = async (req, res) => {
   try {
     const user = req.user
@@ -54,6 +54,8 @@ export const getVehiclesReport = async (req, res) => {
         pumpName: 1,
         diesel: 1,
         dieselIn: 1,
+        shortage:1,
+        shortageAmount:1,
         cash: 1,
         remarks: 1,
         billingRate: 1,
@@ -135,6 +137,8 @@ export const getVehiclesReport = async (req, res) => {
       columnHeaders("Diesel(ltr)", "diesel"),
       columnHeaders("Diesel(Amt)", "amount"),
       columnHeaders("Pump Name", "pumpName"),
+      columnHeaders("Shortage","shortage"),
+      columnHeaders("Shortage Amount","shortageAmount"),
       columnHeaders("Credit", "credit"),
       columnHeaders("Debit", "debit"),
       columnHeaders("Remarks", "remarks"),
