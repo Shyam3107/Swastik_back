@@ -122,9 +122,13 @@ export const uploadTrips = async (req, res) => {
           mssg = `Pump Name is mandatory if Diesel Taken for DI No. ${diNo}`
 
         // Shortage and amount should be 2 decimal
-        if (head == "shortage" && value) value = value?.toFixed(2) ?? value
-        if (head == "shortageAmount" && value) value = value?.toFixed(2) ?? value
-        if (head == "bags" && value) value = value?.toFixed(2) ?? value
+        if(head == "shortage" || head == "shortageAmount" || head == "bags" ){
+          if(value){
+            value = Number(value)
+            if(!value) mssg = `${head} should be number for DI No. ${diNo}`
+            value = value?.toFixed(2) ?? value
+          }
+        }
 
         if (mssg) throw mssg
 
