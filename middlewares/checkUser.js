@@ -43,6 +43,7 @@ export const checkUser = (accessType = false) => {
             .json({ errors: "From Date should be Before To Date" });
         }
 
+        console.log("User : ", req.user.location);
         console.log("Request Query : ", req.query);
 
         return next();
