@@ -1,5 +1,5 @@
-import { Router } from "express"
-const router = Router()
+import { Router } from "express";
+const router = Router();
 
 import {
   addTrips,
@@ -11,18 +11,22 @@ import {
   downloadTrips,
   getTripsByVehicle,
   downloadTripsByVehicle,
-  tempController
-} from "./controller.js"
+  tempController,
+} from "./controller.js";
+import {
+  checkForPastDataAdditon,
+  checkForPastDataModifications,
+} from "../../middlewares/checkUser.js";
 
-router.get("/getTrips", getTrips)
-router.get("/getTripsByVehicle", getTripsByVehicle)
-router.post("/addTrips", addTrips)
-router.put("/editTrips", editTrips)
-router.post("/uploadTrips", uploadTrips)
-router.delete("/uploadRates", uploadRates)
-router.delete("/deleteTrips", deleteTrips)
-router.get("/downloadTrips", downloadTrips)
-router.get("/downloadTripsByVehicle", downloadTripsByVehicle)
-router.get("/tempController", tempController)
+router.get("/getTrips", getTrips);
+router.get("/getTripsByVehicle", getTripsByVehicle);
+router.post("/addTrips", checkForPastDataAdditon(), addTrips);
+router.put("/editTrips", checkForPastDataModifications("TRIP"), editTrips);
+router.post("/uploadTrips", uploadTrips);
+router.delete("/uploadRates", uploadRates);
+router.delete("/deleteTrips", deleteTrips);
+router.get("/downloadTrips", downloadTrips);
+router.get("/downloadTripsByVehicle", downloadTripsByVehicle);
+router.get("/tempController", tempController);
 
-export default router
+export default router;

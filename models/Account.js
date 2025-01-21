@@ -1,5 +1,5 @@
-import mongoose from "mongoose"
-const { Schema, model } = mongoose
+import mongoose from "mongoose";
+const { Schema, model } = mongoose;
 
 const accountSchema = new Schema(
   {
@@ -88,10 +88,15 @@ const accountSchema = new Schema(
       type: String,
       enum: [null, undefined, "ALL", "SELF"],
     },
+    entriesLastChecked: {
+      type: Date,
+      required: true,
+      default: new Date("2024-12-31"),
+    },
   },
   { timestamps: true }
-)
+);
 
-const Account = model("Account", accountSchema)
+const Account = model("Account", accountSchema);
 
-export default Account
+export default Account;

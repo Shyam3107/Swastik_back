@@ -1,19 +1,27 @@
-import { Router } from "express"
+import { Router } from "express";
 import {
   addReceipt,
   getReceipt,
   deleteReceipt,
   editReceipt,
   downloadReceipt,
-  uploadReceipt
-} from "./controller.js"
-const router = Router()
+  uploadReceipt,
+} from "./controller.js";
+import {
+  checkForPastDataAdditon,
+  checkForPastDataModifications,
+} from "../../middlewares/checkUser.js";
+const router = Router();
 
-router.get("/getReceipt", getReceipt)
-router.post("/addReceipt", addReceipt)
-router.put("/editReceipt", editReceipt)
-router.post("/uploadReceipt", uploadReceipt)
-router.delete("/deleteReceipt", deleteReceipt)
-router.get("/downloadReceipt", downloadReceipt)
+router.get("/getReceipt", getReceipt);
+router.post("/addReceipt", checkForPastDataAdditon(), addReceipt);
+router.put(
+  "/editReceipt",
+  checkForPastDataModifications("RECEIPT"),
+  editReceipt
+);
+router.post("/uploadReceipt", uploadReceipt);
+router.delete("/deleteReceipt", deleteReceipt);
+router.get("/downloadReceipt", downloadReceipt);
 
-export default router
+export default router;

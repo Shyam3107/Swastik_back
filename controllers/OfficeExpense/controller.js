@@ -1,4 +1,4 @@
-import momentTimezone from "moment-timezone"
+import momentTimezone from "moment-timezone";
 import {
   handleError,
   errorValidation,
@@ -8,29 +8,32 @@ import {
   formatDateInDDMMYYY,
   columnHeaders,
   validateDateWhileUpload,
-} from "../../utils/utils.js"
-import OfficeExpense from "../../models/OfficeExpense.js"
-import { sendExcelFile } from "../../utils/sendFile.js"
-import { INDIA_TZ } from "../../config/constants.js"
+  isAdmin,
+} from "../../utils/utils.js";
+import OfficeExpense from "../../models/OfficeExpense.js";
+import { sendExcelFile } from "../../utils/sendFile.js";
+import { INDIA_TZ } from "../../config/constants.js";
+import moment from "moment/moment.js";
+import { getUserLastCheckedOn } from "../../middlewares/checkUser.js";
 
-momentTimezone.tz.setDefault(INDIA_TZ)
+momentTimezone.tz.setDefault(INDIA_TZ);
 
-const fileHeader = ["Date", "Amount", "Remarks"]
+const fileHeader = ["Date", "Amount", "Remarks"];
 
-const modelHeader = ["date", "amount", "remarks"]
+const modelHeader = ["date", "amount", "remarks"];
 
 export const getExpenses = async (req, res) => {
   try {
-    const user = req.user
-    let { expenseId, from, to } = req.query
+    const user = req.user;
+    let { expenseId, from, to } = req.query;
 
-    const userQuery = userRankQuery(user)
-    let expenses
+    const userQuery = userRankQuery(user);
+    let expenses;
     if (expenseId) {
       expenses = await OfficeExpense.findOne({
         _id: expenseId,
         companyAdminId: user.companyAdminId,
-      })
+      });
     } else {
       expenses = await OfficeExpense.find({
         ...userQuery,
@@ -40,150 +43,162 @@ export const getExpenses = async (req, res) => {
           path: "addedBy",
           select: "location",
         })
-        .sort({ date: -1 })
-      expenses = parseResponse(expenses)
+        .sort({ date: -1 });
+      expenses = parseResponse(expenses);
       expenses = expenses.map((val) => {
         return {
           ...val,
           date: formatDateInDDMMYYY(val.date),
           addedBy: val?.addedBy?.location,
-        }
-      })
+        };
+      });
     }
 
-    if (!expenses) throw "Record Not Found"
+    if (!expenses) throw "Record Not Found";
 
-    return res.status(200).json({ data: expenses })
+    return res.status(200).json({ data: expenses });
   } catch (error) {
-    return handleError(res, error)
+    return handleError(res, error);
   }
-}
+};
 
 export const uploadExpenses = async (req, res) => {
-  const session = await OfficeExpense.startSession()
+  const session = await OfficeExpense.startSession();
   try {
-    session.startTransaction()
-    const user = req.user
+    session.startTransaction();
+    const user = req.user;
 
-    let dataToBeInsert = req.body.data
+    let dataToBeInsert = req.body.data;
 
-    let data = []
+    let data = [];
+
+    let lastEntryCheckedOn = await getUserLastCheckedOn(user);
 
     for (let ind = 0; ind < dataToBeInsert.length; ind++) {
-      const item = dataToBeInsert[ind]
-      let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId }
-      let mssg = ""
+      const item = dataToBeInsert[ind];
+      let tempVal = { addedBy: user._id, companyAdminId: user.companyAdminId };
+      let mssg = "";
 
       for (let index = 0; index < modelHeader.length; index++) {
-        let head = modelHeader[index]
-        let value = item[fileHeader[index]]
+        let head = modelHeader[index];
+        let value = item[fileHeader[index]];
 
-        if (!value) mssg = `Enter Valid ${fileHeader[index]} for row no. ${ind + 2}`
+        if (!value)
+          mssg = `Enter Valid ${fileHeader[index]} for row no. ${ind + 2}`;
 
-        if (mssg) throw mssg
+        if (mssg) throw mssg;
 
         if (head === "date") {
-          value = validateDateWhileUpload(value, ind)
+          value = validateDateWhileUpload(value, ind);
+          // User can't add data on set beyond specific date
+          if (!isAdmin(user)) {
+            if (moment(value).isSameOrBefore(lastEntryCheckedOn))
+              throw `You Can not make changes in Past entries for row no. ${
+                ind + 2
+              }`;
+          }
         }
 
-        tempVal[head] = value
+        tempVal[head] = value;
       }
 
-      data.push(tempVal)
+      data.push(tempVal);
     }
 
-    const insertData = await OfficeExpense.insertMany(data, { session })
-    await session.commitTransaction()
+    const insertData = await OfficeExpense.insertMany(data, { session });
+    await session.commitTransaction();
 
     return res.status(200).json({
       entries: insertData.length,
       message: `Successfully Inserted ${insertData.length} entries`,
-    })
+    });
   } catch (error) {
-    await session.abortTransaction()
-    return handleError(res, error)
+    await session.abortTransaction();
+    return handleError(res, error);
   } finally {
-    session.endSession()
+    session.endSession();
   }
-}
+};
 
 export const addExpenses = [
   validateBody(modelHeader),
   async (req, res) => {
     try {
-      const errors = errorValidation(req, res)
+      const errors = errorValidation(req, res);
       if (errors) {
-        return null
+        return null;
       }
-      const user = req.user
+      const user = req.user;
 
       await OfficeExpense.create({
         ...req.body,
         addedBy: user._id,
         companyAdminId: user.companyAdminId,
-      })
+      });
 
       return res.status(200).json({
         message: "Office Expenses Added Successfully",
-      })
+      });
     } catch (error) {
-      return handleError(res, error)
+      return handleError(res, error);
     }
   },
-]
+];
 
 export const editExpenses = [
   validateBody(modelHeader),
   async (req, res) => {
     try {
-      const errors = errorValidation(req, res)
+      const errors = errorValidation(req, res);
       if (errors) {
-        return null
+        return null;
       }
 
-      const expenseId = req.body._id
+      const expenseId = req.body._id;
+
       const updateData = await OfficeExpense.findByIdAndUpdate(
         { _id: expenseId },
         req.body
-      )
+      );
 
-      if (!updateData) throw "Record Not Found"
+      if (!updateData) throw "Record Not Found";
 
       return res.status(200).json({
         data: updateData,
         message: "Office Expense Edited Successfully",
-      })
+      });
     } catch (error) {
-      return handleError(res, error)
+      return handleError(res, error);
     }
   },
-]
+];
 
 export const deleteExpenses = async (req, res) => {
   try {
-    const errors = errorValidation(req, res)
+    const errors = errorValidation(req, res);
     if (errors) {
-      return null
+      return null;
     }
-    const user = req.user
-    const expenseIds = req.body
+    const user = req.user;
+    const expenseIds = req.body;
 
-    const deletedData = await OfficeExpense.deleteMany({ _id: expenseIds })
+    const deletedData = await OfficeExpense.deleteMany({ _id: expenseIds });
 
     return res.status(200).json({
       data: deletedData,
-      message: `Office Expense${expenseIds.length > 1 ? "s" : ""
-        } Deleted Successfully`,
-    })
+      message: `Office Expense${
+        expenseIds.length > 1 ? "s" : ""
+      } Deleted Successfully`,
+    });
   } catch (error) {
-    return handleError(res, error)
+    return handleError(res, error);
   }
-}
+};
 
 export const downloadExpenses = async (req, res) => {
   try {
-    const userQuery = userRankQuery(req.user)
-    const { from, to } = req.query
+    const userQuery = userRankQuery(req.user);
+    const { from, to } = req.query;
     let data = await OfficeExpense.find({
       ...userQuery,
       date: { $gte: from, $lte: to },
@@ -193,26 +208,26 @@ export const downloadExpenses = async (req, res) => {
         path: "addedBy",
         select: "location",
       })
-      .sort({ date: 1 })
+      .sort({ date: 1 });
 
-    data = parseResponse(data)
+    data = parseResponse(data);
 
     data = data.map((val) => {
       return {
         ...val,
         date: formatDateInDDMMYYY(val.date),
         addedBy: val?.addedBy?.location,
-      }
-    })
+      };
+    });
 
     const column1 = [
       columnHeaders("Date", "date"),
       columnHeaders("Amount", "amount"),
       columnHeaders("Remarks", "remarks"),
       columnHeaders("Added By", "addedBy"),
-    ]
-    return sendExcelFile(res, [column1], [data], ["Office Expenses"])
+    ];
+    return sendExcelFile(res, [column1], [data], ["Office Expenses"]);
   } catch (error) {
-    return handleError(res, error)
+    return handleError(res, error);
   }
-}
+};
