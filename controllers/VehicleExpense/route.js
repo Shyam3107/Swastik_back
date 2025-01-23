@@ -9,19 +9,24 @@ import {
 } from "./controller.js";
 import {
   checkForPastDataAdditon,
+  checkForPastDataDeletions,
   checkForPastDataModifications,
 } from "../../middlewares/checkUser.js";
 const router = Router();
 
 router.get("/getExpenses", getExpenses);
-router.post("/addExpenses", checkForPastDataAdditon, addExpenses);
+router.post("/addExpenses", checkForPastDataAdditon(), addExpenses);
 router.post("/uploadExpenses", uploadExpenses);
 router.put(
   "/editExpenses",
   checkForPastDataModifications("VEHICLE EXPENSE"),
   editExpenses
 );
-router.delete("/deleteExpenses", deleteExpenses);
+router.delete(
+  "/deleteExpenses",
+  checkForPastDataDeletions("VEHICLE EXPENSE"),
+  deleteExpenses
+);
 router.get("/downloadExpenses", downloadExpenses);
 
 export default router;

@@ -15,6 +15,7 @@ import {
 } from "./controller.js";
 import {
   checkForPastDataAdditon,
+  checkForPastDataDeletions,
   checkForPastDataModifications,
 } from "../../middlewares/checkUser.js";
 
@@ -24,7 +25,7 @@ router.post("/addTrips", checkForPastDataAdditon(), addTrips);
 router.put("/editTrips", checkForPastDataModifications("TRIP"), editTrips);
 router.post("/uploadTrips", uploadTrips);
 router.delete("/uploadRates", uploadRates);
-router.delete("/deleteTrips", deleteTrips);
+router.delete("/deleteTrips", checkForPastDataDeletions("TRIP"), deleteTrips);
 router.get("/downloadTrips", downloadTrips);
 router.get("/downloadTripsByVehicle", downloadTripsByVehicle);
 router.get("/tempController", tempController);

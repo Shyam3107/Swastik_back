@@ -9,6 +9,7 @@ import {
 } from "./controller.js";
 import {
   checkForPastDataAdditon,
+  checkForPastDataDeletions,
   checkForPastDataModifications,
 } from "../../middlewares/checkUser.js";
 const router = Router();
@@ -21,7 +22,11 @@ router.put(
   editReceipt
 );
 router.post("/uploadReceipt", uploadReceipt);
-router.delete("/deleteReceipt", deleteReceipt);
+router.delete(
+  "/deleteReceipt",
+  checkForPastDataDeletions("RECEIPT"),
+  deleteReceipt
+);
 router.get("/downloadReceipt", downloadReceipt);
 
 export default router;

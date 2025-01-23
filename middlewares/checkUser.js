@@ -116,8 +116,7 @@ export const checkForPastDataModifications = (access) => {
             break;
 
           default:
-            next();
-            break;
+            return next();
         }
 
         if (
@@ -127,6 +126,72 @@ export const checkForPastDataModifications = (access) => {
           moment(req.body.date).isSameOrBefore(lastEntryCheckedOn)
         )
           throw "You Can not make changes in Past entries";
+      }
+
+      return next();
+    } catch (err) {
+      return handleError(res, err);
+    }
+  };
+};
+
+export const checkForPastDataDeletions = (access) => {
+  return async (req, res, next) => {
+    try {
+      const user = req.user;
+
+      // User can't change the Past data
+      // alag alag krnna hai , in case of date change , new date ko le rha hai
+      if (!isAdmin(user)) {
+        let lastEntryCheckedOn = await getUserLastCheckedOn(user);
+        lastEntryCheckedOn = moment(lastEntryCheckedOn).endOf("day");
+
+        let oldData;
+
+        const accessId = req.body;
+
+        switch (access) {
+          case "RECEIPT":
+            oldData = await Receipt.find({
+              _id: { $in: accessId },
+              date: { $lte: lastEntryCheckedOn },
+            }).select({
+              date: 1,
+            });
+            break;
+
+          case "OFFICE EXPENSE":
+            oldData = await OfficeExpense.find({
+              _id: { $in: accessId },
+              date: { $lte: lastEntryCheckedOn },
+            }).select({
+              date: 1,
+            });
+            break;
+
+          case "VEHICLE EXPENSE":
+            oldData = await VehiclesExpense.find({
+              _id: { $in: accessId },
+              date: { $lte: lastEntryCheckedOn },
+            }).select({
+              date: 1,
+            });
+            break;
+
+          case "TRIP":
+            oldData = await Trip.find({
+              _id: { $in: accessId },
+              date: { $lte: lastEntryCheckedOn },
+            }).select({
+              date: 1,
+            });
+            break;
+
+          default:
+            return next();
+        }
+
+        if (oldData && oldData?.length) throw "You Can not Delete Past entries";
       }
 
       return next();
