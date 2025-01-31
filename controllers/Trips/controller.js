@@ -72,6 +72,7 @@ export const getTrips = async (req, res) => {
           ...val,
           date: formatDateInDDMMYYY(val?.date),
           addedBy: val?.addedBy?.location,
+          eWayBillExpiry: formatDateInDDMMYYY(val?.eWayBillExpiry),
         };
       });
       metaData.totalDocuments = trips.length;
@@ -158,6 +159,10 @@ export const uploadTrips = async (req, res) => {
                 ind + 2
               }`;
           }
+        }
+
+        if (head === "eWayBillExpiry" && value) {
+          value = validateDateWhileUpload(value, ind);
         }
 
         tempVal[head] = value;

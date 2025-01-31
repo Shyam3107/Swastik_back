@@ -20,8 +20,10 @@ export const fileHeader = [
   "Remarks",
   "Billing Rate",
   "Rate",
-  "Party Name 2"
-]
+  "Party Name 2",
+  "E-Way Bill No.",
+  "E-Way Bill Expiry",
+];
 
 export const modelHeader = [
   "diNo",
@@ -45,8 +47,10 @@ export const modelHeader = [
   "remarks",
   "billingRate",
   "rate",
-  "partyName2"
-]
+  "partyName2",
+  "eWayBillNo",
+  "eWayBillExpiry",
+];
 
 export const rateFileHeader = [
   "DI No.",
@@ -54,8 +58,8 @@ export const rateFileHeader = [
   "Vehicle No.",
   "Quantity",
   "Billing Rate",
-  "Rate"
-]
+  "Rate",
+];
 
 export const validateArr = [
   "diNo",
@@ -69,6 +73,20 @@ export const validateArr = [
   "quantity",
   "driverName",
   "driverPhone",
-]
+];
 
-export const unImportantFields = ["remarks", "rate", "billingRate", "bags", "shortage", "shortageAmount", "diesel", "dieselIn", "pumpName", "cash", "partyName2"]
+export const unImportantFields = [
+  "remarks",
+  "rate",
+  "billingRate",
+  "bags",
+  "shortage",
+  "shortageAmount",
+  "diesel",
+  "dieselIn",
+  "pumpName",
+  "cash",
+  "partyName2",
+  "eWayBillNo",
+  "eWayBillExpiry",
+];

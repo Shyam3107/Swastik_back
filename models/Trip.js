@@ -1,5 +1,5 @@
-import mongoose from "mongoose"
-const { Schema, model } = mongoose
+import mongoose from "mongoose";
+const { Schema, model } = mongoose;
 
 const tripSchema = new Schema(
   {
@@ -53,13 +53,13 @@ const tripSchema = new Schema(
       required: true,
     },
     bags: {
-      type: Number
+      type: Number,
     },
     shortage: {
-      type: Number
+      type: Number,
     },
     shortageAmount: {
-      type: Number
+      type: Number,
     },
     driverName: {
       type: String,
@@ -96,6 +96,13 @@ const tripSchema = new Schema(
       type: Number,
       default: 0,
     },
+    eWayBillNo: {
+      trim: true,
+      type: String,
+    },
+    eWayBillExpiry: {
+      type: Date,
+    },
     addedBy: {
       type: Schema.Types.ObjectId,
       ref: "Account",
@@ -108,10 +115,10 @@ const tripSchema = new Schema(
     },
   },
   { timestamps: true }
-)
+);
 
-tripSchema.index({ diNo: 1, companyAdminId: 1 }, { unique: true })
+tripSchema.index({ diNo: 1, companyAdminId: 1 }, { unique: true });
 
-const Trip = model("Trip", tripSchema)
+const Trip = model("Trip", tripSchema);
 
-export default Trip
+export default Trip;
