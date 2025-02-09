@@ -2,30 +2,28 @@ export const fileHeader = [
   "Date",
   "Vehicle No.",
   "Driver Name",
+  "Driver Phone",
   "Amount",
   "Remarks",
-  "Pump Name",
-  "Diesel",
-  "Diesel In",
-  "Diesel For",
-]
+  "Expense For",
+];
 
 export const modelHeader = [
   "date",
   "vehicleNo",
   "driverName",
+  "Driver Phone",
   "amount",
   "remarks",
-  "pumpName",
-  "diesel",
-  "dieselIn",
-  "dieselFor",
-]
+  "expenseFor",
+];
 
 export const validateArr = [
   "date",
   "vehicleNo",
   "driverName",
+  "driverPhone",
   "amount",
   "remarks",
-]
+  "expenseFor",
+];

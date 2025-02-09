@@ -80,22 +80,8 @@ export const uploadExpenses = async (req, res) => {
         let value = item[fileHeader[index]];
 
         // Check for Values in Important Fields
-        if (index < 5 && !value)
+        if (index < 6 && !value)
           mssg = `Enter Valid ${fileHeader[index]} for row no. ${ind + 2}`;
-
-        if (
-          // If Diesel has value but unit ie Litre or Amount is not defined
-          item["Diesel"] &&
-          head === "dieselIn" &&
-          value !== "Litre" &&
-          value !== "Amount"
-        )
-          mssg = `Diesel In should be Litre or Amount for row no. ${ind + 2}`;
-        else if (item["Diesel"] && !item["Pump Name"])
-          // Diesel Taken but Pump name not defined
-          mssg = `Pump Name is mandatory if Diesel Taken for row no. ${
-            ind + 2
-          }`;
 
         if (mssg) throw mssg;
 
@@ -145,13 +131,6 @@ export const addExpenses = [
         return null;
       }
       const user = req.user;
-
-      const { diesel, dieselIn, pumpName } = req.body;
-
-      if (diesel && dieselIn !== "Litre" && dieselIn !== "Amount")
-        throw "Diesel In should be in Litre or Amount";
-
-      if (diesel && !pumpName) throw "Pump Name is Mandatory if Diesel Taken";
 
       await VehiclesExpense.create(
         [
@@ -204,12 +183,7 @@ export const editExpenses = [
         return null;
       }
 
-      const { diesel, dieselIn, pumpName, _id: expenseId } = req.body;
-
-      if (diesel && dieselIn !== "Litre" && dieselIn !== "Amount")
-        throw "Diesel In should be in Litre or Amount";
-
-      if (diesel && !pumpName) throw "Pump Name is Mandatory if Diesel Taken";
+      const { _id: expenseId } = req.body;
 
       const updateData = await VehiclesExpense.findByIdAndUpdate(
         { _id: expenseId },
@@ -277,11 +251,9 @@ export const downloadExpenses = async (req, res) => {
       columnHeaders("Date", "date"),
       columnHeaders("Vehicle No.", "vehicleNo"),
       columnHeaders("Driver Name", "driverName"),
+      columnHeaders("Driver Phone", "driverPhone"),
       columnHeaders("Amount", "amount"),
-      columnHeaders("Pump Name", "pumpName"),
-      columnHeaders("Diesel", "dieselIn"),
-      columnHeaders("Diesel In", "dieselIn"),
-      columnHeaders("Diesel For", "dieselFor"),
+      columnHeaders("Expense For", "expenseFor"),
       columnHeaders("Remarks", "remarks"),
       columnHeaders("Added By", "addedBy"),
     ];

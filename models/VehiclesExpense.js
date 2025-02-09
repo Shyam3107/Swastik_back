@@ -1,5 +1,5 @@
-import mongoose from "mongoose"
-const { Schema, model } = mongoose
+import mongoose from "mongoose";
+const { Schema, model } = mongoose;
 
 const expenseSchema = new Schema(
   {
@@ -19,20 +19,15 @@ const expenseSchema = new Schema(
       trim: true,
       uppercase: true,
     },
-    pumpName: {
-      trim: true,
+    driverPhone: {
       type: String,
+      required: true,
     },
-    diesel: {
-      type: Number,
-    },
-    dieselIn: {
+    expenseFor: {
       type: String,
-      enum: ["Litre", "Amount", null, "", undefined],
-    },
-    dieselFor: {
-      type: String,
-      enum: ["Driver", "Vehicle", null, "", undefined],
+      enum: ["Driver", "Vehicle"],
+      required: true,
+      default: "Driver",
     },
     amount: {
       type: Number,
@@ -56,8 +51,8 @@ const expenseSchema = new Schema(
     },
   },
   { timestamps: true }
-)
+);
 
-const VehiclesExpense = model("VehiclesExpense", expenseSchema)
+const VehiclesExpense = model("VehiclesExpense", expenseSchema);
 
-export default VehiclesExpense
+export default VehiclesExpense;
