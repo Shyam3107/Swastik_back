@@ -9,7 +9,8 @@ import {
 import {
   getAllSiteReport,
   getSiteReport,
-  downloadSiteReport
+  downloadSiteReport,
+  downloadAllSitesRokar
 } from "./siteController.js"
 const router = Router()
 
@@ -21,5 +22,7 @@ router.get("/getAllSiteReport", getAllSiteReport)
 router.get("/getSiteReport", getSiteReport)
 router.get("/downloadSiteReport", downloadSiteReport)
 router.get("/downloadAllVehicleWiseReport", downloadAllVehicleWiseReport)
+router.get("/downloadAllSitesRokar", downloadAllSitesRokar)
+
 
 export default router
