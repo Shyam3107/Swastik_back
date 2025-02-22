@@ -12,6 +12,7 @@ import {
   columnHeaders,
   userRankQuery,
   formatDateInDDMMYYY,
+  sortViaDate,
 } from "../../utils/utils.js";
 import { sendExcelFile } from "../../utils/sendFile.js";
 import { INDIA_TZ } from "../../config/constants.js";
@@ -531,8 +532,6 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
     // Will be used to map the vehicle number
     data = {};
 
-    let tempPromise = [];
-
     // First Trip, Key will be last 4 digit of vehicle no.
     tripsData.forEach((val) => {
       const vehicleNo = val.vehicleNo.substr(-4);
@@ -543,7 +542,8 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       data[vehicleNo].push({
         ...val,
         date: formatDateInDDMMYYY(val.date),
-        amount: val.cash,
+        total: val.quantity * val.billingRate,
+        driverCash: val.cash,
       });
     });
 
@@ -557,6 +557,8 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       data[vehicleNo].push({
         ...val,
         date: formatDateInDDMMYYY(val.date),
+        driverCash: val.expenseFor !== "Vehicle" ? val.amount : "",
+        vehicleCash: val.expenseFor === "Vehicle" ? val.amount : "",
       });
     });
 
@@ -570,33 +572,25 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       data[vehicleNo].push({
         ...val,
         quantity: "", // as we are giving other name to these
-        pumpName: "",
-        amount: "",
         date: formatDateInDDMMYYY(val.date),
-        dieselFromPump: val.quantity,
-        amountFromPump: val.amount,
-        pumpNameFromPump: val.pumpName,
+        pumpDiesel: val.quantity,
       });
     });
 
-    // Preparing the Excel WorkBook for vehicles
+    console.log("Preparing the Excel WorkBook for vehicles");
     const column1 = [
       columnHeaders("Date", "date"),
       columnHeaders("Vehicle No.", "vehicleNo"),
       columnHeaders("Loading Point", "loadingPoint"),
-      columnHeaders("Locatin", "location"),
+      columnHeaders("Location", "location"),
       columnHeaders("Quantity", "quantity"),
-      columnHeaders("Material", "material"),
-      columnHeaders("Driver Name", "driverName"),
+      columnHeaders("Rate", "billingRate"),
+      columnHeaders("Total", "total"),
       columnHeaders("Diesel", "diesel"),
-      columnHeaders("Diesel In", "dieselIn"),
       columnHeaders("Pump Name", "pumpName"),
-      columnHeaders("Quantity (Bill)", "dieselFromPump"),
-      columnHeaders("Amount (Bill)", "amountFromPump"),
-      columnHeaders("Pump Name (Bill)", "pumpNameFromPump"),
-      columnHeaders("Amount", "amount"),
-      columnHeaders("Billing Rate", "billingRate"),
-      columnHeaders("Rate", "rate"),
+      columnHeaders("Pump Diesel", "pumpDiesel"),
+      columnHeaders("Driver cash", "driverCash"),
+      columnHeaders("Vehicle Cash", "vehicleCash"),
       columnHeaders("Remarks", "remarks"),
     ];
 
@@ -605,6 +599,31 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
     const vehicleNoList = Object.keys(data);
 
     vehicleNoList.forEach((vehicleNo) => {
+      let bhadaTotal = 0;
+      let driverCashTotal = 0;
+      let vehicleCashTotal = 0;
+      let dieselTotal = 0;
+      let pumpDieselTotal = 0;
+
+      data[vehicleNo].forEach((val) => {
+        bhadaTotal += val.total ?? 0;
+        driverCashTotal += val.driverCash ?? 0;
+        vehicleCashTotal += val.vehicleCashTotal ?? 0;
+        dieselTotal += val.diesel ?? 0;
+        pumpDieselTotal += val.pumpDieselTotal ?? 0;
+      });
+
+      data[vehicleNo] = sortViaDate(data[vehicleNo]);
+
+      data[vehicleNo].push({
+        billingRate: "Total",
+        total: bhadaTotal,
+        driverCash: driverCashTotal,
+        vehicleCash: vehicleCashTotal,
+        diesel: dieselTotal,
+        pumpDiesel: pumpDieselTotal,
+      });
+
       excelFiles.push(
         createExcelFile(
           [column1],

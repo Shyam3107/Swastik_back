@@ -63,6 +63,12 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
       },
     };
 
+    const roundOff = {
+      $project: {
+        total: { $round: ["$total", 2] },
+      },
+    };
+
     let openingCred = Receipt.aggregate([
       openingMatch,
       {
@@ -71,6 +77,7 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
           total: { $sum: "$amount" },
         },
       },
+      roundOff,
     ]);
 
     // Total amount Debited = Trips + Vehicle Expenses + Office Expenses
@@ -82,6 +89,7 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
           total: { $sum: "$cash" },
         },
       },
+      roundOff,
     ]);
 
     let openingVE = VehiclesExpense.aggregate([
@@ -92,6 +100,7 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
           total: { $sum: "$amount" },
         },
       },
+      roundOff,
     ]);
 
     let openingOE = OfficeExpense.aggregate([
@@ -102,6 +111,7 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
           total: { $sum: "$amount" },
         },
       },
+      roundOff,
     ]);
 
     // Total Amount Credited and Debited During Period
@@ -124,6 +134,7 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
           total: { $sum: "$amount" },
         },
       },
+      roundOff,
     ]);
 
     // Debited During Peiord = Trips + Vehicle Expense + Office Expense
@@ -135,6 +146,7 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
           total: { $sum: "$cash" },
         },
       },
+      roundOff,
     ]);
 
     let duringVE = VehiclesExpense.aggregate([
@@ -145,6 +157,7 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
           total: { $sum: "$amount" },
         },
       },
+      roundOff,
     ]);
 
     let duringOE = OfficeExpense.aggregate([
@@ -155,6 +168,7 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
           total: { $sum: "$amount" },
         },
       },
+      roundOff,
     ]);
 
     let siteName = Account.findById({ _id: siteId }).select("location");
@@ -247,13 +261,13 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
 
     return {
       siteName,
-      openingBal,
-      periodCred,
-      periodDeb,
-      closingBal,
-      tripExpense,
-      officeExpense,
-      vehicleExpense,
+      openingBal:openingBal?.toFixed(2),
+      periodCred:periodCred?.toFixed(2),
+      periodDeb:periodDeb?.toFixed(2),
+      closingBal:closingBal?.toFixed(2),
+      tripExpense:tripExpense?.toFixed(2),
+      officeExpense:officeExpense?.toFixed(2),
+      vehicleExpense:vehicleExpense?.toFixed(2),
       noOfTrips: duringAllTrips.length,
       records,
     };
