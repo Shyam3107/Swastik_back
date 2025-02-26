@@ -508,11 +508,18 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
     let tripsData = Trip.find(query)
       .select({
         ...select,
+        pumpName: 0,
         diNo: 0,
         lrNo: 0,
         partyName: 0,
         bags: 0,
         driverPhone: 0,
+        shortage: 0,
+        shortageAmount: 0,
+        rate: 0,
+        partyName2: 0,
+        material: 0,
+        driverName: 0,
       })
       .sort({ date: 1 });
 
@@ -521,7 +528,7 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       .sort({ date: 1 });
 
     let dieselData = Diesel.find(query)
-      .select({ ...select })
+      .select({ ...select, fuel: 0 })
       .sort({ date: 1 });
 
     let data = await Promise.all([tripsData, expenseData, dieselData]);
@@ -532,20 +539,101 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
     // Will be used to map the vehicle number
     data = {};
 
-    // First Trip, Key will be last 4 digit of vehicle no.
+    // Here we are merging Trips Diesel and Pump Diesel
+    // First Store the Both Data in Temp Object vehicle Wise
+    const tempTripVehicle = {};
+    const tempDieselVehicle = {};
     tripsData.forEach((val) => {
       const vehicleNo = val.vehicleNo.substr(-4);
 
       // If new Vehicle No.
-      if (!data[vehicleNo]) data[vehicleNo] = [];
+      if (!tempTripVehicle[vehicleNo]) tempTripVehicle[vehicleNo] = [];
 
-      data[vehicleNo].push({
+      tempTripVehicle[vehicleNo].push({
         ...val,
         date: formatDateInDDMMYYY(val.date),
         total: val.quantity * val.billingRate,
         driverCash: val.cash,
       });
     });
+
+    tripsData = Object.keys(tempTripVehicle);
+
+    // Then Diesel
+    dieselData.forEach((val) => {
+      const vehicleNo = val.vehicleNo.substr(-4);
+
+      // If new Vehicle No.
+      if (!tempDieselVehicle[vehicleNo]) tempDieselVehicle[vehicleNo] = [];
+
+      tempDieselVehicle[vehicleNo].push({
+        ...val,
+        quantity: "",
+        date:formatDateInDDMMYYY(val.date),
+        pumpDate: formatDateInDDMMYYY(val.date),
+        pumpDiesel: val.quantity,
+      });
+    });
+
+    dieselData = Object.keys(tempDieselVehicle);
+
+    const tripLength = tripsData.length;
+
+    const dieselLength = dieselData.length;
+
+    let a = 0; // index for Trip length
+    let b = 0; // index for Diesel Length
+    for (; a < tripLength && b < dieselLength; ) {
+      if (tripsData[a] > dieselData[b]) {
+        const veh = dieselData[b];
+        if (!data[veh]) data[veh] = [];
+        data[veh] = tempDieselVehicle[veh];
+        b++;
+      } else if (tripsData[a] < dieselData[b]) {
+        const veh = tripsData[a];
+        if (!data[veh]) data[veh] = [];
+        data[veh] = tempTripVehicle[veh];
+        a++;
+      } else {
+        const veh = tripsData[a];
+        if (!data[veh]) data[veh] = [];
+        const tl = tempTripVehicle[veh].length;
+        const dl = tempDieselVehicle[veh].length;
+
+        let j = 0;
+        for (; j < Math.min(tl, dl); j++) {
+          data[veh].push({
+            ...tempTripVehicle[veh][j],
+            pumpDate: tempDieselVehicle[veh][j].pumpDate,
+            pumpDiesel: tempDieselVehicle[veh][j].pumpDiesel,
+            pumpName: tempDieselVehicle[veh][j].pumpName,
+          });
+        }
+        for (let k = j; k < tl; k++) {
+          data[veh].push(tempTripVehicle[veh][k]);
+        }
+        for (let k = j; k < dl; k++) {
+          data[veh].push(tempDieselVehicle[veh][k]);
+        }
+        a++;
+        b++;
+      }
+    }
+
+    //For Remaining Data
+    // Trips First
+    for (; a < tripLength; a++) {
+      const veh = tripsData[a];
+      if (!data[veh]) data[veh] = [];
+      data[veh] = tempTripVehicle[veh];
+    }
+
+    // Diesel second
+    for (; b < dieselLength; b++) {
+      const veh = dieselData[b];
+      if (!data[veh]) data[veh] = [];
+      data[veh] = tempDieselVehicle[veh];
+    }
 
     // Then Expense
     expenseData.forEach((val) => {
@@ -562,21 +650,6 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       });
     });
 
-    // Then Diesel
-    dieselData.forEach((val) => {
-      const vehicleNo = val.vehicleNo.substr(-4);
-
-      // If new Vehicle No.
-      if (!data[vehicleNo]) data[vehicleNo] = [];
-
-      data[vehicleNo].push({
-        ...val,
-        quantity: "", // as we are giving other name to these
-        date: formatDateInDDMMYYY(val.date),
-        pumpDiesel: val.quantity,
-      });
-    });
-
     console.log("Preparing the Excel WorkBook for vehicles");
     const column1 = [
       columnHeaders("Date", "date"),
@@ -587,6 +660,7 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       columnHeaders("Rate", "billingRate"),
       columnHeaders("Total", "total"),
       columnHeaders("Diesel", "diesel"),
+      columnHeaders("Pump Date", "pumpDate"),
       columnHeaders("Pump Name", "pumpName"),
       columnHeaders("Pump Diesel", "pumpDiesel"),
       columnHeaders("Driver cash", "driverCash"),
@@ -608,9 +682,9 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       data[vehicleNo].forEach((val) => {
         bhadaTotal += val.total ?? 0;
         driverCashTotal += val.driverCash ?? 0;
-        vehicleCashTotal += val.vehicleCashTotal ?? 0;
+        vehicleCashTotal += val.vehicleCash ?? 0;
         dieselTotal += val.diesel ?? 0;
-        pumpDieselTotal += val.pumpDieselTotal ?? 0;
+        pumpDieselTotal += val.pumpDiesel ?? 0;
       });
 
       data[vehicleNo] = sortViaDate(data[vehicleNo]);
@@ -634,9 +708,7 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
     });
 
     excelFiles = await Promise.all(excelFiles);
-
     console.log("Excel Files had been created");
-
     excelFiles = excelFiles.map((file, index) => {
       return {
         file,
@@ -645,9 +717,7 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
     });
 
     const files = await createZipFile(excelFiles);
-
     console.log("Zip File had been created");
-
     const fileName = "reports.zip";
     const fileType = "application/zip";
 
