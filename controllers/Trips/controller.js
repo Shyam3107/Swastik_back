@@ -401,12 +401,17 @@ export const deleteTrips = async (req, res) => {
 // Download The list of trips
 export const downloadTrips = async (req, res) => {
   try {
-    const companyAdminId = req?.user?.companyAdminId;
+    const user = req?.user;
+    const companyAdminId = user?.companyAdminId;
     const { from, to } = req.query;
-    let trips = await Trip.find({
+    const query = {
       companyAdminId,
       date: { $gte: from, $lte: to },
-    })
+    };
+    if (user?.showTrips === "SELF") {
+      query.addedBy = user._id;
+    }
+    let trips = await Trip.find(query)
       .select({
         _id: 0,
         __v: 0,
