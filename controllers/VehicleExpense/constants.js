@@ -12,7 +12,7 @@ export const modelHeader = [
   "date",
   "vehicleNo",
   "driverName",
-  "Driver Phone",
+  "driverPhone",
   "amount",
   "remarks",
   "expenseFor",

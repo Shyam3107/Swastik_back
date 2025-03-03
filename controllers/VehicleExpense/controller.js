@@ -9,6 +9,7 @@ import {
   formatDateInDDMMYYY,
   validateDateWhileUpload,
   isAdmin,
+  validatePhoneNo,
 } from "../../utils/utils.js";
 import VehiclesExpense from "../../models/VehiclesExpense.js";
 import { INDIA_TZ } from "../../config/constants.js";
@@ -94,7 +95,8 @@ export const uploadExpenses = async (req, res) => {
                 ind + 2
               }`;
           }
-        }
+        } else if (head === "driverPhone" && !validatePhoneNo(value))
+          mssg = `Fill Valid Driver Phone No. for DI No. ${diNo}`;
 
         tempVal[head] = value;
       }
