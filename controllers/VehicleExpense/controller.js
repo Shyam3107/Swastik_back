@@ -96,7 +96,7 @@ export const uploadExpenses = async (req, res) => {
               }`;
           }
         } else if (head === "driverPhone" && !validatePhoneNo(value))
-          mssg = `Fill Valid Driver Phone No. for DI No. ${diNo}`;
+          mssg = `Fill Valid Driver Phone No. for row no. ${ind + 2}`;
 
         tempVal[head] = value;
       }
