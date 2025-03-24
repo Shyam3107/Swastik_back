@@ -137,7 +137,7 @@ export const addReceipt = [
       });
 
       return res.status(200).json({
-        message: "Office Receipt Added Successfully",
+        message: "Receipt Added Successfully",
       });
     } catch (error) {
       return handleError(res, error);

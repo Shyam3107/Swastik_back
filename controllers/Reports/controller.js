@@ -514,8 +514,6 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
         partyName: 0,
         bags: 0,
         driverPhone: 0,
-        shortage: 0,
-        shortageAmount: 0,
         rate: 0,
         partyName2: 0,
         material: 0,
@@ -569,7 +567,7 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       tempDieselVehicle[vehicleNo].push({
         ...val,
         quantity: "",
-        date:formatDateInDDMMYYY(val.date),
+        date: formatDateInDDMMYYY(val.date),
         pumpDate: formatDateInDDMMYYY(val.date),
         pumpDiesel: val.quantity,
       });
@@ -663,6 +661,8 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       columnHeaders("Pump Date", "pumpDate"),
       columnHeaders("Pump Name", "pumpName"),
       columnHeaders("Pump Diesel", "pumpDiesel"),
+      columnHeaders("Shortage", "shortage"),
+      columnHeaders("Shortage Amount", "shortageAmount"),
       columnHeaders("Driver cash", "driverCash"),
       columnHeaders("Vehicle Cash", "vehicleCash"),
       columnHeaders("Remarks", "remarks"),
@@ -678,6 +678,8 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       let vehicleCashTotal = 0;
       let dieselTotal = 0;
       let pumpDieselTotal = 0;
+      let shortageTotal = 0;
+      let shortageAmountTotal = 0;
 
       data[vehicleNo].forEach((val) => {
         bhadaTotal += val.total ?? 0;
@@ -685,17 +687,21 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
         vehicleCashTotal += val.vehicleCash ?? 0;
         dieselTotal += val.diesel ?? 0;
         pumpDieselTotal += val.pumpDiesel ?? 0;
+        shortageTotal += val.shortage ?? 0;
+        shortageAmountTotal += val.shortageAmount ?? 0;
       });
 
       data[vehicleNo] = sortViaDate(data[vehicleNo]);
 
       data[vehicleNo].push({
-        billingRate: "Total",
+        location: "Total",
         total: bhadaTotal,
         driverCash: driverCashTotal,
         vehicleCash: vehicleCashTotal,
         diesel: dieselTotal,
         pumpDiesel: pumpDieselTotal,
+        shortage: shortageTotal,
+        shortageAmount: shortageAmountTotal,
       });
 
       excelFiles.push(
