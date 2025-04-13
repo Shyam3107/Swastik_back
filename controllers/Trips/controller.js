@@ -148,6 +148,10 @@ export const uploadTrips = async (req, res) => {
           }
         }
 
+        if(item["Cash"] && head ==="remarks" && !value){
+          mssg = `Remarks is mandatory if Cash is Given for DI No. ${diNo}`;
+        }
+
         if (mssg) throw mssg;
 
         if (head === "date") {

@@ -18,6 +18,7 @@ import { fileHeader, modelHeader, validateArr } from "./constants.js";
 import Driver from "../../models/Driver.js";
 import moment from "moment/moment.js";
 import { getUserLastCheckedOn } from "../../middlewares/checkUser.js";
+import Fleet from "../../models/Fleet.js";
 
 momentTimezone.tz.setDefault(INDIA_TZ);
 
@@ -84,6 +85,14 @@ export const uploadExpenses = async (req, res) => {
         if (index < 6 && !value)
           mssg = `Enter Valid ${fileHeader[index]} for row no. ${ind + 2}`;
 
+        if (head === "vehicleNo") {
+          const isExist = await Fleet.findOne({ vehicleNo: value });
+          if (!isExist)
+            mssg = `Vehicle No. must be present in Fleet List,for row no. ${
+              ind + 2
+            } `;
+        }
+
         if (mssg) throw mssg;
 
         if (head === "date") {
@@ -133,6 +142,11 @@ export const addExpenses = [
         return null;
       }
       const user = req.user;
+      const { vehicleNo, driverName, driverPhone } = req.body;
+
+      const isExist = await Fleet.findOne({ vehicleNo });
+
+      if (!isExist) throw "Choose Vehicle No. from given list only";
 
       await VehiclesExpense.create(
         [
@@ -144,8 +158,6 @@ export const addExpenses = [
         ],
         { session }
       );
-
-      const { vehicleNo, driverName, driverPhone } = req.body;
 
       await Driver.updateOne(
         { vehicleNo },

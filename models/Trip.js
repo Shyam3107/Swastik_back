@@ -51,6 +51,7 @@ const tripSchema = new Schema(
     quantity: {
       type: Number,
       required: true,
+      min: 1,
     },
     bags: {
       type: Number,
@@ -83,6 +84,7 @@ const tripSchema = new Schema(
     },
     cash: {
       type: Number,
+      min: 0,
     },
     remarks: {
       trim: true,
