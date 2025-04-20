@@ -90,3 +90,5 @@ export const unImportantFields = [
   "eWayBillNo",
   "eWayBillExpiry",
 ];
+
+export const charNotAllowed = ["?", "/", "=", "#", "%", "&"];

@@ -14,6 +14,7 @@ import {
 import Trip from "../../models/Trip.js";
 import Driver from "../../models/Driver.js";
 import {
+  charNotAllowed,
   fileHeader,
   modelHeader,
   unImportantFields,
@@ -120,6 +121,13 @@ export const uploadTrips = async (req, res) => {
             // For same DI No.
             mssg = `Two rows can't have same DI No. ${value}`;
 
+          if (
+            !charNotAllowed.every((v) => {
+              return !value.includes(v);
+            })
+          )
+            mssg = `?,/,=,#,%,& characters are not allowed for DI No. ${value}`;
+
           diNo = value;
           tempDiNo[value] = true;
         } else if (!unImportantFields.includes(head) && !value) {
@@ -148,7 +156,7 @@ export const uploadTrips = async (req, res) => {
           }
         }
 
-        if(item["Cash"] && head ==="remarks" && !value){
+        if (item["Cash"] && head === "remarks" && !value) {
           mssg = `Remarks is mandatory if Cash is Given for DI No. ${diNo}`;
         }
 
