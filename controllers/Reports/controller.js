@@ -547,6 +547,8 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       // If new Vehicle No.
       if (!tempTripVehicle[vehicleNo]) tempTripVehicle[vehicleNo] = [];
 
+      if (!val.cash) val.cash = 0;
+
       tempTripVehicle[vehicleNo].push({
         ...val,
         date: formatDateInDDMMYYY(val.date),
@@ -640,11 +642,13 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       // If new Vehicle No.
       if (!data[vehicleNo]) data[vehicleNo] = [];
 
+      if (!val.amount) val.amount = 0;
+
       data[vehicleNo].push({
         ...val,
         date: formatDateInDDMMYYY(val.date),
-        driverCash: val.expenseFor !== "Vehicle" ? val.amount : "",
-        vehicleCash: val.expenseFor === "Vehicle" ? val.amount : "",
+        driverCash: val.expenseFor !== "Vehicle" ? val.amount : 0,
+        vehicleCash: val.expenseFor === "Vehicle" ? val.amount : 0,
       });
     });
 
@@ -680,6 +684,7 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       let pumpDieselTotal = 0;
       let shortageTotal = 0;
       let shortageAmountTotal = 0;
+      let quantityTotal = 0;
 
       data[vehicleNo].forEach((val) => {
         bhadaTotal += val.total ?? 0;
@@ -689,6 +694,7 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
         pumpDieselTotal += val.pumpDiesel ?? 0;
         shortageTotal += val.shortage ?? 0;
         shortageAmountTotal += val.shortageAmount ?? 0;
+        quantityTotal += val.quantity ?? 0;
       });
 
       data[vehicleNo] = sortViaDate(data[vehicleNo]);
@@ -702,6 +708,7 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
         pumpDiesel: pumpDieselTotal,
         shortage: shortageTotal,
         shortageAmount: shortageAmountTotal,
+        quantity: quantityTotal,
       });
 
       excelFiles.push(
