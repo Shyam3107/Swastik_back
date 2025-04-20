@@ -5,6 +5,7 @@ import Receipt from "../../models/Receipt.js";
 import Trip from "../../models/Trip.js";
 import VehiclesExpense from "../../models/VehiclesExpense.js";
 import Diesel from "../../models/Diesel.js";
+import Fleets from "../../models/Fleet.js";
 import {
   handleError,
   parseResponse,
@@ -539,8 +540,8 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
 
     // Here we are merging Trips Diesel and Pump Diesel
     // First Store the Both Data in Temp Object vehicle Wise
-    const tempTripVehicle = {};
-    const tempDieselVehicle = {};
+    let tempTripVehicle = {};
+    let tempDieselVehicle = {};
     tripsData.forEach((val) => {
       const vehicleNo = val.vehicleNo.substr(-4);
 
@@ -635,6 +636,11 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       data[veh] = tempDieselVehicle[veh];
     }
 
+    tripsData = null;
+    tempDieselVehicle = null;
+    dieselData = null;
+    tempTripVehicle = null;
+
     // Then Expense
     expenseData.forEach((val) => {
       const vehicleNo = val.vehicleNo.substr(-4);
@@ -672,7 +678,18 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       columnHeaders("Remarks", "remarks"),
     ];
 
-    let excelFiles = [];
+    // Get Fleet List
+    let fleets = await Fleets.find({ companyAdminId: user.companyAdminId });
+    fleets = parseResponse(fleets);
+    let tempFleet = {};
+    fleets = fleets.forEach((val) => {
+      tempFleet[val.vehicleNo.substr(-4)] = true;
+    });
+
+    let excelFilesSelf = [];
+    let excelFilesMarket = [];
+    let vehicleNoSelf = [];
+    let vehicleNoMarket = [];
 
     const vehicleNoList = Object.keys(data);
 
@@ -711,25 +728,48 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
         quantity: quantityTotal,
       });
 
-      excelFiles.push(
-        createExcelFile(
-          [column1],
-          [data[vehicleNo]],
-          [vehicleNo]
-        ).xlsx.writeBuffer()
-      );
+      // if Vehicle No. is in Fleet then it is self vehicle else Market vehicle
+      if (tempFleet[vehicleNo]) {
+        vehicleNoSelf.push(vehicleNo);
+        excelFilesSelf.push(
+          createExcelFile(
+            [column1],
+            [data[vehicleNo]],
+            [vehicleNo]
+          ).xlsx.writeBuffer()
+        );
+      } else {
+        vehicleNoMarket.push(vehicleNo);
+        excelFilesMarket.push(
+          createExcelFile(
+            [column1],
+            [data[vehicleNo]],
+            [vehicleNo]
+          ).xlsx.writeBuffer()
+        );
+      }
     });
 
-    excelFiles = await Promise.all(excelFiles);
+    excelFilesSelf = await Promise.all(excelFilesSelf);
+    excelFilesMarket = await Promise.all(excelFilesMarket);
     console.log("Excel Files had been created");
-    excelFiles = excelFiles.map((file, index) => {
+    excelFilesSelf = excelFilesSelf.map((file, index) => {
       return {
         file,
-        fileName: vehicleNoList[index] + ".xlsx",
+        fileName: "Self/" + vehicleNoSelf[index] + ".xlsx",
+      };
+    });
+    excelFilesMarket = excelFilesMarket.map((file, index) => {
+      return {
+        file,
+        fileName: "Market/" + vehicleNoMarket[index] + ".xlsx",
       };
     });
 
-    const files = await createZipFile(excelFiles);
+    vehicleNoSelf = null;
+    vehicleNoMarket = null;
+
+    const files = await createZipFile([...excelFilesMarket, ...excelFilesSelf]);
     console.log("Zip File had been created");
     const fileName = "reports.zip";
     const fileType = "application/zip";
