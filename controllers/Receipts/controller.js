@@ -86,7 +86,8 @@ export const uploadReceipt = async (req, res) => {
         if (!value)
           mssg = `Enter Valid ${fileHeader[index]} for row no. ${ind + 2}`;
 
-        if (mssg) throw mssg;
+        if (fileHeader[index] === "Amount" && value?.toString()?.includes("."))
+          mssg = `Amount should be in whole number for Vehicle no. ${vehicleNo}`;
 
         if (head === "date") {
           value = validateDateWhileUpload(value, ind);
@@ -98,6 +99,7 @@ export const uploadReceipt = async (req, res) => {
               }`;
           }
         }
+        if (mssg) throw mssg;
 
         tempVal[head] = value;
       }
@@ -130,6 +132,11 @@ export const addReceipt = [
       }
       const user = req.user;
 
+      const { amount } = req.body;
+
+      if (amount && amount?.toString()?.includes("."))
+        throw "Amount should be in whole number";
+
       await Receipt.create({
         ...req.body,
         addedBy: user._id,
@@ -155,6 +162,11 @@ export const editReceipt = [
       }
 
       const receiptId = req.body._id;
+
+      const { amount } = req.body;
+
+      if (amount && amount?.toString()?.includes("."))
+        throw "Amount should be in whole number";
 
       const updateData = await Receipt.findByIdAndUpdate(
         { _id: receiptId },

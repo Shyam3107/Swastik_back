@@ -1,15 +1,9 @@
-import mongoose from "mongoose"
-const { Schema, model } = mongoose
+import mongoose from "mongoose";
+const { Schema, model } = mongoose;
 
 const driverSchema = new Schema(
   {
-    vehicleNo: {
-      type: String,
-      uppercase: true,
-      trim: true,
-      required: true,
-    },
-    driverName: {
+    name: {
       type: String,
       uppercase: true,
       trim: true,
@@ -19,12 +13,52 @@ const driverSchema = new Schema(
       type: String,
       required: true,
     },
-    addedBy: {
-      type: Schema.Types.ObjectId,
-      ref: "Account",
+    aadharCardNo: {
+      type: Number,
       required: true,
     },
-    lastUpdatedBy: {
+    aadharCardDOB: {
+      type: Date,
+      required: true,
+    },
+    dlNo: {
+      type: String,
+      required: true,
+    },
+    dlDOB: {
+      type: Date,
+      required: true,
+    },
+    dlValidity: {
+      type: Date,
+      required: true,
+    },
+    homePhone: {
+      type: String,
+      required: true,
+    },
+    relation: {
+      type: String,
+      required: true,
+    },
+    guarantor: {
+      type: String,
+      required: true,
+    },
+    remarks: {
+      type: String,
+    },
+    isDriving: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    defaulter:{
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    addedBy: {
       type: Schema.Types.ObjectId,
       ref: "Account",
       required: true,
@@ -36,10 +70,10 @@ const driverSchema = new Schema(
     },
   },
   { timestamps: true }
-)
+);
 
-driverSchema.index({ vehicleNo: 1, companyAdminId: 1 }, { unique: true })
+driverSchema.index({ dlNo: 1, companyAdminId: 1 }, { unique: true });
 
-const Driver = model("Driver", driverSchema)
+const Driver = model("DriverList", driverSchema);
 
-export default Driver
+export default Driver;

@@ -86,7 +86,8 @@ export const uploadExpenses = async (req, res) => {
         if (!value)
           mssg = `Enter Valid ${fileHeader[index]} for row no. ${ind + 2}`;
 
-        if (mssg) throw mssg;
+        if (fileHeader[index] === "Amount" && value?.toString()?.includes("."))
+          mssg = `Amount should be in whole number for Vehicle no. ${vehicleNo}`;
 
         if (head === "date") {
           value = validateDateWhileUpload(value, ind);
@@ -98,6 +99,8 @@ export const uploadExpenses = async (req, res) => {
               }`;
           }
         }
+
+        if (mssg) throw mssg;
 
         tempVal[head] = value;
       }
@@ -130,6 +133,11 @@ export const addExpenses = [
       }
       const user = req.user;
 
+      const { amount } = req.body;
+
+      if (amount && amount?.toString()?.includes("."))
+        throw "Amount should be in whole number";
+
       await OfficeExpense.create({
         ...req.body,
         addedBy: user._id,
@@ -155,6 +163,11 @@ export const editExpenses = [
       }
 
       const expenseId = req.body._id;
+
+      const { amount } = req.body;
+
+      if (amount && amount?.toString()?.includes("."))
+        throw "Amount should be in whole number";
 
       const updateData = await OfficeExpense.findByIdAndUpdate(
         { _id: expenseId },

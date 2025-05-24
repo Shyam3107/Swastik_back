@@ -261,13 +261,13 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
 
     return {
       siteName,
-      openingBal:openingBal?.toFixed(2),
-      periodCred:periodCred?.toFixed(2),
-      periodDeb:periodDeb?.toFixed(2),
-      closingBal:closingBal?.toFixed(2),
-      tripExpense:tripExpense?.toFixed(2),
-      officeExpense:officeExpense?.toFixed(2),
-      vehicleExpense:vehicleExpense?.toFixed(2),
+      openingBal:openingBal,
+      periodCred:periodCred,
+      periodDeb:periodDeb,
+      closingBal:closingBal,
+      tripExpense:tripExpense,
+      officeExpense:officeExpense,
+      vehicleExpense:vehicleExpense,
       noOfTrips: duringAllTrips.length,
       records,
     };

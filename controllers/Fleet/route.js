@@ -6,6 +6,7 @@ import {
   deleteFleet,
   editFleet,
   downloadFleet,
+  getFleetListForTrips,
 } from "./controller.js";
 const router = Router();
 
@@ -15,5 +16,6 @@ router.post("/uploadFleet", uploadFleet);
 router.put("/editFleet", editFleet);
 router.delete("/deleteFleet", deleteFleet);
 router.get("/downloadFleet", downloadFleet);
+router.get("/getFleetListForTrips", getFleetListForTrips);
 
 export default router;

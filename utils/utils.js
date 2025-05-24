@@ -147,3 +147,9 @@ export const validateDateWhileUpload = (value, ind, checkFutureDate = true) => {
 export const sortViaDate = (data) => {
   return data.sort((a, b) => (a.date > b.date ? 1 : -1));
 };
+
+export const validateAadharCard = (aadharCardNo) => {
+  if (aadharCardNo?.length !== 12) return false;
+  const regex = /^[0-9]{12}$/;
+  return regex.test(aadharCardNo);
+}

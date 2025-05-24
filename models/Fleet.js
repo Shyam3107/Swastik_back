@@ -8,6 +8,8 @@ const schema = new Schema(
       uppercase: true,
       trim: true,
       required: true,
+      minlength: [9, "Vehicle number must be at least 9 characters long"],
+      maxlength: [10, "Vehicle number must not exceed 10 characters"],
     },
     owner: {
       type: String,
@@ -21,6 +23,15 @@ const schema = new Schema(
     },
     remarks: {
       type: String,
+    },
+    driver: {
+      type: Schema.Types.ObjectId,
+      ref: "DriverList",
+      default: null,
+    },
+    driverJoiningDate: {
+      type: Date,
+      default: null,
     },
     addedBy: {
       type: Schema.Types.ObjectId,

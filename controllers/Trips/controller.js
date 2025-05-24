@@ -12,7 +12,6 @@ import {
   isAdmin,
 } from "../../utils/utils.js";
 import Trip from "../../models/Trip.js";
-import Driver from "../../models/Driver.js";
 import {
   charNotAllowed,
   fileHeader,
@@ -146,12 +145,18 @@ export const uploadTrips = async (req, res) => {
         else if (item["Diesel"] && !item["Pump Name"])
           // Diesel Taken but Pump name not defined
           mssg = `Pump Name is mandatory if Diesel Taken for DI No. ${diNo}`;
+        else if (
+          fileHeader[index] === "Cash" &&
+          value?.toString()?.includes(".")
+        )
+          mssg = `Cash should be in whole number for DI No. ${diNo}`;
 
         // Shortage and amount should be 2 decimal
         if (head == "shortage" || head == "shortageAmount" || head == "bags") {
           if (value) {
             value = Number(value);
-            if (!value) mssg = `${head} should be number for DI No. ${diNo}`;
+            if (!value && value !== 0)
+              mssg = `${head} should be number for DI No. ${diNo}`;
             value = value?.toFixed(2) ?? value;
           }
         }
@@ -229,19 +234,19 @@ export const uploadRates = async (req, res) => {
     for (let ind = 0; ind < dataToBeUpdate.length; ind++) {
       const item = dataToBeUpdate[ind];
 
-      let diNo = item["DI No."];
-      let vehicleNo = item["Vehicle No."];
-      let rate = item["Rate"];
-      let billingRate = item["Billing Rate"];
+      const diNo = item["DI No."];
+      const vehicleNo = item["Vehicle No."];
+      const rate = item["Rate"];
+      const billingRate = item["Billing Rate"];
+      const quantity = Number(item["Quantity"]);
 
       let tempObj = { ...item, reason: "" };
-      if (billingRate === null || billingRate === undefined)
-        throw `Billing Rate is required for row no. ${ind + 2}`;
-      if (rate === null || rate === undefined)
-        throw `Rate is required for row no. ${ind + 2}`;
+      if (!diNo || !vehicleNo || !quantity || !rate || !billingRate) {
+        throw `All Fields are required for row no. ${ind + 2}`;
+      }
 
       const updateRate = await Trip.findOneAndUpdate(
-        { diNo, vehicleNo, companyAdminId: req.user.companyAdminId },
+        { diNo, vehicleNo, companyAdminId: req.user.companyAdminId, quantity },
         { $set: { billingRate, rate } },
         { session }
       );
@@ -274,10 +279,8 @@ export const addTrips = [
   validateBody(validateArr),
   async (req, res) => {
     const session = await Trip.startSession();
-    const driverSession = await Driver.startSession();
     try {
       session.startTransaction();
-      driverSession.startTransaction();
 
       const user = req?.user;
       const errors = errorValidation(req, res);
@@ -294,6 +297,9 @@ export const addTrips = [
       if (diesel && !pumpName) throw "Pump Name is required if Diesel Taken";
 
       if (cash && !remarks) throw "Remarks field is mandatory if given Cash";
+
+      if (cash && cash?.toString()?.includes("."))
+        throw "Cash should be in whole number";
 
       if (!req.body.pumpName) delete req.body.pumpName;
       if (!req.body.diesel) delete req.body.diesel;
@@ -312,30 +318,13 @@ export const addTrips = [
         { session }
       );
 
-      const { vehicleNo, driverName, driverPhone } = req.body;
-
-      await Driver.updateOne(
-        { vehicleNo },
-        {
-          driverName,
-          driverPhone,
-          lastUpdateBy: user._id,
-          addedBy: user._id,
-          companyAdminId: req?.user?.companyAdminId,
-        },
-        { upsert: true, driverSession }
-      );
-
       await session.commitTransaction();
-      await driverSession.commitTransaction();
 
       return res.status(200).json({ message: "Trip Added Successfully" });
     } catch (error) {
       await session.abortTransaction();
-      await driverSession.abortTransaction();
       return handleError(res, error);
     } finally {
-      await driverSession.endSession();
       await session.endSession();
     }
   },
@@ -368,6 +357,8 @@ export const editTrips = [
       if (diesel && !pumpName) throw "Pump Name is required if Diesel Taken";
 
       if (cash && !remarks) throw "Remarks field is mandatory if given Cash";
+      if (cash && cash?.toString()?.includes("."))
+        throw "Cash should be in whole number";
 
       if (!req.body.pumpName) delete req.body.pumpName;
       if (!req.body.diesel) delete req.body.diesel;

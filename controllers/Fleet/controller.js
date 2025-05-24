@@ -4,10 +4,14 @@ import {
   validateBody,
   parseResponse,
   columnHeaders,
+  formatDateInDDMMYYY,
 } from "../../utils/utils.js";
 import { sendExcelFile } from "../../utils/sendFile.js";
 import { modelHeader, fileHeader, validateArr } from "./constants.js";
 import Fleet from "../../models/Fleet.js";
+import Trips from "../../models/Trip.js";
+import mongoose from "mongoose";
+import moment from "moment";
 
 export const getFleet = async (req, res) => {
   try {
@@ -19,12 +23,29 @@ export const getFleet = async (req, res) => {
       details = await Fleet.findOne({
         vehicleNo,
         companyAdminId: user.companyAdminId,
-      }).select({ vehicleNo: 1, owner: 1, ownerName: 1 });
+      }).select({
+        vehicleNo: 1,
+        owner: 1,
+        ownerName: 1,
+        driver: 1,
+        driverJoiningDate: 1,
+      });
     } else {
       details = await Fleet.find({
         companyAdminId: user.companyAdminId,
       })
-        .select({ vehicleNo: 1, ownerName: 1, addedBy: 1, owner: 1 })
+        .select({
+          vehicleNo: 1,
+          ownerName: 1,
+          addedBy: 1,
+          owner: 1,
+          driver: 1,
+          driverJoiningDate: 1,
+        })
+        .populate({
+          path: "driver",
+          select: "name dlNo driverPhone",
+        })
         .populate({
           path: "addedBy",
           select: "location",
@@ -34,6 +55,10 @@ export const getFleet = async (req, res) => {
       details = details.map((val) => {
         return {
           ...val,
+          driver: val?.driver?.name + " - " + val?.driver?.dlNo,
+          driverJoiningDate: formatDateInDDMMYYY(val.driverJoiningDate),
+          driverPhone: val?.driver?.driverPhone ?? "",
+          driverName: val?.driver?.name ?? "",
           addedBy: val?.addedBy?.location,
         };
       });
@@ -218,6 +243,79 @@ export const downloadFleet = async (req, res) => {
       columnHeaders("Added By", "addedBy"),
     ];
     return sendExcelFile(res, [column1], [data], ["Fleet"]);
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
+export const getFleetListForTrips = async (req, res) => {
+  try {
+    const user = req.user;
+
+    let details = await Fleet.find({
+      companyAdminId: user.companyAdminId,
+    })
+      .select({
+        vehicleNo: 1,
+        driver: 1,
+      })
+      .populate({
+        path: "driver",
+        select: "name driverPhone",
+      })
+      .sort({ vehicleNo: 1 });
+    details = parseResponse(details);
+    details = details.map((val) => {
+      return {
+        ...val,
+        driverName: val?.driver?.name ?? "",
+        driverPhone: val?.driver?.driverPhone ?? "",
+      };
+    });
+
+    // Taking Last 3 months vehicles only
+    const from = moment().startOf("month").subtract(3, "months").toISOString();
+
+    const fleetVehicles = await Fleet.find({
+      companyAdminId: user.companyAdminId,
+    })
+      .select({
+        vehicleNo: 1,
+        driver: 1,
+        _id: 0,
+      })
+      .distinct("vehicleNo");
+
+    let marketVehicles = await Trips.aggregate([
+      {
+        $match: {
+          companyAdminId: mongoose.Types.ObjectId(user?.companyAdminId?._id),
+          date: { $gte: new Date(from) },
+          vehicleNo: { $nin: fleetVehicles },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            vehicleNo: "$vehicleNo",
+          },
+          driverName: { $push: "$driverName" },
+          driverPhone: { $push: "$driverPhone" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          vehicleNo: "$_id.vehicleNo",
+          driverName: { $arrayElemAt: ["$driverName", 0] },
+          driverPhone: { $arrayElemAt: ["$driverPhone", 0] },
+        },
+      },
+    ]);
+
+    if (!details) throw "Record Not Found";
+
+    return res.status(200).json({ data: [ ...details, ...marketVehicles ] });
   } catch (error) {
     return handleError(res, error);
   }

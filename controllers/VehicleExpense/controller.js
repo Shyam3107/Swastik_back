@@ -88,12 +88,14 @@ export const uploadExpenses = async (req, res) => {
         if (head === "vehicleNo") {
           const isExist = await Fleet.findOne({ vehicleNo: value });
           if (!isExist)
-            mssg = `Vehicle No. must be present in Fleet List,for row no. ${
+            mssg = `Vehicle No. must be present in Fleet List for row no. ${
               ind + 2
             } `;
-        }
-
-        if (mssg) throw mssg;
+        } else if (
+          fileHeader[index] === "Amount" &&
+          value?.toString()?.includes(".")
+        )
+          mssg = `Amount should be in whole number for Vehicle no. ${vehicleNo}`;
 
         if (head === "date") {
           value = validateDateWhileUpload(value, ind);
@@ -106,6 +108,8 @@ export const uploadExpenses = async (req, res) => {
           }
         } else if (head === "driverPhone" && !validatePhoneNo(value))
           mssg = `Fill Valid Driver Phone No. for row no. ${ind + 2}`;
+
+        if (mssg) throw mssg;
 
         tempVal[head] = value;
       }
@@ -132,21 +136,22 @@ export const addExpenses = [
   validateBody(validateArr),
   async (req, res) => {
     const session = await VehiclesExpense.startSession();
-    const driverSession = await Driver.startSession();
     try {
       session.startTransaction();
-      driverSession.startTransaction();
 
       const errors = errorValidation(req, res);
       if (errors) {
         return null;
       }
       const user = req.user;
-      const { vehicleNo, driverName, driverPhone } = req.body;
+      const { vehicleNo, amount } = req.body;
 
       const isExist = await Fleet.findOne({ vehicleNo });
 
       if (!isExist) throw "Choose Vehicle No. from given list only";
+
+      if (amount && amount?.toString()?.includes("."))
+        throw "Amount should be in whole number";
 
       await VehiclesExpense.create(
         [
@@ -159,30 +164,15 @@ export const addExpenses = [
         { session }
       );
 
-      await Driver.updateOne(
-        { vehicleNo },
-        {
-          driverName,
-          driverPhone: driverPhone ?? "9999999999",
-          lastUpdateBy: user._id,
-          addedBy: user._id,
-          companyAdminId: req?.user?.companyAdminId,
-        },
-        { upsert: true, driverSession }
-      );
-
       await session.commitTransaction();
-      await driverSession.commitTransaction();
 
       return res.status(200).json({
         message: "Vehicles Expenses Added Successfully",
       });
     } catch (error) {
       await session.abortTransaction();
-      await driverSession.abortTransaction();
       return handleError(res, error);
     } finally {
-      await driverSession.endSession();
       await session.endSession();
     }
   },
@@ -197,7 +187,10 @@ export const editExpenses = [
         return null;
       }
 
-      const { _id: expenseId } = req.body;
+      const { _id: expenseId, amount } = req.body;
+
+      if (amount && amount?.toString()?.includes("."))
+        throw "Amount should be in whole number";
 
       const updateData = await VehiclesExpense.findByIdAndUpdate(
         { _id: expenseId },

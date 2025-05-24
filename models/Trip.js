@@ -47,6 +47,8 @@ const tripSchema = new Schema(
       uppercase: true,
       trim: true,
       required: true,
+      minlength: [9, "Vehicle number must be at least 9 characters long"],
+      maxlength: [10, "Vehicle number must not exceed 10 characters"],
     },
     quantity: {
       type: Number,

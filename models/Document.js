@@ -1,5 +1,5 @@
-import mongoose from "mongoose"
-const { Schema, model } = mongoose
+import mongoose from "mongoose";
+const { Schema, model } = mongoose;
 
 const documentSchema = new Schema(
   {
@@ -8,6 +8,8 @@ const documentSchema = new Schema(
       uppercase: true,
       trim: true,
       required: true,
+      minlength: [9, "Vehicle number must be at least 9 characters long"],
+      maxlength: [10, "Vehicle number must not exceed 10 characters"],
     },
     taxPaidUpto: {
       type: Date,
@@ -35,7 +37,7 @@ const documentSchema = new Schema(
     },
     isNationalPermit: {
       type: Boolean,
-      default: false
+      default: false,
     },
     addedBy: {
       type: Schema.Types.ObjectId,
@@ -49,10 +51,10 @@ const documentSchema = new Schema(
     },
   },
   { timestamps: true }
-)
+);
 
-documentSchema.index({ vehicleNo: 1, companyAdminId: 1 }, { unique: true })
+documentSchema.index({ vehicleNo: 1, companyAdminId: 1 }, { unique: true });
 
-const Document = model("Document", documentSchema)
+const Document = model("Document", documentSchema);
 
-export default Document
+export default Document;

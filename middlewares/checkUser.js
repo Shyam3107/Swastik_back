@@ -1,10 +1,8 @@
 import jsonwebtoken from "jsonwebtoken";
 import moment from "moment";
-import { methods } from "../config/constants.js";
 import {
   handleError,
   isAdmin,
-  isOperationAllowed,
   parseResponse,
 } from "../utils/utils.js";
 import Account from "../models/Account.js";
