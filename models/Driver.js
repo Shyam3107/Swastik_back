@@ -11,11 +11,18 @@ const driverSchema = new Schema(
     },
     driverPhone: {
       type: String,
-      required: true,
+      required: [true, "Enter Valid Driver Phone"],
+      validate: {
+        validator: function (v) {
+          return /^\d{10}$/.test(v);
+        },
+        message: "Enter Valid Driver Phone No.",
+      },
     },
     aadharCardNo: {
       type: Number,
       required: true,
+      unique: true,
     },
     aadharCardDOB: {
       type: Date,
@@ -24,6 +31,7 @@ const driverSchema = new Schema(
     dlNo: {
       type: String,
       required: true,
+      trim: true,
     },
     dlDOB: {
       type: Date,
@@ -42,8 +50,9 @@ const driverSchema = new Schema(
       required: true,
     },
     guarantor: {
-      type: String,
-      required: true,
+      type: Schema.Types.ObjectId,
+      ref: "DriverList",
+      default: null,
     },
     remarks: {
       type: String,
@@ -53,7 +62,7 @@ const driverSchema = new Schema(
       required: true,
       default: false,
     },
-    defaulter:{
+    defaulter: {
       type: Boolean,
       required: true,
       default: false,

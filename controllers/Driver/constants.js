@@ -40,5 +40,4 @@ export const validateArr = [
   "dlValidity",
   "homePhone",
   "relation",
-  "guarantor",
 ];

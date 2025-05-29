@@ -5,7 +5,9 @@ import {
   handleError,
   parseResponse,
   validateAadharCard,
+  validateAlphaNumeric,
   validateBody,
+  validateDateWhileUpload,
   validatePhoneNo,
 } from "../../utils/utils.js";
 import Driver from "../../models/Driver.js";
@@ -33,9 +35,16 @@ export const getDrivers = async (req, res) => {
     let driverList;
 
     if (driverId) {
-      driverList = await Driver.findById({ _id: driverId }).select(select);
+      driverList = await Driver.findById({ _id: driverId })
+        .select(select)
     } else {
-      driverList = await Driver.find(query).select(select).sort({ name: 1 });
+      driverList = await Driver.find(query)
+        .select(select)
+        .populate({
+          path: "guarantor",
+          select: "name remarks dlNo",
+        })
+        .sort({ name: 1 });
       driverList = parseResponse(driverList);
       driverList = driverList.map((val) => {
         return {
@@ -45,6 +54,9 @@ export const getDrivers = async (req, res) => {
           dlValidity: formatDateInDDMMYYY(val.dlValidity),
           isDriving: val.isDriving ? "Yes" : "No",
           defaulter: val.defaulter ? "Yes" : "No",
+          guarantor: val?.guarantor
+            ? val.guarantor.name + " - " + val.guarantor.dlNo
+            : "",
         };
       });
     }
@@ -93,7 +105,7 @@ export const uploadDrivers = async (req, res) => {
         }
 
         if (head === "aadharCardNo") {
-          if (value?.toString !== 12) {
+          if (!validateAadharCard(value)) {
             mssg = `Enter Valid ${fileHeader[index]} in row: ${i + 2}`;
           }
         }
@@ -103,8 +115,11 @@ export const uploadDrivers = async (req, res) => {
           head === "dlDOB" ||
           head === "dlValidity"
         ) {
-          value = validateDateWhileUpload(value, ind);
+          value = validateDateWhileUpload(value, i + 2, false);
         }
+
+        if (head === "dlNo" && !validateAlphaNumeric(value))
+          mssg = `DL No. should be Alpha Numeric in row: ${i + 2}`;
 
         if (mssg) throw mssg;
 
@@ -140,7 +155,8 @@ export const addDriver = [
       }
       const user = req.user;
 
-      const { driverPhone, aadharCardNo, homePhone, dlValidity } = req.body;
+      const { driverPhone, aadharCardNo, homePhone, dlValidity, dlNo } =
+        req.body;
 
       if (!validatePhoneNo(driverPhone)) throw "Enter Valid Driver Phone No";
 
@@ -150,6 +166,8 @@ export const addDriver = [
         throw "DL Validity should be greater than today";
 
       if (!validateAadharCard(aadharCardNo)) throw "Enter Valid Aadhar Card No";
+
+      if (!validateAlphaNumeric(dlNo)) throw "DL No. should be Alpha Numeric";
 
       await Driver.create({
         ...req.body,

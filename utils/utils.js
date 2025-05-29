@@ -149,7 +149,12 @@ export const sortViaDate = (data) => {
 };
 
 export const validateAadharCard = (aadharCardNo) => {
-  if (aadharCardNo?.length !== 12) return false;
+  if (aadharCardNo?.toString()?.length !== 12) return false;
   const regex = /^[0-9]{12}$/;
   return regex.test(aadharCardNo);
-}
+};
+
+export const validateAlphaNumeric = (val) => {
+  const regex = /^[a-zA-Z0-9]+$/;
+  return regex.test(val?.trim());
+};
