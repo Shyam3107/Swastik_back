@@ -261,13 +261,13 @@ const getSiteReportBySiteId = async (siteId, from, to, companyAdminId) => {
 
     return {
       siteName,
-      openingBal:openingBal,
-      periodCred:periodCred,
-      periodDeb:periodDeb,
-      closingBal:closingBal,
-      tripExpense:tripExpense,
-      officeExpense:officeExpense,
-      vehicleExpense:vehicleExpense,
+      openingBal: openingBal,
+      periodCred: periodCred,
+      periodDeb: periodDeb,
+      closingBal: closingBal,
+      tripExpense: tripExpense,
+      officeExpense: officeExpense,
+      vehicleExpense: vehicleExpense,
       noOfTrips: duringAllTrips.length,
       records,
     };
@@ -497,7 +497,7 @@ export const getAllSiteReport = async (req, res) => {
 
     let allSites = Account.find({ companyAdminId })
       .select("location")
-      .sort({ _id: 1 });
+      .sort({ location: 1 });
 
     let data = await Promise.all([
       openingCred,

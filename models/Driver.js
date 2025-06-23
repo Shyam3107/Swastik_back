@@ -11,10 +11,10 @@ const driverSchema = new Schema(
     },
     driverPhone: {
       type: String,
-      required: [true, "Enter Valid Driver Phone"],
+      required: [true, "Driver Phone no. is required"],
       validate: {
         validator: function (v) {
-          return /^\d{10}$/.test(v);
+          return /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im.test(v);
         },
         message: "Enter Valid Driver Phone No.",
       },

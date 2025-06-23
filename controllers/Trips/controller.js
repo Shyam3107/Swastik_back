@@ -52,7 +52,7 @@ export const getTrips = async (req, res) => {
         companyAdminId: user.companyAdminId,
       }).populate({
         path: "addedBy",
-        select: "location consignor branch phone phone2 tptCode",
+        select: "location consignor branch phone phone2 tptCode companyName",
       });
     else {
       // Find all Trips
@@ -227,6 +227,8 @@ export const uploadRates = async (req, res) => {
       columnHeaders("Billing Rate", "Billing Rate"),
       columnHeaders("Rate", "Rate"),
       columnHeaders("Reason", "reason"),
+      columnHeaders("Shortage", "Shortage"),
+      columnHeaders("Shortage Amount", "Shortage Amount"),
     ];
 
     let row = [];
@@ -239,15 +241,27 @@ export const uploadRates = async (req, res) => {
       const rate = item["Rate"];
       const billingRate = item["Billing Rate"];
       const quantity = Number(item["Quantity"]);
+      const shortage = item["Shortage"];
+      const shortageAmount = item["Shortage Amount"];
 
       let tempObj = { ...item, reason: "" };
       if (!diNo || !vehicleNo || !quantity || !rate || !billingRate) {
         throw `All Fields are required for row no. ${ind + 2}`;
       }
 
+      let updateData = { billingRate, rate };
+
+      if (shortage && shortage != 0) {
+        updateData.shortage = shortage;
+      }
+
+      if (shortageAmount  && shortageAmount != 0) {
+        updateData.shortageAmount = shortageAmount;
+      }
+
       const updateRate = await Trip.findOneAndUpdate(
         { diNo, vehicleNo, companyAdminId: req.user.companyAdminId, quantity },
-        { $set: { billingRate, rate } },
+        { $set: updateData },
         { session }
       );
 
@@ -255,6 +269,10 @@ export const uploadRates = async (req, res) => {
       if (!updateRate) {
         tempObj.reason = "Record doesn't exist";
         row.push(tempObj);
+      }
+
+      if (ind % 25 === 0) {
+        console.log(`Processed ${ind + 1} rows`);
       }
     }
 

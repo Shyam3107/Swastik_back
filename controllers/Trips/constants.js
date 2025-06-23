@@ -59,6 +59,8 @@ export const rateFileHeader = [
   "Quantity",
   "Billing Rate",
   "Rate",
+  "Shortage",
+  "Shortage Amount",
 ];
 
 export const validateArr = [

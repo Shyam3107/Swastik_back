@@ -146,6 +146,17 @@ export const addFleet = [
       )
         throw "Owner Name is required in case of Attached Vehicle";
 
+      // Check if Driver is already attached to a vehicle
+      if (req.body.driver) {
+        const existingVehicle = await Fleet.findOne({
+          driver: req.body.driver,
+          vehicleNo: { $ne: req.body.vehicleNo },
+        });
+        if (existingVehicle) {
+          throw `Driver is already attached to vehicle ${existingVehicle.vehicleNo}`;
+        }
+      }
+
       await Fleet.create({
         ...req.body,
         addedBy: user._id,
@@ -177,6 +188,17 @@ export const editFleet = [
         (!req.body.ownerName || req.body.ownerName.length === 0)
       )
         throw "Owner Name is required in case of Attached Vehicle";
+
+      // Check if Driver is already attached to a vehicle
+      if (req.body.driver) {
+        const existingVehicle = await Fleet.findOne({
+          driver: req.body.driver,
+          vehicleNo: { $ne: req.body.vehicleNo },
+        });
+        if (existingVehicle) {
+          throw `Driver is already attached to vehicle ${existingVehicle.vehicleNo}`;
+        }
+      }
 
       const updateData = await Fleet.findByIdAndUpdate(
         { _id: vehicleId },
@@ -315,7 +337,7 @@ export const getFleetListForTrips = async (req, res) => {
 
     if (!details) throw "Record Not Found";
 
-    return res.status(200).json({ data: [ ...details, ...marketVehicles ] });
+    return res.status(200).json({ data: [...details, ...marketVehicles] });
   } catch (error) {
     return handleError(res, error);
   }
