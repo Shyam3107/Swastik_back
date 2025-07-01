@@ -33,11 +33,7 @@ export const fileHeader = [
 export const validateArr = [
   "name",
   "driverPhone",
-  "aadharCardNo",
-  "aadharCardDOB",
   "dlNo",
   "dlDOB",
   "dlValidity",
-  "homePhone",
-  "relation",
 ];

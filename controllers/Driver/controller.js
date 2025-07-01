@@ -35,8 +35,7 @@ export const getDrivers = async (req, res) => {
     let driverList;
 
     if (driverId) {
-      driverList = await Driver.findById({ _id: driverId })
-        .select(select)
+      driverList = await Driver.findById({ _id: driverId }).select(select);
     } else {
       driverList = await Driver.find(query)
         .select(select)
@@ -97,24 +96,23 @@ export const uploadDrivers = async (req, res) => {
         if (validateArr.includes(head) && !value)
           mssg = `Enter Valid ${fileHeader[index]} in row: ${i + 2}`;
 
-        if (
-          (head === "driverPhone" || head === "homePhone") &&
-          !validatePhoneNo(value)
-        ) {
+        if (head === "driverPhone" && !validatePhoneNo(value)) {
+          mssg = `Enter Valid ${fileHeader[index]} in row: ${i + 2}`;
+        }
+        // If Home Phone is not provided, we will set it to empty string
+        if (head === "homePhone" && value && !validatePhoneNo(value)) {
           mssg = `Enter Valid ${fileHeader[index]} in row: ${i + 2}`;
         }
 
-        if (head === "aadharCardNo") {
-          if (!validateAadharCard(value)) {
-            mssg = `Enter Valid ${fileHeader[index]} in row: ${i + 2}`;
-          }
+        // If Aadhar Card No is not provided, we will set it to empty string
+        if (head === "aadharCardNo" && value && !validateAadharCard(value)) {
+          mssg = `Enter Valid ${fileHeader[index]} in row: ${i + 2}`;
         }
 
-        if (
-          head === "aadharCardDOB" ||
-          head === "dlDOB" ||
-          head === "dlValidity"
-        ) {
+        if (head === "aadharCardDOB" && value)
+          value = validateDateWhileUpload(value, i + 2, false);
+
+        if (head === "dlDOB" || head === "dlValidity") {
           value = validateDateWhileUpload(value, i + 2, false);
         }
 
@@ -155,17 +153,12 @@ export const addDriver = [
       }
       const user = req.user;
 
-      const { driverPhone, aadharCardNo, homePhone, dlValidity, dlNo } =
-        req.body;
+      const { driverPhone, dlValidity, dlNo } = req.body;
 
       if (!validatePhoneNo(driverPhone)) throw "Enter Valid Driver Phone No";
 
-      if (!validatePhoneNo(homePhone)) throw "Enter Valid Home Phone No";
-
       if (moment(dlValidity).isBefore(moment()))
         throw "DL Validity should be greater than today";
-
-      if (!validateAadharCard(aadharCardNo)) throw "Enter Valid Aadhar Card No";
 
       if (!validateAlphaNumeric(dlNo)) throw "DL No. should be Alpha Numeric";
 

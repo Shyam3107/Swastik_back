@@ -14,19 +14,19 @@ const driverSchema = new Schema(
       required: [true, "Driver Phone no. is required"],
       validate: {
         validator: function (v) {
-          return /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im.test(v);
+          return /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im.test(
+            v
+          );
         },
         message: "Enter Valid Driver Phone No.",
       },
     },
     aadharCardNo: {
       type: Number,
-      required: true,
-      unique: true,
     },
     aadharCardDOB: {
       type: Date,
-      required: true,
+      default: null,
     },
     dlNo: {
       type: String,
@@ -43,11 +43,9 @@ const driverSchema = new Schema(
     },
     homePhone: {
       type: String,
-      required: true,
     },
     relation: {
       type: String,
-      required: true,
     },
     guarantor: {
       type: Schema.Types.ObjectId,
