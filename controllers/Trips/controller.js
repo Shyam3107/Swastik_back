@@ -119,10 +119,10 @@ export const uploadTrips = async (req, res) => {
           else if (tempDiNo[value])
             // For same DI No.
             mssg = `Two rows can't have same DI No. ${value}`;
-
-          if (
+          else if (
+            typeof value === "string" &&
             !charNotAllowed.every((v) => {
-              return !value.includes(v);
+              return !value?.includes(v);
             })
           )
             mssg = `?,/,=,#,%,& characters are not allowed for DI No. ${value}`;
@@ -255,7 +255,7 @@ export const uploadRates = async (req, res) => {
         updateData.shortage = shortage;
       }
 
-      if (shortageAmount  && shortageAmount != 0) {
+      if (shortageAmount && shortageAmount != 0) {
         updateData.shortageAmount = shortageAmount;
       }
 
