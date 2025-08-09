@@ -29,6 +29,7 @@ export const getFleet = async (req, res) => {
         ownerName: 1,
         driver: 1,
         driverJoiningDate: 1,
+        remarks: 1,
       });
     } else {
       details = await Fleet.find({
@@ -41,6 +42,7 @@ export const getFleet = async (req, res) => {
           owner: 1,
           driver: 1,
           driverJoiningDate: 1,
+          remarks: 1,
         })
         .populate({
           path: "driver",
