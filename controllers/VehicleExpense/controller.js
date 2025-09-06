@@ -95,7 +95,7 @@ export const uploadExpenses = async (req, res) => {
           fileHeader[index] === "Amount" &&
           value?.toString()?.includes(".")
         )
-          mssg = `Amount should be in whole number for Vehicle no. ${vehicleNo}`;
+          mssg = `Amount should be in whole number for row no. ${ind + 2}`;
 
         if (head === "date") {
           value = validateDateWhileUpload(value, ind);
