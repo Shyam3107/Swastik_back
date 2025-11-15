@@ -23,6 +23,8 @@ const driverSchema = new Schema(
     },
     aadharCardNo: {
       type: Number,
+      unique: true,
+      partialFilterExpression: { aadharCardNo: { $ne: null } },
     },
     aadharCardDOB: {
       type: Date,

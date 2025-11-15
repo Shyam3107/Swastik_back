@@ -7,7 +7,6 @@ import {
   editDocuments,
   downloadDocuments,
   downloadMissingDocuments,
-  completeVehicleNumber,
 } from "./controller.js";
 const router = Router();
 
@@ -18,6 +17,5 @@ router.put("/editDocuments", editDocuments);
 router.delete("/deleteDocuments", deleteDocuments);
 router.get("/downloadDocuments", downloadDocuments);
 router.get("/downloadMissingDocuments", downloadMissingDocuments);
-router.delete("/completeVehicleNum", completeVehicleNumber);
 
 export default router;

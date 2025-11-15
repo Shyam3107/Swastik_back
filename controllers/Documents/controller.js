@@ -304,39 +304,3 @@ export const downloadMissingDocuments = async (req, res) => {
     return handleError(res, error);
   }
 };
-
-// Complete the Vehicle Number and return the File
-export const completeVehicleNumber = async (req, res) => {
-  try {
-    const data = req.body.data ?? [];
-
-    // Fetch the Vehicle no.
-    let documents = await Document.find({
-      companyAdminId: req?.user?.companyAdminId,
-    })
-      .select({ vehicleNo: 1 })
-      .sort({ vehicleNo: 1 });
-
-    documents = parseResponse(documents);
-
-    let vehicleMap = {};
-    documents.forEach((val) => {
-      const vehicleNo = val?.vehicleNo?.split(" ")[0];
-      vehicleMap[vehicleNo.substr(-4)] = vehicleNo;
-    });
-
-    // Complete the Vehicle Number
-    let finalData = [];
-
-    data.forEach((row) => {
-      finalData.push({ vehicleNo: vehicleMap[row["Vehicle No."]] });
-    });
-
-    const column1 = [columnHeaders("Vehicle No.", "vehicleNo")];
-
-    return sendExcelFile(res, [column1], [finalData], ["Entries"]);
-  } catch (error) {
-    return handleError(res, error);
-  } finally {
-  }
-};

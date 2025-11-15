@@ -24,7 +24,7 @@ router.put(
 );
 router.delete(
   "/deleteExpenses",
-  checkForPastDataDeletions("DELETE EXPENSE"),
+  checkForPastDataDeletions("OFFICE EXPENSE"),
   deleteExpenses
 );
 router.get("/downloadExpenses", downloadExpenses);

@@ -12,6 +12,8 @@ import Fleet from "../../models/Fleet.js";
 import Trips from "../../models/Trip.js";
 import mongoose from "mongoose";
 import moment from "moment";
+import Driver from "../../models/Driver.js";
+import DriverHistory from "../../models/DriverHistory.js";
 
 export const getFleet = async (req, res) => {
   try {
@@ -157,13 +159,34 @@ export const addFleet = [
         if (existingVehicle) {
           throw `Driver is already attached to vehicle ${existingVehicle.vehicleNo}`;
         }
+        // Joining Date is required for Driver Assignment
+        if (!req.body.driverJoiningDate) {
+          throw `Driver Joining Date is required when assigning a driver to vehicle ${existingVehicle.vehicleNo}`;
+        }
       }
 
-      await Fleet.create({
+      const createFleet = await Fleet.create({
         ...req.body,
         addedBy: user._id,
         companyAdminId: user.companyAdminId,
       });
+
+      if (req.body.driver) {
+        // Mark new driver as driving
+        await Driver.findByIdAndUpdate(
+          { _id: req.body.driver },
+          { isDriving: true }
+        );
+
+        // Create Driver History
+        await DriverHistory.create({
+          vehicleNo: createFleet._id,
+          driver: req.body.driver,
+          driverJoiningDate: req.body.driverJoiningDate,
+          addedBy: user._id,
+          companyAdminId: user.companyAdminId,
+        });
+      }
 
       return res.status(200).json({
         message: "Vehicle Added Successfully in Fleet",
@@ -182,7 +205,7 @@ export const editFleet = [
       if (errors) {
         return null;
       }
-
+      const user = req.user;
       const vehicleId = req.body._id;
 
       if (
@@ -190,6 +213,19 @@ export const editFleet = [
         (!req.body.ownerName || req.body.ownerName.length === 0)
       )
         throw "Owner Name is required in case of Attached Vehicle";
+
+      // Mark old driver as isDriving false if driver is changed
+      let oldDriver = await Fleet.findById(vehicleId)
+        .select({ driver: 1 })
+        .populate({ path: "driver", select: "_id" });
+      let oldDriverId = oldDriver?.driver?._id;
+      if (oldDriverId) {
+        // Mark old driver as not driving
+        await Driver.findByIdAndUpdate(
+          { _id: oldDriverId },
+          { isDriving: false }
+        );
+      }
 
       // Check if Driver is already attached to a vehicle
       if (req.body.driver) {
@@ -200,6 +236,23 @@ export const editFleet = [
         if (existingVehicle) {
           throw `Driver is already attached to vehicle ${existingVehicle.vehicleNo}`;
         }
+        if (!req.body.driverJoiningDate) {
+          throw `Driver Joining Date is required when assigning a driver to vehicle`;
+        }
+        // Mark new driver as driving
+        await Driver.findByIdAndUpdate(
+          { _id: req.body.driver },
+          { isDriving: true }
+        );
+
+        // Create Driver History
+        await DriverHistory.create({
+          vehicleNo: req.body._id,
+          driver: req.body.driver,
+          driverJoiningDate: req.body.driverJoiningDate,
+          addedBy: user._id,
+          companyAdminId: user.companyAdminId,
+        });
       }
 
       const updateData = await Fleet.findByIdAndUpdate(
@@ -342,5 +395,41 @@ export const getFleetListForTrips = async (req, res) => {
     return res.status(200).json({ data: [...details, ...marketVehicles] });
   } catch (error) {
     return handleError(res, error);
+  }
+};
+
+// Complete the Vehicle Number and return the File
+export const completeVehicleNumber = async (req, res) => {
+  try {
+    const data = req.body.data ?? [];
+
+    // Fetch the Vehicle no.
+    let documents = await Fleet.find({
+      companyAdminId: req?.user?.companyAdminId,
+    })
+      .select({ vehicleNo: 1 })
+      .sort({ vehicleNo: 1 });
+
+    documents = parseResponse(documents);
+
+    let vehicleMap = {};
+    documents.forEach((val) => {
+      const vehicleNo = val?.vehicleNo?.split(" ")[0];
+      vehicleMap[vehicleNo.substr(-4)] = vehicleNo;
+    });
+
+    // Complete the Vehicle Number
+    let finalData = [];
+
+    data.forEach((row) => {
+      finalData.push({ vehicleNo: vehicleMap[row["Vehicle No."]] });
+    });
+
+    const column1 = [columnHeaders("Vehicle No.", "vehicleNo")];
+
+    return sendExcelFile(res, [column1], [finalData], ["Entries"]);
+  } catch (error) {
+    return handleError(res, error);
+  } finally {
   }
 };

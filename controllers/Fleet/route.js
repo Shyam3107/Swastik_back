@@ -7,6 +7,7 @@ import {
   editFleet,
   downloadFleet,
   getFleetListForTrips,
+  completeVehicleNumber,
 } from "./controller.js";
 const router = Router();
 
@@ -17,5 +18,6 @@ router.put("/editFleet", editFleet);
 router.delete("/deleteFleet", deleteFleet);
 router.get("/downloadFleet", downloadFleet);
 router.get("/getFleetListForTrips", getFleetListForTrips);
+router.delete("/completeVehicleNum", completeVehicleNumber);
 
 export default router;
