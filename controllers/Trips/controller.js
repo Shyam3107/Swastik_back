@@ -488,6 +488,9 @@ export const downloadTrips = async (req, res) => {
       columnHeaders("Rate", "rate"),
       columnHeaders("Cash", "cash"),
       columnHeaders("Remarks", "remarks"),
+      columnHeaders("Party Name 2", "partyName2"),
+      columnHeaders("E-way Bill No.", "eWayBillNo"),
+      columnHeaders("E-way Bill Expiry", "eWayBillExpiry"),
       columnHeaders("Added By", "addedBy"),
     ];
 
