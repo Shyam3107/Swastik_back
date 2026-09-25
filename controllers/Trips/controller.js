@@ -229,6 +229,8 @@ export const uploadRates = async (req, res) => {
       columnHeaders("Reason", "reason"),
       columnHeaders("Shortage", "Shortage"),
       columnHeaders("Shortage Amount", "Shortage Amount"),
+      columnHeaders("E-way Bill No.", "E-way Bill No."),
+      columnHeaders("E-way Bill Expiry", "E-way Bill Expiry"),
     ];
 
     let row = [];
@@ -243,6 +245,8 @@ export const uploadRates = async (req, res) => {
       const quantity = Number(item["Quantity"]);
       const shortage = item["Shortage"];
       const shortageAmount = item["Shortage Amount"];
+      const eWayBillNo = item["E-way Bill No."];
+      const eWayBillExpiry = item["E-way Bill Expiry"];
 
       let tempObj = { ...item, reason: "" };
       if (!diNo || !vehicleNo || !quantity || !rate || !billingRate) {
@@ -257,6 +261,14 @@ export const uploadRates = async (req, res) => {
 
       if (shortageAmount && shortageAmount != 0) {
         updateData.shortageAmount = shortageAmount;
+      }
+
+      if (eWayBillNo && eWayBillNo?.length > 0) {
+        updateData.eWayBillNo = eWayBillNo;
+      }
+
+      if (eWayBillExpiry && validateDateWhileUpload(eWayBillExpiry, ind)) {
+        updateData.eWayBillExpiry = eWayBillExpiry;
       }
 
       const updateRate = await Trip.findOneAndUpdate(

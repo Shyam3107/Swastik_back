@@ -61,6 +61,8 @@ export const rateFileHeader = [
   "Rate",
   "Shortage",
   "Shortage Amount",
+  "E-way Bill No.",
+  "E-way Bill Expiry",
 ];
 
 export const validateArr = [
