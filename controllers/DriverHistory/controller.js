@@ -17,10 +17,17 @@ import Driver from "../../models/Driver.js";
 export const getDriverHistory = async (req, res) => {
   try {
     const user = req.user;
+    const { vehicleId } = req.query;
 
-    let details = await DriverHistory.find({
+    let query = {
       companyAdminId: user.companyAdminId,
-    })
+    };
+
+    if (vehicleId) {
+      query.vehicleNo = mongoose.Types.ObjectId(vehicleId);
+    }
+
+    let details = await DriverHistory.find(query)
       .select({
         vehicleNo: 1,
         driver: 1,

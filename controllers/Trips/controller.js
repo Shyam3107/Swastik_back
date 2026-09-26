@@ -172,8 +172,7 @@ export const uploadTrips = async (req, res) => {
           // User can't add data on set beyond specific date
           if (!isAdmin(user)) {
             if (moment(value).isSameOrBefore(lastEntryCheckedOn))
-              throw `You Can not make changes in Past entries for row no. ${
-                ind + 2
+              throw `You Can not make changes in Past entries for row no. ${ind + 2
               }`;
           }
         }
@@ -422,9 +421,8 @@ export const deleteTrips = async (req, res) => {
     await Trip.deleteMany({ _id: tripIds });
 
     return res.status(200).json({
-      message: `Successfully Deleted ${tripIds.length} Trip${
-        tripIds.length > 1 ? "s" : ""
-      }`,
+      message: `Successfully Deleted ${tripIds.length} Trip${tripIds.length > 1 ? "s" : ""
+        }`,
     });
   } catch (error) {
     return handleError(res, error);

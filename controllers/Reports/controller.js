@@ -506,6 +506,15 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       addedBy: 0,
     };
 
+    // Get Fleet List
+    let fleets = await Fleets.find({ companyAdminId: user.companyAdminId });
+    fleets = parseResponse(fleets);
+    let tempFleet = {};
+    fleets = fleets.forEach((val) => {
+      tempFleet[val.vehicleNo?.substr(-4)] = val.owner;
+    });
+
+    // Get All Data from Trips, Diesel and Vehicle Expense
     let tripsData = Trip.find(query)
       .select({
         ...select,
@@ -515,7 +524,6 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
         partyName: 0,
         bags: 0,
         driverPhone: 0,
-        rate: 0,
         partyName2: 0,
         material: 0,
         driverName: 0,
@@ -550,10 +558,14 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
 
       if (!val.cash) val.cash = 0;
 
+      // In case of Market Vehicle we are reducing the rate by 50 or 30 as per the billing rate
+      if (tempFleet[vehicleNo] !== "SELF") {
+        val.rate = val.billingRate > 1000 ? val.billingRate - 50 : val.billingRate - 30;
+      }
+
       tempTripVehicle[vehicleNo].push({
         ...val,
         date: formatDateInDDMMYYY(val.date),
-        total: val.quantity * val.billingRate,
         driverCash: val.cash,
       });
     });
@@ -584,7 +596,7 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
 
     let a = 0; // index for Trip length
     let b = 0; // index for Diesel Length
-    for (; a < tripLength && b < dieselLength; ) {
+    for (; a < tripLength && b < dieselLength;) {
       if (tripsData[a] > dieselData[b]) {
         const veh = dieselData[b];
         if (!data[veh]) data[veh] = [];
@@ -665,7 +677,8 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       columnHeaders("Loading Point", "loadingPoint"),
       columnHeaders("Location", "location"),
       columnHeaders("Quantity", "quantity"),
-      columnHeaders("Rate", "billingRate"),
+      columnHeaders("Billing Rate", "billingRate"),
+      columnHeaders("Rate", "rate"),
       columnHeaders("Total", "total"),
       columnHeaders("Diesel", "diesel"),
       columnHeaders("Pump Date", "pumpDate"),
@@ -678,13 +691,7 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       columnHeaders("Remarks", "remarks"),
     ];
 
-    // Get Fleet List
-    let fleets = await Fleets.find({ companyAdminId: user.companyAdminId });
-    fleets = parseResponse(fleets);
-    let tempFleet = {};
-    fleets = fleets.forEach((val) => {
-      tempFleet[val.vehicleNo.substr(-4)] = true;
-    });
+
 
     let excelFilesSelf = [];
     let excelFilesMarket = [];
@@ -694,38 +701,28 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
     const vehicleNoList = Object.keys(data);
 
     vehicleNoList.forEach((vehicleNo) => {
-      let bhadaTotal = 0;
-      let driverCashTotal = 0;
-      let vehicleCashTotal = 0;
-      let dieselTotal = 0;
-      let pumpDieselTotal = 0;
-      let shortageTotal = 0;
-      let shortageAmountTotal = 0;
-      let quantityTotal = 0;
-
-      data[vehicleNo].forEach((val) => {
-        bhadaTotal += val.total ?? 0;
-        driverCashTotal += val.driverCash ?? 0;
-        vehicleCashTotal += val.vehicleCash ?? 0;
-        dieselTotal += val.diesel ?? 0;
-        pumpDieselTotal += val.pumpDiesel ?? 0;
-        shortageTotal += val.shortage ?? 0;
-        shortageAmountTotal += val.shortageAmount ?? 0;
-        quantityTotal += val.quantity ?? 0;
-      });
-
       data[vehicleNo] = sortViaDate(data[vehicleNo]);
 
+      // We have to calulate Total Amount ie Rate and Quantity 
+      // As Rows number is change after merging the data of Trips, Diesel and Vehicle Expense
+      data[vehicleNo] = data[vehicleNo].map((val, index) => {
+        return {
+          ...val,
+          total: { formula: `E${index + 2}*G${index + 2}` },
+        };
+      });
+
+      // Adding Formula for Total in Excel File in last Row of the Vehicle No. Data
       data[vehicleNo].push({
         location: "Total",
-        total: bhadaTotal,
-        driverCash: driverCashTotal,
-        vehicleCash: vehicleCashTotal,
-        diesel: dieselTotal,
-        pumpDiesel: pumpDieselTotal,
-        shortage: shortageTotal,
-        shortageAmount: shortageAmountTotal,
-        quantity: quantityTotal,
+        quantity: { formula: `SUM(E2:E${data[vehicleNo].length + 1})` },
+        total: { formula: `SUM(H2:H${data[vehicleNo].length + 1})` },
+        diesel: { formula: `SUM(I2:I${data[vehicleNo].length + 1})` },
+        pumpDiesel: { formula: `SUM(L2:L${data[vehicleNo].length + 1})` },
+        shortage: { formula: `SUM(M2:M${data[vehicleNo].length + 1})` },
+        shortageAmount: { formula: `SUM(N2:N${data[vehicleNo].length + 1})` },
+        driverCash: { formula: `SUM(O2:O${data[vehicleNo].length + 1})` },
+        vehicleCash: { formula: `SUM(P2:P${data[vehicleNo].length + 1})` },
       });
 
       // if Vehicle No. is in Fleet then it is self vehicle else Market vehicle
