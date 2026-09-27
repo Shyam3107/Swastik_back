@@ -549,7 +549,7 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
     // Here we are merging Trips Diesel and Pump Diesel
     // First Store the Both Data in Temp Object vehicle Wise
     let tempTripVehicle = {};
-    let tempDieselVehicle = {};
+    let tempDieselVehicle = {}; // All Diesel Data will be stored here vehicle wise
     tripsData.forEach((val) => {
       const vehicleNo = val.vehicleNo.substr(-4);
 
@@ -570,7 +570,7 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       });
     });
 
-    tripsData = Object.keys(tempTripVehicle);
+    tripsData = Object.keys(tempTripVehicle).sort();
 
     // Then Diesel
     dieselData.forEach((val) => {
@@ -579,16 +579,19 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       // If new Vehicle No.
       if (!tempDieselVehicle[vehicleNo]) tempDieselVehicle[vehicleNo] = [];
 
-      tempDieselVehicle[vehicleNo].push({
+      let tempVal = {
         ...val,
-        quantity: "",
-        date: formatDateInDDMMYYY(val.date),
         pumpDate: formatDateInDDMMYYY(val.date),
         pumpDiesel: val.quantity,
-      });
+      }
+
+      delete tempVal.quantity; // as it will be used in Trips
+      delete tempVal.date; // as it will be used in Trips
+
+      tempDieselVehicle[vehicleNo].push(tempVal);
     });
 
-    dieselData = Object.keys(tempDieselVehicle);
+    dieselData = Object.keys(tempDieselVehicle).sort();
 
     const tripLength = tripsData.length;
 
@@ -597,7 +600,9 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
     let a = 0; // index for Trip length
     let b = 0; // index for Diesel Length
     for (; a < tripLength && b < dieselLength;) {
-      if (tripsData[a] > dieselData[b]) {
+
+      if (tripsData[a] > dieselData[b]) { // Compare the Vehicle No. and then merge the data
+        // If Diesel Vehicle No. is less than Trip Vehicle No. then add the Diesel Data to the final data
         const veh = dieselData[b];
         if (!data[veh]) data[veh] = [];
         data[veh] = tempDieselVehicle[veh];
@@ -610,8 +615,8 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       } else {
         const veh = tripsData[a];
         if (!data[veh]) data[veh] = [];
-        const tl = tempTripVehicle[veh].length;
-        const dl = tempDieselVehicle[veh].length;
+        const tl = tempTripVehicle[veh].length; // Number of Trips for the Vehicle
+        const dl = tempDieselVehicle[veh].length; // Number of Diesel for the Vehicle
 
         let j = 0;
         for (; j < Math.min(tl, dl); j++) {
@@ -620,13 +625,16 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
             pumpDate: tempDieselVehicle[veh][j].pumpDate,
             pumpDiesel: tempDieselVehicle[veh][j].pumpDiesel,
             pumpName: tempDieselVehicle[veh][j].pumpName,
+            pumpAmount: tempDieselVehicle[veh][j].amount,
           });
         }
         for (let k = j; k < tl; k++) {
           data[veh].push(tempTripVehicle[veh][k]);
         }
         for (let k = j; k < dl; k++) {
-          data[veh].push(tempDieselVehicle[veh][k]);
+          data[veh].push({ ...tempDieselVehicle[veh][k], 
+            date: tempDieselVehicle[veh][k].pumpDate, 
+            pumpAmount: tempDieselVehicle[veh][j].amount, });
         }
         a++;
         b++;
@@ -684,14 +692,13 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
       columnHeaders("Pump Date", "pumpDate"),
       columnHeaders("Pump Name", "pumpName"),
       columnHeaders("Pump Diesel", "pumpDiesel"),
+      columnHeaders("Pump Amount", "pumpAmount"),
       columnHeaders("Shortage", "shortage"),
       columnHeaders("Shortage Amount", "shortageAmount"),
       columnHeaders("Driver cash", "driverCash"),
       columnHeaders("Vehicle Cash", "vehicleCash"),
       columnHeaders("Remarks", "remarks"),
     ];
-
-
 
     let excelFilesSelf = [];
     let excelFilesMarket = [];
@@ -719,10 +726,11 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
         total: { formula: `SUM(H2:H${data[vehicleNo].length + 1})` },
         diesel: { formula: `SUM(I2:I${data[vehicleNo].length + 1})` },
         pumpDiesel: { formula: `SUM(L2:L${data[vehicleNo].length + 1})` },
-        shortage: { formula: `SUM(M2:M${data[vehicleNo].length + 1})` },
-        shortageAmount: { formula: `SUM(N2:N${data[vehicleNo].length + 1})` },
-        driverCash: { formula: `SUM(O2:O${data[vehicleNo].length + 1})` },
-        vehicleCash: { formula: `SUM(P2:P${data[vehicleNo].length + 1})` },
+        pumpAmount: { formula: `SUM(M2:M${data[vehicleNo].length + 1})` },
+        shortae: { formula: `SUM(N2:N${data[vehicleNo].length + 1})` },
+        shortageAmount: { formula: `SUM(O2:O${data[vehicleNo].length + 1})` },
+        driverCash: { formula: `SUM(P2:P${data[vehicleNo].length + 1})` },
+        vehicleCash: { formula: `SUM(Q2:Q${data[vehicleNo].length + 1})` },
       });
 
       // if Vehicle No. is in Fleet then it is self vehicle else Market vehicle
