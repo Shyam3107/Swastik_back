@@ -725,12 +725,12 @@ export const downloadAllVehicleWiseReport = async (req, res) => {
         quantity: { formula: `SUM(E2:E${data[vehicleNo].length + 1})` },
         total: { formula: `SUM(H2:H${data[vehicleNo].length + 1})` },
         diesel: { formula: `SUM(I2:I${data[vehicleNo].length + 1})` },
-        pumpDiesel: { formula: `SUM(L2:L${data[vehicleNo].length + 1})` },
-        pumpAmount: { formula: `SUM(M2:M${data[vehicleNo].length + 1})` },
-        shortae: { formula: `SUM(N2:N${data[vehicleNo].length + 1})` },
-        shortageAmount: { formula: `SUM(O2:O${data[vehicleNo].length + 1})` },
-        driverCash: { formula: `SUM(P2:P${data[vehicleNo].length + 1})` },
-        vehicleCash: { formula: `SUM(Q2:Q${data[vehicleNo].length + 1})` },
+        pumpDiesel: { formula: `SUM(J2:J${data[vehicleNo].length + 1})` },
+        //pumpAmount: { formula: `SUM(M2:M${data[vehicleNo].length + 1})` },
+        shortae: { formula: `SUM(L2:L${data[vehicleNo].length + 1})` },
+        shortageAmount: { formula: `SUM(M2:M${data[vehicleNo].length + 1})` },
+        driverCash: { formula: `SUM(N2:N${data[vehicleNo].length + 1})` },
+        vehicleCash: { formula: `SUM(O2:O${data[vehicleNo].length + 1})` },
       });
 
       // if Vehicle No. is in Fleet then it is self vehicle else Market vehicle
