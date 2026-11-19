@@ -24,6 +24,7 @@ import logisticRoute from "./controllers/Logistics/route.js";
 import vehicleOwnerRoute from "./controllers/VehicleOwner/route.js";
 import hardwareShopBillRoute from "./controllers/HardwareShopBill/route.js";
 import fleetRoute from "./controllers/Fleet/route.js";
+import companyBillsRoute from "./controllers/CompanyBills/route.js";
 import { getHome } from "./controllers/Home/controller.js";
 import { access, PORT } from "./config/constants.js";
 import httpCallLogger from "./middlewares/httpCallLogger.js";
@@ -85,6 +86,9 @@ app.use("/receipts", checkUser(), receiptRoute);
 
 // CONFIGURATION
 app.use("/configure/accounts", checkUser(access.ACCOUNTS), accountRoute);
+
+// Company Bills
+app.use("/companyBills", checkUser(), companyBillsRoute)
 
 // REPORTS
 app.use("/reports", checkUser(), reportRoute);
